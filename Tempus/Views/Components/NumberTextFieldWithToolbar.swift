@@ -22,6 +22,16 @@ class TextFieldManager {
         print("📝 Registered field \(index), total registered: \(textFields.count), totalFieldCount: \(totalFieldCount)")
     }
 
+    func unregister(index: Int) {
+        textFields.removeValue(forKey: index)
+        print("🗑️ Unregistered field \(index), remaining: \(textFields.keys.sorted())")
+    }
+
+    func clearAll() {
+        textFields.removeAll()
+        print("🧹 Cleared all fields")
+    }
+
     func focusField(_ index: Int) {
         print("🎯 Trying to focus field \(index), registered fields: \(textFields.keys.sorted())")
 

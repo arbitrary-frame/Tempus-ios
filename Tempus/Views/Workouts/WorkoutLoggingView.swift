@@ -229,6 +229,7 @@ struct ExerciseEntryView: View {
     @Binding var exerciseEntry: WorkoutExerciseEntry
     let previousData: WorkoutExerciseData?
     @State private var textFieldManager = TextFieldManager()
+    @State private var structureId = UUID() // Track when structure changes
 
     // Calculate total field count for keyboard navigation
     private var totalFieldCount: Int {
@@ -277,8 +278,13 @@ struct ExerciseEntryView: View {
                         set: $exerciseEntry.sets[index],
                         textFieldManager: textFieldManager,
                         baseFieldIndex: baseFieldIndex,
-                        totalFieldCount: totalFieldCount
+                        totalFieldCount: totalFieldCount,
+                        onStructureChange: {
+                            structureId = UUID()
+                            textFieldManager.clearAll()
+                        }
                     )
+                    .id("\(structureId)-\(index)") // Force recreation when structure changes
 
                     // Delete set button (only show if more than 1 set)
                     if exerciseEntry.sets.count > 1 {
@@ -317,6 +323,8 @@ struct ExerciseEntryView: View {
         let newSetNumber = exerciseEntry.sets.count + 1
         HapticManager.shared.trigger(.light)
         exerciseEntry.sets.append(WorkoutSet(setNumber: newSetNumber, weightsAndReps: [WeightRep(weight: 0, reps: 0)]))
+        structureId = UUID() // Force recreation of text fields
+        textFieldManager.clearAll() // Clear old field references
     }
 
     private func deleteSet(_ set: WorkoutSet) {
@@ -329,6 +337,8 @@ struct ExerciseEntryView: View {
                 weightsAndReps: exerciseEntry.sets[index].weightsAndReps
             )
         }
+        structureId = UUID() // Force recreation of text fields
+        textFieldManager.clearAll() // Clear old field references
     }
 
     private func formatSet(_ set: WorkoutSet) -> String {
@@ -348,6 +358,7 @@ struct SetEntryRow: View {
     let textFieldManager: TextFieldManager
     let baseFieldIndex: Int
     let totalFieldCount: Int
+    let onStructureChange: () -> Void
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -433,11 +444,13 @@ struct SetEntryRow: View {
     private func addDropSet() {
         HapticManager.shared.trigger(.light)
         set.weightsAndReps.append(WeightRep())
+        onStructureChange() // Notify parent that structure changed
     }
 
     private func removeWeightRep(at index: Int) {
         HapticManager.shared.trigger(.light)
         set.weightsAndReps.remove(at: index)
+        onStructureChange() // Notify parent that structure changed
     }
 }
 
