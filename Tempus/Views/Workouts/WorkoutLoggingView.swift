@@ -140,6 +140,7 @@ struct WorkoutLoggingView: View {
     }
 
     private func removeExercise(_ exercise: WorkoutExerciseEntry) {
+        HapticManager.shared.trigger(.light)
         workoutExercises.removeAll { $0.id == exercise.id }
     }
 
@@ -174,6 +175,7 @@ struct WorkoutLoggingView: View {
         )
 
         modelContext.insert(workout)
+        HapticManager.shared.trigger(.success)
         dismiss()
     }
 }
@@ -248,10 +250,12 @@ struct ExerciseEntryView: View {
 
     private func addSet() {
         let newSetNumber = exerciseEntry.sets.count + 1
+        HapticManager.shared.trigger(.light)
         exerciseEntry.sets.append(WorkoutSet(setNumber: newSetNumber, weightsAndReps: [WeightRep(weight: 0, reps: 0)]))
     }
 
     private func deleteSet(_ set: WorkoutSet) {
+        HapticManager.shared.trigger(.light)
         exerciseEntry.sets.removeAll { $0.id == set.id }
         // Renumber remaining sets
         for (index, _) in exerciseEntry.sets.enumerated() {
@@ -326,10 +330,12 @@ struct SetEntryRow: View {
     }
 
     private func addDropSet() {
+        HapticManager.shared.trigger(.light)
         set.weightsAndReps.append(WeightRep())
     }
 
     private func removeWeightRep(_ wr: WeightRep) {
+        HapticManager.shared.trigger(.light)
         set.weightsAndReps.removeAll { $0.id == wr.id }
     }
 }
@@ -404,6 +410,7 @@ struct ExercisePickerView: View {
     }
 
     private func addExercise(_ exercise: Exercise) {
+        HapticManager.shared.trigger(.selection)
         if isSelected(exercise) {
             // Remove if already selected
             selectedExercises.removeAll { $0.exerciseID == exercise.id }

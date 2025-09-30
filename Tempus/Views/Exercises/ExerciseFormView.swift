@@ -149,11 +149,13 @@ struct ExerciseFormView: View {
             tagInput = ""
             return
         }
+        HapticManager.shared.trigger(.light)
         tags.append(trimmedTag)
         tagInput = ""
     }
 
     private func removeTag(_ tag: String) {
+        HapticManager.shared.trigger(.light)
         tags.removeAll { $0 == tag }
     }
 
@@ -169,6 +171,7 @@ struct ExerciseFormView: View {
         if isDuplicate {
             validationMessage = "An exercise with this name already exists"
             showingValidationError = true
+            HapticManager.shared.trigger(.error)
             return
         }
 
@@ -190,6 +193,7 @@ struct ExerciseFormView: View {
             modelContext.insert(newExercise)
         }
 
+        HapticManager.shared.trigger(.success)
         dismiss()
     }
 }

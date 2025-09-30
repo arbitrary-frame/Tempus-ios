@@ -80,6 +80,7 @@ struct WorkoutRoutinesListView: View {
     }
 
     private func deleteRoutine(_ routine: WorkoutRoutine) {
+        HapticManager.shared.trigger(.warning)
         withAnimation {
             modelContext.delete(routine)
         }

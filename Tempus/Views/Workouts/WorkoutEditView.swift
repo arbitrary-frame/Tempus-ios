@@ -146,6 +146,7 @@ struct WorkoutEditView: View {
     }
 
     private func removeExercise(_ exercise: WorkoutExerciseEntry) {
+        HapticManager.shared.trigger(.light)
         workoutExercises.removeAll { $0.id == exercise.id }
     }
 
@@ -166,10 +167,12 @@ struct WorkoutEditView: View {
         workout.exercisesData = exercisesData
         workout.notes = workoutNotes.isEmpty ? nil : workoutNotes
 
+        HapticManager.shared.trigger(.success)
         dismiss()
     }
 
     private func deleteWorkout() {
+        HapticManager.shared.trigger(.warning)
         modelContext.delete(workout)
         dismiss()
     }

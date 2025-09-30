@@ -94,6 +94,7 @@ struct WorkoutsListView: View {
     }
 
     private func deleteWorkout(_ workout: WorkoutEntry) {
+        HapticManager.shared.trigger(.warning)
         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
             modelContext.delete(workout)
         }
