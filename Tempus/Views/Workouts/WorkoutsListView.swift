@@ -13,7 +13,6 @@ struct WorkoutsListView: View {
     @Query(sort: \WorkoutEntry.workoutDate, order: .reverse) private var workouts: [WorkoutEntry]
     @State private var showingWorkoutLogging = false
     @State private var selectedWorkout: WorkoutEntry?
-    @State private var addButtonTapped = false
 
     var body: some View {
         NavigationStack {
@@ -21,11 +20,8 @@ struct WorkoutsListView: View {
                 if workouts.isEmpty {
                     ContentUnavailableView {
                         Label("No Workouts Yet", systemImage: "figure.strengthtraining.traditional")
-                            .symbolRenderingMode(.multicolor)
-                            .symbolEffect(.bounce, value: workouts.isEmpty)
                     } description: {
                         Text("Tap + to log your first workout")
-                            .foregroundStyle(.secondary)
                     }
                 } else {
                     ScrollView {
@@ -59,14 +55,10 @@ struct WorkoutsListView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        addButtonTapped.toggle()
                         showingWorkoutLogging = true
                         print("DEBUG: Add workout button tapped")
                     } label: {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title2)
-                            .symbolRenderingMode(.hierarchical)
-                            .symbolEffect(.bounce, value: addButtonTapped)
+                        Image(systemName: "plus")
                     }
                 }
             }
@@ -129,11 +121,9 @@ struct WorkoutCardView: View {
 
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    // Animated icon with gradient
                     Image(systemName: "figure.strengthtraining.traditional")
                         .font(.title)
                         .symbolRenderingMode(.multicolor)
-                        .symbolEffect(.pulse.byLayer, options: .repeating.speed(0.5))
 
                     Spacer()
 
@@ -141,7 +131,6 @@ struct WorkoutCardView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "figure.mixed.cardio")
                             .font(.caption)
-                            .symbolRenderingMode(.hierarchical)
                         Text("\(workout.exercisesData.count)")
                             .font(.caption.bold())
                     }

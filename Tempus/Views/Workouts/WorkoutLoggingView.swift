@@ -344,13 +344,7 @@ struct ExercisePickerView: View {
                         }
                     } header: {
                         if let group = MuscleGroup(rawValue: muscleGroup) {
-                            Label {
-                                Text(muscleGroup)
-                            } icon: {
-                                Image(systemName: group.icon)
-                                    .symbolRenderingMode(.hierarchical)
-                                    .symbolEffect(.pulse.byLayer, options: .repeating.speed(0.4))
-                            }
+                            Label(muscleGroup, systemImage: group.icon)
                         } else {
                             Text(muscleGroup)
                         }

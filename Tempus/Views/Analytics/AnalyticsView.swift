@@ -18,11 +18,8 @@ struct AnalyticsView: View {
                 if workouts.isEmpty {
                     ContentUnavailableView {
                         Label("No Analytics Yet", systemImage: "chart.line.uptrend.xyaxis")
-                            .symbolRenderingMode(.multicolor)
-                            .symbolEffect(.bounce, value: workouts.isEmpty)
                     } description: {
                         Text("Log your first workout to see progress")
-                            .foregroundStyle(.secondary)
                     }
                 } else {
                     ScrollView {
@@ -49,7 +46,6 @@ struct AnalyticsView: View {
                                         Image(systemName: "figure.strengthtraining.traditional")
                                             .font(.system(size: 48))
                                             .symbolRenderingMode(.multicolor)
-                                            .symbolEffect(.pulse.byLayer, options: .repeating.speed(0.5))
                                     }
                                 }
                                 .padding(24)
@@ -65,9 +61,7 @@ struct AnalyticsView: View {
                                 VStack(spacing: 12) {
                                     Image(systemName: "chart.xyaxis.line")
                                         .font(.system(size: 36))
-                                        .symbolRenderingMode(.hierarchical)
-                                        .foregroundStyle(.accent)
-                                        .symbolEffect(.variableColor.iterative, options: .repeating.speed(0.3))
+                                        .foregroundStyle(.secondary)
 
                                     Text("Coming Soon")
                                         .font(.headline)

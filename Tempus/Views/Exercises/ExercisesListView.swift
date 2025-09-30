@@ -42,10 +42,10 @@ struct ExercisesListView: View {
                     }
                 } else {
                     ScrollView {
-                        LazyVStack(spacing: 16, pinnedViews: [.sectionHeaders]) {
+                        LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
                             ForEach(groupedExercises.keys.sorted(), id: \.self) { muscleGroup in
                                 Section {
-                                    LazyVStack(spacing: 12) {
+                                    LazyVStack(spacing: 8) {
                                         ForEach(groupedExercises[muscleGroup]!) { exercise in
                                             ExerciseCardView(exercise: exercise)
                                                 .onTapGesture {
@@ -54,12 +54,9 @@ struct ExercisesListView: View {
                                                     }
                                                     print("DEBUG: Exercise tapped - \(exercise.name)")
                                                 }
-                                                .transition(.asymmetric(
-                                                    insertion: .scale.combined(with: .opacity),
-                                                    removal: .scale.combined(with: .opacity)
-                                                ))
                                         }
                                     }
+                                    .padding(.bottom, 12)
                                 } header: {
                                     if let group = MuscleGroup(rawValue: muscleGroup) {
                                         HStack {
@@ -67,7 +64,6 @@ struct ExercisesListView: View {
                                                 .font(.title3)
                                                 .symbolRenderingMode(.hierarchical)
                                                 .foregroundStyle(.accent)
-                                                .symbolEffect(.pulse.byLayer, options: .repeating.speed(0.3))
 
                                             Text(muscleGroup)
                                                 .font(.title3.bold())
@@ -91,14 +87,10 @@ struct ExercisesListView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        addButtonTapped.toggle()
                         showingCreateForm = true
                         print("DEBUG: Add exercise button tapped")
                     } label: {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title2)
-                            .symbolRenderingMode(.hierarchical)
-                            .symbolEffect(.bounce, value: addButtonTapped)
+                        Image(systemName: "plus")
                     }
                 }
             }
