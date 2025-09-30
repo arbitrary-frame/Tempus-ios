@@ -3,13 +3,17 @@
 ## Git Workflow
 
 ### Branch Strategy
-- **NEVER work directly on `master` or `main`**
+- **⛔️ CRITICAL: NEVER EVER work directly on `master` or `main`**
+- **⛔️ BEFORE ANY WORK: Check current branch with `git branch`**
+- **⛔️ If on master: STOP and create a feature branch immediately**
 - Create a feature branch for every task: `feature/task-name`
 - Examples: `feature/data-models`, `feature/workout-logging-screen`, `feature/analytics-charts`
 
-### Before Any Work
-1. Ensure we're on the correct feature branch
-2. Branch should be up to date with master
+### MANDATORY First Step - Before Any Work
+1. **Run `git branch` to verify you are NOT on master**
+2. **If on master**: Immediately run `git checkout -b feature/descriptive-name`
+3. Ensure branch is up to date with master if needed
+4. **Double-check you're on the correct feature branch before making ANY changes**
 
 ### During Development
 1. Work incrementally on the feature branch
@@ -53,7 +57,8 @@
 - Follow requirements-ios.md specifications strictly
 
 ### What NOT to Do
-- Don't work on master/main branch
+- **⛔️ NEVER EVER work on master/main branch - This is the #1 rule**
+- **⛔️ ALWAYS check `git branch` before starting any work**
 - Don't push code that doesn't build
 - Don't implement Swift tests (user not comfortable with testing yet)
 - Don't deviate from requirements without asking first
@@ -117,9 +122,23 @@ Tempus/
 ## Summary Checklist
 
 Before requesting user review:
-- [ ] Working on feature branch (not master)
+- [ ] **⛔️ VERIFIED: Not on master branch (run `git branch` to confirm)**
+- [ ] Working on feature branch with descriptive name
 - [ ] Code follows requirements-ios.md
 - [ ] Xcode build succeeds
 - [ ] Debug print statements added where helpful
 - [ ] Committed with clear message
 - [ ] Ready for user review
+
+## ⛔️ CRITICAL RULE - READ FIRST
+
+**BEFORE MAKING ANY CODE CHANGES:**
+```bash
+# ALWAYS run this command first:
+git branch
+
+# If it shows "* master", IMMEDIATELY create a feature branch:
+git checkout -b feature/descriptive-name
+```
+
+**NO EXCEPTIONS. EVER.**
