@@ -11,6 +11,7 @@ import SwiftData
 @main
 struct TempusApp: App {
     @StateObject private var themeManager = ThemeManager()
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
 
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
@@ -29,8 +30,13 @@ struct TempusApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(themeManager)
+            if hasCompletedOnboarding {
+                ContentView()
+                    .environmentObject(themeManager)
+            } else {
+                OnboardingCoordinator()
+                    .environmentObject(themeManager)
+            }
         }
         .modelContainer(sharedModelContainer)
     }
