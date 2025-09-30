@@ -12,6 +12,7 @@ struct WorkoutEditView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query private var allExercises: [Exercise]
+    @Query(sort: \WorkoutEntry.workoutDate, order: .reverse) private var allWorkouts: [WorkoutEntry]
 
     let workout: WorkoutEntry
 
@@ -59,7 +60,10 @@ struct WorkoutEditView: View {
                 if !workoutExercises.isEmpty {
                     ForEach($workoutExercises) { $exerciseEntry in
                         Section {
-                            ExerciseEntryView(exerciseEntry: $exerciseEntry)
+                            ExerciseEntryView(
+                                exerciseEntry: $exerciseEntry,
+                                previousData: getPreviousWorkoutData(for: exerciseEntry.exerciseID, before: workout.workoutDate)
+                            )
                         } header: {
                             HStack {
                                 Text(exerciseEntry.exerciseName)
@@ -148,6 +152,23 @@ struct WorkoutEditView: View {
     private func removeExercise(_ exercise: WorkoutExerciseEntry) {
         HapticManager.shared.trigger(.light)
         workoutExercises.removeAll { $0.id == exercise.id }
+    }
+
+    private func getPreviousWorkoutData(for exerciseID: UUID, before date: Date) -> WorkoutExerciseData? {
+        // Find the most recent workout (excluding current) that contains this exercise
+        for otherWorkout in allWorkouts {
+            // Skip the current workout being edited
+            if otherWorkout.id == workout.id {
+                continue
+            }
+            // Only look at workouts before the current one
+            if otherWorkout.workoutDate < date {
+                if let exerciseData = otherWorkout.exercisesData.first(where: { $0.exerciseID == exerciseID }) {
+                    return exerciseData
+                }
+            }
+        }
+        return nil
     }
 
     private func saveWorkout() {

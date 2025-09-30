@@ -12,6 +12,7 @@ struct WorkoutLoggingView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query private var allExercises: [Exercise]
+    @Query(sort: \WorkoutEntry.workoutDate, order: .reverse) private var allWorkouts: [WorkoutEntry]
 
     @State private var workoutName: String
     @State private var workoutDate: Date
@@ -76,7 +77,10 @@ struct WorkoutLoggingView: View {
                 if !workoutExercises.isEmpty {
                     ForEach($workoutExercises) { $exerciseEntry in
                         Section {
-                            ExerciseEntryView(exerciseEntry: $exerciseEntry)
+                            ExerciseEntryView(
+                                exerciseEntry: $exerciseEntry,
+                                previousData: getPreviousWorkoutData(for: exerciseEntry.exerciseID)
+                            )
                         } header: {
                             HStack {
                                 Text(exerciseEntry.exerciseName)
@@ -155,6 +159,16 @@ struct WorkoutLoggingView: View {
         workoutName = "\(routineName) - \(formatter.string(from: date))"
     }
 
+    private func getPreviousWorkoutData(for exerciseID: UUID) -> WorkoutExerciseData? {
+        // Find the most recent workout that contains this exercise
+        for workout in allWorkouts {
+            if let exerciseData = workout.exercisesData.first(where: { $0.exerciseID == exerciseID }) {
+                return exerciseData
+            }
+        }
+        return nil
+    }
+
     private func saveWorkout() {
         // Convert WorkoutExerciseEntry to WorkoutExerciseData
         let exercisesData = workoutExercises.map { entry in
@@ -209,9 +223,37 @@ struct WorkoutExerciseEntry: Identifiable {
 // Exercise entry view with sets
 struct ExerciseEntryView: View {
     @Binding var exerciseEntry: WorkoutExerciseEntry
+    let previousData: WorkoutExerciseData?
 
     var body: some View {
         VStack(spacing: 12) {
+            // Previous workout preview
+            if let previous = previousData {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Last Session")
+                        .font(.caption.bold())
+                        .foregroundStyle(.secondary)
+
+                    HStack(spacing: 4) {
+                        ForEach(previous.sets.prefix(3), id: \.id) { set in
+                            Text(formatSet(set))
+                                .font(.caption)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(.ultraThinMaterial)
+                                .clipShape(Capsule())
+                        }
+                        if previous.sets.count > 3 {
+                            Text("+\(previous.sets.count - 3)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.vertical, 4)
+            }
+
             // Sets
             ForEach(exerciseEntry.sets.indices, id: \.self) { index in
                 HStack {
@@ -238,13 +280,15 @@ struct ExerciseEntryView: View {
             }
             .buttonStyle(.borderless)
 
-            // Exercise Notes
-            TextField("Exercise notes (optional)", text: Binding(
-                get: { exerciseEntry.notes ?? "" },
-                set: { exerciseEntry.notes = $0.isEmpty ? nil : $0 }
-            ), axis: .vertical)
-            .lineLimit(2...4)
-            .font(.caption)
+            // Exercise Notes (only show if notes exist)
+            if let notes = exerciseEntry.notes, !notes.isEmpty {
+                TextField("Exercise notes", text: Binding(
+                    get: { exerciseEntry.notes ?? "" },
+                    set: { exerciseEntry.notes = $0.isEmpty ? nil : $0 }
+                ), axis: .vertical)
+                .lineLimit(2...4)
+                .font(.caption)
+            }
         }
     }
 
@@ -264,6 +308,16 @@ struct ExerciseEntryView: View {
                 weightsAndReps: exerciseEntry.sets[index].weightsAndReps
             )
         }
+    }
+
+    private func formatSet(_ set: WorkoutSet) -> String {
+        let weightReps = set.weightsAndReps.map { wr in
+            if wr.weight == 0 && wr.reps == 0 {
+                return "—"
+            }
+            return "\(Int(wr.weight))kg × \(wr.reps)"
+        }.joined(separator: " → ")
+        return weightReps
     }
 }
 
