@@ -19,6 +19,10 @@ struct WorkoutLoggingView: View {
     @State private var showingExercisePicker = false
     @State private var workoutNotes: String = ""
 
+    // Track if name was from template to auto-update it
+    private let templateName: String?
+    private let isFromTemplate: Bool
+
     init(date: Date = Date(), template: WorkoutTemplate? = nil) {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_GB")
@@ -28,6 +32,8 @@ struct WorkoutLoggingView: View {
             print("DEBUG: WorkoutLoggingView init with template - \(template.name)")
             print("DEBUG: Template has \(template.exercises.count) exercises")
 
+            self.templateName = template.name
+            self.isFromTemplate = true
             _workoutName = State(initialValue: "\(template.name) - \(formatter.string(from: date))")
             _workoutDate = State(initialValue: date)
 
@@ -43,6 +49,8 @@ struct WorkoutLoggingView: View {
             _workoutExercises = State(initialValue: entries)
         } else {
             print("DEBUG: WorkoutLoggingView init without template")
+            self.templateName = nil
+            self.isFromTemplate = false
             _workoutName = State(initialValue: "Workout - \(formatter.string(from: date))")
             _workoutDate = State(initialValue: date)
         }
@@ -58,6 +66,9 @@ struct WorkoutLoggingView: View {
 
                     DatePicker("Date", selection: $workoutDate, displayedComponents: .date)
                         .environment(\.locale, Locale(identifier: "en_GB"))
+                        .onChange(of: workoutDate) { oldValue, newValue in
+                            updateWorkoutNameIfNeeded(for: newValue)
+                        }
                 } header: {
                     Label("Workout Details", systemImage: "figure.strengthtraining.traditional")
                         .symbolRenderingMode(.hierarchical)
@@ -136,6 +147,18 @@ struct WorkoutLoggingView: View {
     private func removeExercise(_ exercise: WorkoutExerciseEntry) {
         workoutExercises.removeAll { $0.id == exercise.id }
         print("DEBUG: Removed exercise - \(exercise.exerciseName)")
+    }
+
+    private func updateWorkoutNameIfNeeded(for date: Date) {
+        // Only auto-update if workout is from template
+        guard isFromTemplate, let templateName = templateName else { return }
+
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_GB")
+        formatter.dateStyle = .medium
+
+        workoutName = "\(templateName) - \(formatter.string(from: date))"
+        print("DEBUG: Updated workout name to: \(workoutName)")
     }
 
     private func saveWorkout() {
