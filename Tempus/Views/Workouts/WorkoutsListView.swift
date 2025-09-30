@@ -154,8 +154,16 @@ struct WorkoutCardView: View {
     let workout: WorkoutEntry
     @State private var isPressed = false
 
+    private static let calendar = Calendar.current
+    private static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_GB")
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter
+    }()
+
     var formattedDate: String {
-        let calendar = Calendar.current
         let now = Date()
         let interval = now.timeIntervalSince(workout.workoutDate)
 
@@ -169,15 +177,11 @@ struct WorkoutCardView: View {
             return hours == 1 ? "1 hour ago" : "\(hours) hours ago"
         }
 
-        if calendar.isDateInYesterday(workout.workoutDate) {
+        if Self.calendar.isDateInYesterday(workout.workoutDate) {
             return "Yesterday"
         }
 
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_GB")
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return formatter.string(from: workout.workoutDate)
+        return Self.dateFormatter.string(from: workout.workoutDate)
     }
 
     var body: some View {

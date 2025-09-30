@@ -25,17 +25,20 @@ struct WorkoutLoggingView: View {
     private let isFromRoutine: Bool
     private let sourceRoutine: WorkoutRoutine?
 
-    init(date: Date = Date(), routine: WorkoutRoutine? = nil) {
-        self.sourceRoutine = routine
+    private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_GB")
         formatter.dateStyle = .medium
+        return formatter
+    }()
+
+    init(date: Date = Date(), routine: WorkoutRoutine? = nil) {
+        self.sourceRoutine = routine
 
         if let routine = routine {
-
             self.routineName = routine.name
             self.isFromRoutine = true
-            _workoutName = State(initialValue: "\(routine.name) - \(formatter.string(from: date))")
+            _workoutName = State(initialValue: "\(routine.name) - \(Self.dateFormatter.string(from: date))")
             _workoutDate = State(initialValue: date)
 
             // Pre-populate exercises from routine
@@ -49,7 +52,7 @@ struct WorkoutLoggingView: View {
         } else {
             self.routineName = nil
             self.isFromRoutine = false
-            _workoutName = State(initialValue: "Workout - \(formatter.string(from: date))")
+            _workoutName = State(initialValue: "Workout - \(Self.dateFormatter.string(from: date))")
             _workoutDate = State(initialValue: date)
         }
     }
@@ -152,11 +155,7 @@ struct WorkoutLoggingView: View {
         // Only auto-update if workout is from routine
         guard isFromRoutine, let routineName = routineName else { return }
 
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_GB")
-        formatter.dateStyle = .medium
-
-        workoutName = "\(routineName) - \(formatter.string(from: date))"
+        workoutName = "\(routineName) - \(Self.dateFormatter.string(from: date))"
     }
 
     private func getPreviousWorkoutData(for exerciseID: UUID) -> WorkoutExerciseData? {
