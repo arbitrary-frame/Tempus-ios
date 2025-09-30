@@ -16,6 +16,7 @@ struct WorkoutsListView: View {
     @State private var selectedWorkout: WorkoutEntry?
     @State private var showingRoutinePicker = false
     @State private var routineToStart: WorkoutRoutine?
+    @State private var showingCalendar = false
     @AppStorage("userName") private var userName: String = ""
     @State private var currentGreeting: String = "Workouts"
 
@@ -111,7 +112,13 @@ struct WorkoutsListView: View {
                 updateGreeting()
             }
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button {
+                        showingCalendar = true
+                    } label: {
+                        Image(systemName: "calendar")
+                    }
+
                     Menu {
                         Button {
                             showingWorkoutLogging = true
@@ -150,6 +157,9 @@ struct WorkoutsListView: View {
             .fullScreenCover(item: $routineToStart) { routine in
                 WorkoutLoggingView(routine: routine)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+            .sheet(isPresented: $showingCalendar) {
+                WorkoutCalendarView()
             }
         }
     }
