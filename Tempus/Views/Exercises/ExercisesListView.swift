@@ -42,10 +42,10 @@ struct ExercisesListView: View {
                     }
                 } else {
                     ScrollView {
-                        LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+                        LazyVStack(spacing: 16, pinnedViews: [.sectionHeaders]) {
                             ForEach(groupedExercises.keys.sorted(), id: \.self) { muscleGroup in
                                 Section {
-                                    LazyVStack(spacing: 8) {
+                                    LazyVStack(spacing: 12) {
                                         ForEach(groupedExercises[muscleGroup]!) { exercise in
                                             ExerciseCardView(exercise: exercise)
                                                 .onTapGesture {
@@ -56,7 +56,6 @@ struct ExercisesListView: View {
                                                 }
                                         }
                                     }
-                                    .padding(.bottom, 12)
                                 } header: {
                                     if let group = MuscleGroup(rawValue: muscleGroup) {
                                         HStack {
