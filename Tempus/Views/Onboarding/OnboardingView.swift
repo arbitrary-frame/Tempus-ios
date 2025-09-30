@@ -15,35 +15,46 @@ struct OnboardingView: View {
 
     var body: some View {
         ZStack {
-            TabView(selection: $currentPage) {
-                // Screen 1: Welcome + Name
-                WelcomeScreen(userName: $userName)
-                    .tag(0)
-
-                // Screen 2: Log Workouts
-                FeatureScreen(
-                    icon: "figure.strengthtraining.traditional",
-                    title: "Log Your Workouts",
-                    description: "Track sets, reps, and weights with an intuitive interface"
-                )
-                .tag(1)
-
-                // Screen 3: Create Routines
-                FeatureScreen(
-                    icon: "arrow.triangle.2.circlepath",
-                    title: "Create Workout Routines",
-                    description: "Build templates for your favorite workouts"
-                )
-                .tag(2)
-
-                // Screen 4: Track Progress
-                FinalScreen(userName: userName, onComplete: {
-                    completeOnboarding()
-                })
-                .tag(3)
+            // Content for current page
+            Group {
+                switch currentPage {
+                case 0:
+                    WelcomeScreen(userName: $userName, onNext: {
+                        withAnimation {
+                            currentPage += 1
+                        }
+                    })
+                case 1:
+                    FeatureScreen(
+                        icon: "figure.strengthtraining.traditional",
+                        title: "Log Your Workouts",
+                        description: "Track sets, reps, and weights with an intuitive interface",
+                        onNext: {
+                            withAnimation {
+                                currentPage += 1
+                            }
+                        }
+                    )
+                case 2:
+                    FeatureScreen(
+                        icon: "arrow.triangle.2.circlepath",
+                        title: "Create Workout Routines",
+                        description: "Build templates for your favorite workouts",
+                        onNext: {
+                            withAnimation {
+                                currentPage += 1
+                            }
+                        }
+                    )
+                case 3:
+                    FinalScreen(userName: userName, onComplete: {
+                        completeOnboarding()
+                    })
+                default:
+                    EmptyView()
+                }
             }
-            .tabViewStyle(.page(indexDisplayMode: .always))
-            .indexViewStyle(.page(backgroundDisplayMode: .always))
+            .transition(.slide)
 
             // Skip button (hide on last screen)
             if currentPage < 3 {
@@ -62,6 +73,19 @@ struct OnboardingView: View {
                     Spacer()
                 }
             }
+
+            // Page indicator
+            VStack {
+                Spacer()
+                HStack(spacing: 8) {
+                    ForEach(0..<4) { index in
+                        Circle()
+                            .fill(index == currentPage ? Color.accentColor : Color.secondary.opacity(0.3))
+                            .frame(width: 8, height: 8)
+                    }
+                }
+                .padding(.bottom, 100)
+            }
         }
         .preferredColorScheme(themeManager.colorScheme)
     }
@@ -76,6 +100,7 @@ struct OnboardingView: View {
 // MARK: - Welcome Screen
 struct WelcomeScreen: View {
     @Binding var userName: String
+    let onNext: () -> Void
     @FocusState private var isNameFieldFocused: Bool
 
     var body: some View {
@@ -113,10 +138,20 @@ struct WelcomeScreen: View {
             }
             .padding(.horizontal, 40)
 
-            Text("Swipe to continue →")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .padding(.top, 8)
+            Button {
+                HapticManager.shared.trigger(.light)
+                onNext()
+            } label: {
+                Text("Continue")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(.accent)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .padding(.horizontal, 40)
+            .padding(.top, 16)
 
             Spacer()
         }
@@ -129,6 +164,7 @@ struct FeatureScreen: View {
     let icon: String
     let title: String
     let description: String
+    let onNext: () -> Void
 
     var body: some View {
         VStack(spacing: 40) {
@@ -153,9 +189,19 @@ struct FeatureScreen: View {
 
             Spacer()
 
-            Text("Swipe to continue →")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            Button {
+                HapticManager.shared.trigger(.light)
+                onNext()
+            } label: {
+                Text("Continue")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(.accent)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .padding(.horizontal, 40)
 
             Spacer()
         }
