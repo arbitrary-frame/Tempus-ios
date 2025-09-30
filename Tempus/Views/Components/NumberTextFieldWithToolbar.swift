@@ -12,9 +12,14 @@ import UIKit
 class TextFieldManager {
     var textFields: [Int: UITextField] = [:]
 
+    var totalFieldCount: Int {
+        // Return the highest registered field index + 1
+        return (textFields.keys.max() ?? -1) + 1
+    }
+
     func register(_ textField: UITextField, for index: Int) {
         textFields[index] = textField
-        print("📝 Registered field \(index), total registered: \(textFields.count)")
+        print("📝 Registered field \(index), total registered: \(textFields.count), totalFieldCount: \(totalFieldCount)")
     }
 
     func focusField(_ index: Int) {
@@ -125,7 +130,6 @@ struct NumberTextFieldWithToolbar: UIViewRepresentable {
     class Coordinator: NSObject, UITextFieldDelegate {
         @Binding var text: String
         let fieldIndex: Int
-        let totalFields: Int
         let manager: TextFieldManager
 
         var previousButton: UIBarButtonItem?
@@ -134,12 +138,11 @@ struct NumberTextFieldWithToolbar: UIViewRepresentable {
         init(
             text: Binding<String>,
             fieldIndex: Int,
-            totalFields: Int,
+            totalFields: Int, // Kept for compatibility but not used
             manager: TextFieldManager
         ) {
             self._text = text
             self.fieldIndex = fieldIndex
-            self.totalFields = totalFields
             self.manager = manager
         }
 
@@ -148,21 +151,28 @@ struct NumberTextFieldWithToolbar: UIViewRepresentable {
         }
 
         func updateButtonStates() {
+            let totalFields = manager.totalFieldCount
             previousButton?.isEnabled = fieldIndex > 0
             nextButton?.isEnabled = fieldIndex < totalFields - 1
+            print("🔄 Updated button states for field \(fieldIndex): prev=\(previousButton?.isEnabled ?? false), next=\(nextButton?.isEnabled ?? false), totalFields=\(totalFields)")
         }
 
         @objc func previousTapped() {
             HapticManager.shared.trigger(.selection)
             if fieldIndex > 0 {
+                print("⬆️ Previous from \(fieldIndex) to \(fieldIndex - 1)")
                 manager.focusField(fieldIndex - 1)
             }
         }
 
         @objc func nextTapped() {
             HapticManager.shared.trigger(.selection)
+            let totalFields = manager.totalFieldCount
             if fieldIndex < totalFields - 1 {
+                print("⬇️ Next from \(fieldIndex) to \(fieldIndex + 1)")
                 manager.focusField(fieldIndex + 1)
+            } else {
+                print("⛔ Next blocked: fieldIndex=\(fieldIndex), totalFields=\(totalFields)")
             }
         }
 
