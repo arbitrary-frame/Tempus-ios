@@ -233,14 +233,14 @@ struct SetEntryRow: View {
     @Binding var set: WorkoutSet
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Set \(set.setNumber)")
-                .font(.subheadline.bold())
-                .foregroundStyle(.accent)
-
+        VStack(spacing: 4) {
             // Weight/Rep pairs stacked vertically (for drop sets)
             ForEach($set.weightsAndReps) { $wr in
-                HStack(spacing: 8) {
+                HStack(spacing: 12) {
+                    Text("Set \(set.setNumber)")
+                        .font(.subheadline)
+                        .frame(width: 50, alignment: .leading)
+
                     TextField("kg", text: Binding(
                         get: { wr.weight == 0 ? "" : "\(wr.weight)" },
                         set: { wr.weight = Double($0) ?? 0 }
@@ -263,24 +263,29 @@ struct SetEntryRow: View {
 
                     if set.weightsAndReps.count > 1 {
                         Button {
-                            removeWeightRep(wr)
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                removeWeightRep(wr)
+                            }
                         } label: {
                             Image(systemName: "minus.circle.fill")
                                 .foregroundStyle(.red)
+                                .symbolRenderingMode(.hierarchical)
+                        }
+                        .buttonStyle(.borderless)
+                    }
+
+                    // Add Drop Set Button (shown on first row only)
+                    if wr.id == set.weightsAndReps.first?.id {
+                        Button {
+                            addDropSet()
+                        } label: {
+                            Image(systemName: "plus.circle")
+                                .symbolRenderingMode(.hierarchical)
                         }
                         .buttonStyle(.borderless)
                     }
                 }
             }
-
-            // Add Drop Set Button
-            Button {
-                addDropSet()
-            } label: {
-                Label("Add Drop Set", systemImage: "plus.circle")
-                    .font(.caption)
-            }
-            .buttonStyle(.borderless)
         }
     }
 
