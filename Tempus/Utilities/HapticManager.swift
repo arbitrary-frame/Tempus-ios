@@ -20,24 +20,31 @@ final class HapticManager {
         switch type {
         case .light:
             let generator = UIImpactFeedbackGenerator(style: .light)
+            generator.prepare()
             generator.impactOccurred()
         case .medium:
             let generator = UIImpactFeedbackGenerator(style: .medium)
+            generator.prepare()
             generator.impactOccurred()
         case .heavy:
             let generator = UIImpactFeedbackGenerator(style: .heavy)
+            generator.prepare()
             generator.impactOccurred()
         case .success:
             let generator = UINotificationFeedbackGenerator()
+            generator.prepare()
             generator.notificationOccurred(.success)
         case .warning:
             let generator = UINotificationFeedbackGenerator()
+            generator.prepare()
             generator.notificationOccurred(.warning)
         case .error:
             let generator = UINotificationFeedbackGenerator()
+            generator.prepare()
             generator.notificationOccurred(.error)
         case .selection:
             let generator = UISelectionFeedbackGenerator()
+            generator.prepare()
             generator.selectionChanged()
         }
     }
@@ -46,15 +53,16 @@ final class HapticManager {
     /// - Parameter type: The type of haptic to prepare
     func prepare(_ type: HapticType) {
         switch type {
-        case .light, .medium, .heavy:
-            let generator = UIImpactFeedbackGenerator(style: .medium)
-            generator.prepare()
+        case .light:
+            UIImpactFeedbackGenerator(style: .light).prepare()
+        case .medium:
+            UIImpactFeedbackGenerator(style: .medium).prepare()
+        case .heavy:
+            UIImpactFeedbackGenerator(style: .heavy).prepare()
         case .success, .warning, .error:
-            let generator = UINotificationFeedbackGenerator()
-            generator.prepare()
+            UINotificationFeedbackGenerator().prepare()
         case .selection:
-            let generator = UISelectionFeedbackGenerator()
-            generator.prepare()
+            UISelectionFeedbackGenerator().prepare()
         }
     }
 }
