@@ -94,24 +94,40 @@ struct TemplateRowView: View {
     let template: WorkoutTemplate
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(template.name)
-                .font(.headline)
-
-            HStack {
-                Image(systemName: "figure.mixed.cardio")
-                    .font(.caption2)
+        HStack(spacing: 12) {
+            // Show emoji icon or default icon
+            if let emoji = template.emoji, !emoji.isEmpty {
+                Text(emoji)
+                    .font(.title2)
+                    .frame(width: 44, height: 44)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
+            } else {
+                Image(systemName: "doc.text")
+                    .font(.title3)
                     .foregroundStyle(.secondary)
-                Text("\(template.exercises.count) exercises")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .frame(width: 44, height: 44)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
             }
 
-            if let description = template.templateDescription, !description.isEmpty {
-                Text(description)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(template.name)
+                    .font(.headline)
+
+                HStack {
+                    Image(systemName: "figure.mixed.cardio")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    Text("\(template.exercises.count) exercises")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                if let description = template.templateDescription, !description.isEmpty {
+                    Text(description)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
             }
         }
         .padding(.vertical, 4)

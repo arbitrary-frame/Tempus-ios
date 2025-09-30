@@ -16,6 +16,7 @@ struct SaveWorkoutAsTemplateView: View {
     let workoutExercises: [WorkoutExerciseEntry]
     @State private var templateName: String
     @State private var templateDescription: String = ""
+    @State private var emoji: String = ""
 
     init(workoutExercises: [WorkoutExerciseEntry], defaultName: String) {
         self.workoutExercises = workoutExercises
@@ -30,8 +31,15 @@ struct SaveWorkoutAsTemplateView: View {
         NavigationStack {
             List {
                 Section("Template Details") {
-                    TextField("Template Name", text: $templateName)
-                        .autocorrectionDisabled()
+                    HStack(spacing: 12) {
+                        EmojiIconPicker(selectedEmoji: Binding(
+                            get: { emoji.isEmpty ? nil : emoji },
+                            set: { emoji = $0 ?? "" }
+                        ))
+
+                        TextField("Template Name", text: $templateName)
+                            .autocorrectionDisabled()
+                    }
 
                     TextField("Description (optional)", text: $templateDescription, axis: .vertical)
                         .lineLimit(3...6)
@@ -72,6 +80,7 @@ struct SaveWorkoutAsTemplateView: View {
 
     private func saveTemplate() {
         let trimmedName = templateName.trimmingCharacters(in: .whitespaces)
+        let trimmedEmoji = emoji.trimmingCharacters(in: .whitespaces)
 
         // Get the actual Exercise objects
         let exercises = workoutExercises.compactMap { entry in
@@ -81,6 +90,7 @@ struct SaveWorkoutAsTemplateView: View {
         let template = WorkoutTemplate(
             name: trimmedName,
             templateDescription: templateDescription.isEmpty ? nil : templateDescription,
+            emoji: trimmedEmoji.isEmpty ? nil : trimmedEmoji,
             exercises: exercises
         )
 

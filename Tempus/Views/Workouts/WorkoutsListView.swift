@@ -144,9 +144,15 @@ struct WorkoutCardView: View {
 
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    Image(systemName: "figure.strengthtraining.traditional")
-                        .font(.title)
-                        .symbolRenderingMode(.multicolor)
+                    // Show template emoji if workout created from template, otherwise default icon
+                    if let emoji = workout.template?.emoji, !emoji.isEmpty {
+                        Text(emoji)
+                            .font(.largeTitle)
+                    } else {
+                        Image(systemName: "figure.strengthtraining.traditional")
+                            .font(.title)
+                            .symbolRenderingMode(.multicolor)
+                    }
 
                     Spacer()
 
