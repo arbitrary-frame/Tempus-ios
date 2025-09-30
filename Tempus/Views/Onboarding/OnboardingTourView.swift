@@ -67,9 +67,7 @@ struct OnboardingTourView: View {
                     // Next button
                     Button {
                         HapticManager.shared.trigger(.light)
-                        if hasNextStep {
-                            onboardingState.nextStep()
-                        }
+                        onboardingState.nextStep()
                     } label: {
                         Text(hasNextStep ? "Next" : "Finish Tour")
                             .font(.headline)
@@ -88,6 +86,7 @@ struct OnboardingTourView: View {
                 .padding(.bottom, 32)
             }
         }
+        .preferredColorScheme(themeManager.colorScheme)
         .onChange(of: onboardingState.currentStep) { _, newStep in
             updateTabSelection(for: newStep)
         }

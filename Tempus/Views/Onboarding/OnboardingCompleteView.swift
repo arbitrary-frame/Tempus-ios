@@ -10,6 +10,7 @@ import SwiftData
 
 struct OnboardingCompleteView: View {
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject var themeManager: ThemeManager
     @ObservedObject var onboardingState: OnboardingState
 
     var body: some View {
@@ -79,6 +80,7 @@ struct OnboardingCompleteView: View {
             Spacer()
         }
         .padding()
+        .preferredColorScheme(themeManager.colorScheme)
     }
 
     private func startFresh() {
@@ -101,5 +103,6 @@ struct OnboardingCompleteView: View {
 
 #Preview {
     OnboardingCompleteView(onboardingState: OnboardingState())
+        .environmentObject(ThemeManager())
         .modelContainer(for: [Exercise.self, WorkoutRoutine.self, WorkoutEntry.self])
 }

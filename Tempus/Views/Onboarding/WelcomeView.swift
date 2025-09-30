@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct WelcomeView: View {
+    @EnvironmentObject var themeManager: ThemeManager
     @ObservedObject var onboardingState: OnboardingState
     @State private var name: String = ""
     @FocusState private var isNameFieldFocused: Bool
@@ -73,6 +74,7 @@ struct WelcomeView: View {
             Spacer()
         }
         .padding()
+        .preferredColorScheme(themeManager.colorScheme)
         .onAppear {
             // Focus the name field when view appears
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -94,4 +96,5 @@ struct WelcomeView: View {
 
 #Preview {
     WelcomeView(onboardingState: OnboardingState())
+        .environmentObject(ThemeManager())
 }
