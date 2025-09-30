@@ -228,63 +228,64 @@ struct ExerciseEntryView: View {
     }
 }
 
-// Individual set entry row
+// Individual set entry row with horizontal scroll
 struct SetEntryRow: View {
     @Binding var set: WorkoutSet
 
     var body: some View {
-        VStack(spacing: 4) {
-            // Weight/Rep pairs stacked vertically (for drop sets)
-            ForEach($set.weightsAndReps) { $wr in
-                HStack(spacing: 12) {
-                    Text("Set \(set.setNumber)")
-                        .font(.subheadline)
-                        .frame(width: 50, alignment: .leading)
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 12) {
+                Text("Set \(set.setNumber)")
+                    .font(.subheadline.bold())
+                    .foregroundStyle(.accent)
+                    .frame(width: 50, alignment: .leading)
 
-                    TextField("kg", text: Binding(
-                        get: { wr.weight == 0 ? "" : "\(wr.weight)" },
-                        set: { wr.weight = Double($0) ?? 0 }
-                    ))
-                    .keyboardType(.decimalPad)
-                    .textFieldStyle(.roundedBorder)
-                    .frame(width: 60)
+                // Weight/Rep pairs (for drop sets)
+                ForEach($set.weightsAndReps) { $wr in
+                    HStack(spacing: 4) {
+                        TextField("kg", text: Binding(
+                            get: { wr.weight == 0 ? "" : "\(wr.weight)" },
+                            set: { wr.weight = Double($0) ?? 0 }
+                        ))
+                        .keyboardType(.decimalPad)
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 60)
 
-                    Image(systemName: "xmark")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                        Image(systemName: "xmark")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
 
-                    TextField("reps", text: Binding(
-                        get: { wr.reps == 0 ? "" : "\(wr.reps)" },
-                        set: { wr.reps = Int($0) ?? 0 }
-                    ))
-                    .keyboardType(.numberPad)
-                    .textFieldStyle(.roundedBorder)
-                    .frame(width: 50)
+                        TextField("reps", text: Binding(
+                            get: { wr.reps == 0 ? "" : "\(wr.reps)" },
+                            set: { wr.reps = Int($0) ?? 0 }
+                        ))
+                        .keyboardType(.numberPad)
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 50)
 
-                    if set.weightsAndReps.count > 1 {
-                        Button {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                removeWeightRep(wr)
+                        if set.weightsAndReps.count > 1 {
+                            Button {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                    removeWeightRep(wr)
+                                }
+                            } label: {
+                                Image(systemName: "minus.circle.fill")
+                                    .foregroundStyle(.red)
+                                    .symbolRenderingMode(.hierarchical)
                             }
-                        } label: {
-                            Image(systemName: "minus.circle.fill")
-                                .foregroundStyle(.red)
-                                .symbolRenderingMode(.hierarchical)
+                            .buttonStyle(.borderless)
                         }
-                        .buttonStyle(.borderless)
-                    }
-
-                    // Add Drop Set Button (shown on first row only)
-                    if wr.id == set.weightsAndReps.first?.id {
-                        Button {
-                            addDropSet()
-                        } label: {
-                            Image(systemName: "plus.circle")
-                                .symbolRenderingMode(.hierarchical)
-                        }
-                        .buttonStyle(.borderless)
                     }
                 }
+
+                // Add Drop Set Button
+                Button {
+                    addDropSet()
+                } label: {
+                    Image(systemName: "plus.circle")
+                        .symbolRenderingMode(.hierarchical)
+                }
+                .buttonStyle(.borderless)
             }
         }
     }
