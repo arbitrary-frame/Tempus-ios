@@ -17,46 +17,7 @@ struct WorkoutsListView: View {
     @State private var showingRoutinePicker = false
     @State private var routineToStart: WorkoutRoutine?
     @AppStorage("userName") private var userName: String = ""
-
-    private var navigationTitle: String {
-        guard !userName.isEmpty else { return "Workouts" }
-
-        let hour = Calendar.current.component(.hour, from: Date())
-        let messages: [String]
-
-        switch hour {
-        case 5..<12:
-            messages = [
-                "Morning \(userName)",
-                "Let's go \(userName)",
-                "Ready \(userName)?",
-                "Time to train \(userName)"
-            ]
-        case 12..<17:
-            messages = [
-                "Hey \(userName)",
-                "Let's work \(userName)",
-                "Ready \(userName)?",
-                "Time to move \(userName)"
-            ]
-        case 17..<22:
-            messages = [
-                "Evening \(userName)",
-                "Let's go \(userName)",
-                "Ready \(userName)?",
-                "Time to push \(userName)"
-            ]
-        default:
-            messages = [
-                "Hey \(userName)",
-                "Can't sleep \(userName)?",
-                "Night owl \(userName)?",
-                "Late session \(userName)?"
-            ]
-        }
-
-        return messages.randomElement() ?? messages[0]
-    }
+    @State private var currentGreeting: String = "Workouts"
 
     var body: some View {
         NavigationStack {
@@ -89,7 +50,10 @@ struct WorkoutsListView: View {
                     .scrollContentBackground(.hidden)
                 }
             }
-            .navigationTitle(navigationTitle)
+            .navigationTitle(currentGreeting)
+            .onAppear {
+                updateGreeting()
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
@@ -139,6 +103,49 @@ struct WorkoutsListView: View {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
             modelContext.delete(workout)
         }
+    }
+
+    private func updateGreeting() {
+        guard !userName.isEmpty else {
+            currentGreeting = "Workouts"
+            return
+        }
+
+        let hour = Calendar.current.component(.hour, from: Date())
+        let messages: [String]
+
+        switch hour {
+        case 5..<12:
+            messages = [
+                "Morning \(userName)",
+                "Let's go \(userName)",
+                "Ready \(userName)?",
+                "Time to train \(userName)"
+            ]
+        case 12..<17:
+            messages = [
+                "Hey \(userName)",
+                "Let's work \(userName)",
+                "Ready \(userName)?",
+                "Time to move \(userName)"
+            ]
+        case 17..<22:
+            messages = [
+                "Evening \(userName)",
+                "Let's go \(userName)",
+                "Ready \(userName)?",
+                "Time to push \(userName)"
+            ]
+        default:
+            messages = [
+                "Hey \(userName)",
+                "Can't sleep \(userName)?",
+                "Night owl \(userName)?",
+                "Late session \(userName)?"
+            ]
+        }
+
+        currentGreeting = messages.randomElement() ?? messages[0]
     }
 }
 
