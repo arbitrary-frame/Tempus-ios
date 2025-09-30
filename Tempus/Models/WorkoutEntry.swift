@@ -34,6 +34,5 @@ final class WorkoutEntry {
         self.createdAt = Date()
 
         // DEBUG: Workout entry created
-        print("DEBUG: WorkoutEntry created - \(name) on \(date) with \(exercisesData.count) exercises")
     }
 }

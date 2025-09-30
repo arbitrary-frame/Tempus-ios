@@ -22,9 +22,6 @@ struct WorkoutExerciseData: Codable, Identifiable {
         self.exerciseName = exerciseName
         self.sets = sets
         self.notes = notes
-
-        // DEBUG: Exercise data created
-        print("DEBUG: WorkoutExerciseData created - \(exerciseName) with \(sets.count) sets")
     }
 }
 

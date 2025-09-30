@@ -32,7 +32,6 @@ struct WorkoutsListView: View {
                             WorkoutCardView(workout: workout)
                                 .onTapGesture {
                                     selectedWorkout = workout
-                                    print("DEBUG: Workout tapped - \(workout.workoutName)")
                                 }
                                 .listRowBackground(Color.clear)
                                 .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
@@ -55,7 +54,6 @@ struct WorkoutsListView: View {
                     Menu {
                         Button {
                             showingWorkoutLogging = true
-                            print("DEBUG: Quick log workout tapped")
                         } label: {
                             Label("Quick Log", systemImage: "plus.circle")
                         }
@@ -67,7 +65,6 @@ struct WorkoutsListView: View {
                                 ForEach(routines) { routine in
                                     Button {
                                         routineToStart = routine
-                                        print("DEBUG: Starting workout from routine - \(routine.name)")
                                     } label: {
                                         Text(routine.name)
                                     }
@@ -100,7 +97,6 @@ struct WorkoutsListView: View {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
             modelContext.delete(workout)
         }
-        print("DEBUG: Deleted workout - \(workout.workoutName)")
     }
 }
 

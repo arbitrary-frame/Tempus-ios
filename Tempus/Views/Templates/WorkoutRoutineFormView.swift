@@ -102,7 +102,6 @@ struct WorkoutRoutineFormView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
-                        print("DEBUG: Routine form cancelled")
                         dismiss()
                     }
                 }
@@ -121,7 +120,6 @@ struct WorkoutRoutineFormView: View {
 
     private func removeExercise(_ exercise: Exercise) {
         selectedExercises.removeAll { $0.id == exercise.id }
-        print("DEBUG: Removed exercise from routine - \(exercise.name)")
     }
 
     private func saveRoutine() {
@@ -135,7 +133,6 @@ struct WorkoutRoutineFormView: View {
             routine.emoji = trimmedEmoji.isEmpty ? nil : trimmedEmoji
             routine.exercises = selectedExercises
             routine.updatedAt = Date()
-            print("DEBUG: Routine updated - \(trimmedName)")
         } else {
             // Create new routine
             let newRoutine = WorkoutRoutine(
@@ -145,7 +142,6 @@ struct WorkoutRoutineFormView: View {
                 exercises: selectedExercises
             )
             modelContext.insert(newRoutine)
-            print("DEBUG: Routine created - \(trimmedName)")
         }
 
         dismiss()
@@ -222,10 +218,8 @@ struct RoutineExercisePickerView: View {
     private func toggleExercise(_ exercise: Exercise) {
         if isSelected(exercise) {
             selectedExercises.removeAll { $0.id == exercise.id }
-            print("DEBUG: Removed \(exercise.name) from routine")
         } else {
             selectedExercises.append(exercise)
-            print("DEBUG: Added \(exercise.name) to routine")
         }
     }
 }
