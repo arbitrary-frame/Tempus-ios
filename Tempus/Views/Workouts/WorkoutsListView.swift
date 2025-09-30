@@ -18,13 +18,46 @@ struct WorkoutsListView: View {
     @State private var routineToStart: WorkoutRoutine?
     @AppStorage("userName") private var userName: String = ""
 
-    private var greeting: String {
+    private var navigationTitle: String {
+        guard !userName.isEmpty else { return "Workouts" }
+
         let hour = Calendar.current.component(.hour, from: Date())
+        let messages: [String]
+
         switch hour {
-        case 0..<12: return "Good Morning"
-        case 12..<17: return "Good Afternoon"
-        default: return "Good Evening"
+        case 5..<12:
+            messages = [
+                "Morning \(userName)",
+                "Let's go \(userName)",
+                "Ready \(userName)?",
+                "Time to train \(userName)"
+            ]
+        case 12..<17:
+            messages = [
+                "Hey \(userName)",
+                "Let's work \(userName)",
+                "Ready \(userName)?",
+                "Time to move \(userName)"
+            ]
+        case 17..<22:
+            messages = [
+                "Evening \(userName)",
+                "Let's go \(userName)",
+                "Ready \(userName)?",
+                "Time to push \(userName)"
+            ]
+        default:
+            messages = [
+                "Hey \(userName)",
+                "Can't sleep \(userName)?",
+                "Night owl \(userName)?",
+                "Late session \(userName)?"
+            ]
         }
+
+        // Use day of year as seed for consistent daily rotation
+        let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0
+        return messages[dayOfYear % messages.count]
     }
 
     var body: some View {
@@ -58,7 +91,7 @@ struct WorkoutsListView: View {
                     .scrollContentBackground(.hidden)
                 }
             }
-            .navigationTitle(userName.isEmpty ? "Workouts" : "\(greeting), \(userName)")
+            .navigationTitle(navigationTitle)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
