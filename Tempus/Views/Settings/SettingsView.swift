@@ -102,49 +102,62 @@ struct SettingsView: View {
     }
 
     private func exportAllData() {
-        let exportModel = ExportData(
-            version: "1.0.0",
-            workouts: workouts.map { workout in
-                ExportWorkout(
-                    id: workout.id.uuidString,
-                    name: workout.workoutName,
-                    date: workout.workoutDate,
-                    notes: workout.notes,
-                    exercises: workout.exercisesData.map { exercise in
-                        ExportExercise(
-                            name: exercise.exerciseName,
-                            sets: exercise.sets.map { set in
-                                ExportSet(
-                                    setNumber: set.setNumber,
-                                    weightsAndReps: set.weightsAndReps.map { wr in
-                                        ExportWeightRep(weight: wr.weight, reps: wr.reps)
-                                    }
-                                )
-                            },
-                            notes: exercise.notes
-                        )
-                    }
-                )
-            },
-            exercises: exercises.map { exercise in
-                ExportExerciseDefinition(
-                    id: exercise.id.uuidString,
-                    name: exercise.name,
-                    description: exercise.exerciseDescription,
-                    muscleGroup: exercise.muscleGroup,
-                    tags: exercise.tags
-                )
-            },
-            exportDate: Date()
-        )
+        // Capture data on main thread
+        let workoutsSnapshot = workouts
+        let exercisesSnapshot = exercises
 
-        do {
-            let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .iso8601
-            encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-            exportData = try encoder.encode(exportModel)
-            showingExportSheet = true
-        } catch {
+        // Move expensive encoding to background thread
+        Task.detached(priority: .userInitiated) {
+            let exportModel = ExportData(
+                version: "1.0.0",
+                workouts: workoutsSnapshot.map { workout in
+                    ExportWorkout(
+                        id: workout.id.uuidString,
+                        name: workout.workoutName,
+                        date: workout.workoutDate,
+                        notes: workout.notes,
+                        exercises: workout.exercisesData.map { exercise in
+                            ExportExercise(
+                                name: exercise.exerciseName,
+                                sets: exercise.sets.map { set in
+                                    ExportSet(
+                                        setNumber: set.setNumber,
+                                        weightsAndReps: set.weightsAndReps.map { wr in
+                                            ExportWeightRep(weight: wr.weight, reps: wr.reps)
+                                        }
+                                    )
+                                },
+                                notes: exercise.notes
+                            )
+                        }
+                    )
+                },
+                exercises: exercisesSnapshot.map { exercise in
+                    ExportExerciseDefinition(
+                        id: exercise.id.uuidString,
+                        name: exercise.name,
+                        description: exercise.exerciseDescription,
+                        muscleGroup: exercise.muscleGroup,
+                        tags: exercise.tags
+                    )
+                },
+                exportDate: Date()
+            )
+
+            do {
+                let encoder = JSONEncoder()
+                encoder.dateEncodingStrategy = .iso8601
+                encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+                let data = try encoder.encode(exportModel)
+
+                // Update UI on main thread
+                await MainActor.run {
+                    exportData = data
+                    showingExportSheet = true
+                }
+            } catch {
+                // Handle error on main thread if needed
+            }
         }
     }
 

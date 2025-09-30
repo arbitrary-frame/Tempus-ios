@@ -24,6 +24,24 @@ struct WorkoutEditView: View {
     @State private var showingDeleteConfirmation = false
     @State private var showingSaveAsRoutine = false
 
+    // Cached previous workout data lookup - prevents N+1 query pattern
+    private var previousWorkoutDataCache: [UUID: WorkoutExerciseData] {
+        var cache: [UUID: WorkoutExerciseData] = [:]
+        for otherWorkout in allWorkouts {
+            // Skip current workout and only look at workouts before the current one
+            guard otherWorkout.id != workout.id, otherWorkout.workoutDate < workoutDate else {
+                continue
+            }
+            for exerciseData in otherWorkout.exercisesData {
+                // Only keep the most recent (first occurrence due to reverse sort)
+                if cache[exerciseData.exerciseID] == nil {
+                    cache[exerciseData.exerciseID] = exerciseData
+                }
+            }
+        }
+        return cache
+    }
+
     init(workout: WorkoutEntry) {
         self.workout = workout
         _workoutName = State(initialValue: workout.workoutName)
@@ -62,7 +80,7 @@ struct WorkoutEditView: View {
                         Section {
                             ExerciseEntryView(
                                 exerciseEntry: $exerciseEntry,
-                                previousData: getPreviousWorkoutData(for: exerciseEntry.exerciseID, before: workout.workoutDate)
+                                previousData: previousWorkoutDataCache[exerciseEntry.exerciseID]
                             )
                         } header: {
                             HStack {
@@ -154,22 +172,6 @@ struct WorkoutEditView: View {
         workoutExercises.removeAll { $0.id == exercise.id }
     }
 
-    private func getPreviousWorkoutData(for exerciseID: UUID, before date: Date) -> WorkoutExerciseData? {
-        // Find the most recent workout (excluding current) that contains this exercise
-        for otherWorkout in allWorkouts {
-            // Skip the current workout being edited
-            if otherWorkout.id == workout.id {
-                continue
-            }
-            // Only look at workouts before the current one
-            if otherWorkout.workoutDate < date {
-                if let exerciseData = otherWorkout.exercisesData.first(where: { $0.exerciseID == exerciseID }) {
-                    return exerciseData
-                }
-            }
-        }
-        return nil
-    }
 
     private func saveWorkout() {
         // Convert WorkoutExerciseEntry back to WorkoutExerciseData
