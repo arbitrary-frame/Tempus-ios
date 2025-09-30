@@ -35,17 +35,18 @@ struct AnalyticsView: View {
                                         VStack(alignment: .leading, spacing: 4) {
                                             Text("Total Workouts")
                                                 .font(.caption)
-                                                .foregroundStyle(.secondary)
+                                                .foregroundStyle(Color.tempusTextSecondary)
                                             Text("\(workouts.count)")
                                                 .font(.system(size: 48, weight: .bold))
-                                                .foregroundStyle(.primary)
+                                                .foregroundStyle(Color.tempusTeal)
                                         }
 
                                         Spacer()
 
                                         Image(systemName: "figure.strengthtraining.traditional")
                                             .font(.system(size: 48))
-                                            .symbolRenderingMode(.multicolor)
+                                            .symbolRenderingMode(.hierarchical)
+                                            .foregroundStyle(Color.tempusTeal)
                                     }
                                 }
                                 .padding(24)
