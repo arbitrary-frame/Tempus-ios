@@ -12,6 +12,7 @@ struct ExercisesListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Exercise.name) private var exercises: [Exercise]
     @State private var searchText = ""
+    @State private var showingCreateForm = false
 
     var filteredExercises: [Exercise] {
         if searchText.isEmpty {
@@ -44,12 +45,15 @@ struct ExercisesListView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        // TODO: Show create exercise form
+                        showingCreateForm = true
                         print("DEBUG: Add exercise button tapped")
                     } label: {
                         Image(systemName: "plus")
                     }
                 }
+            }
+            .sheet(isPresented: $showingCreateForm) {
+                ExerciseFormView()
             }
         }
     }

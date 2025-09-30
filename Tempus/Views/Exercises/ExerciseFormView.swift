@@ -1,0 +1,195 @@
+//
+//  ExerciseFormView.swift
+//  Tempus
+//
+//  Created by Ronak Pattani on 30/09/2025.
+//
+
+import SwiftUI
+import SwiftData
+
+struct ExerciseFormView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+    @Query private var allExercises: [Exercise]
+
+    @State private var name: String = ""
+    @State private var exerciseDescription: String = ""
+    @State private var muscleGroup: MuscleGroup = .chest
+    @State private var tagInput: String = ""
+    @State private var tags: [String] = []
+    @State private var showingValidationError = false
+    @State private var validationMessage = ""
+
+    let isEditing: Bool
+    let exerciseToEdit: Exercise?
+
+    init(exercise: Exercise? = nil) {
+        self.isEditing = exercise != nil
+        self.exerciseToEdit = exercise
+
+        if let exercise = exercise {
+            _name = State(initialValue: exercise.name)
+            _exerciseDescription = State(initialValue: exercise.exerciseDescription ?? "")
+            _muscleGroup = State(initialValue: MuscleGroup(rawValue: exercise.muscleGroup) ?? .chest)
+            _tags = State(initialValue: exercise.tags)
+        }
+    }
+
+    var isValid: Bool {
+        !name.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Basic Information") {
+                    TextField("Exercise Name", text: $name)
+                        .autocorrectionDisabled()
+
+                    TextField("Description (optional)", text: $exerciseDescription, axis: .vertical)
+                        .lineLimit(3...6)
+                }
+
+                Section("Classification") {
+                    Picker("Muscle Group", selection: $muscleGroup) {
+                        ForEach(MuscleGroup.allCases) { group in
+                            Text(group.rawValue).tag(group)
+                        }
+                    }
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Tags")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+
+                        // Display current tags
+                        if !tags.isEmpty {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 8) {
+                                    ForEach(tags, id: \.self) { tag in
+                                        HStack(spacing: 4) {
+                                            Text(tag)
+                                                .font(.caption)
+                                            Button {
+                                                removeTag(tag)
+                                            } label: {
+                                                Image(systemName: "xmark.circle.fill")
+                                                    .font(.caption)
+                                            }
+                                        }
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 6)
+                                        .background(Color.secondary.opacity(0.2))
+                                        .clipShape(Capsule())
+                                    }
+                                }
+                            }
+                        }
+
+                        // Tag input
+                        HStack {
+                            TextField("Add tag", text: $tagInput)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                                .onSubmit {
+                                    addTag()
+                                }
+
+                            if !tagInput.isEmpty {
+                                Button("Add") {
+                                    addTag()
+                                }
+                                .buttonStyle(.borderedProminent)
+                            }
+                        }
+                    }
+                }
+
+                if showingValidationError {
+                    Section {
+                        Text(validationMessage)
+                            .foregroundStyle(.red)
+                            .font(.caption)
+                    }
+                }
+            }
+            .navigationTitle(isEditing ? "Edit Exercise" : "New Exercise")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        print("DEBUG: Exercise form cancelled")
+                        dismiss()
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(isEditing ? "Save" : "Create") {
+                        saveExercise()
+                    }
+                    .disabled(!isValid)
+                }
+            }
+        }
+    }
+
+    private func addTag() {
+        let trimmedTag = tagInput.trimmingCharacters(in: .whitespaces)
+        guard !trimmedTag.isEmpty, !tags.contains(trimmedTag) else {
+            tagInput = ""
+            return
+        }
+        tags.append(trimmedTag)
+        tagInput = ""
+        print("DEBUG: Tag added - \(trimmedTag)")
+    }
+
+    private func removeTag(_ tag: String) {
+        tags.removeAll { $0 == tag }
+        print("DEBUG: Tag removed - \(tag)")
+    }
+
+    private func saveExercise() {
+        let trimmedName = name.trimmingCharacters(in: .whitespaces)
+
+        // Validate unique name (case-insensitive)
+        let isDuplicate = allExercises.contains { exercise in
+            exercise.name.lowercased() == trimmedName.lowercased() &&
+            exercise.id != exerciseToEdit?.id
+        }
+
+        if isDuplicate {
+            validationMessage = "An exercise with this name already exists"
+            showingValidationError = true
+            print("DEBUG: Exercise save failed - duplicate name: \(trimmedName)")
+            return
+        }
+
+        if isEditing, let exercise = exerciseToEdit {
+            // Update existing exercise
+            exercise.name = trimmedName
+            exercise.exerciseDescription = exerciseDescription.isEmpty ? nil : exerciseDescription
+            exercise.muscleGroup = muscleGroup.rawValue
+            exercise.tags = tags
+            exercise.updatedAt = Date()
+            print("DEBUG: Exercise updated - \(trimmedName)")
+        } else {
+            // Create new exercise
+            let newExercise = Exercise(
+                name: trimmedName,
+                muscleGroup: muscleGroup.rawValue,
+                tags: tags,
+                exerciseDescription: exerciseDescription.isEmpty ? nil : exerciseDescription
+            )
+            modelContext.insert(newExercise)
+            print("DEBUG: Exercise created - \(trimmedName)")
+        }
+
+        dismiss()
+    }
+}
+
+#Preview {
+    ExerciseFormView()
+        .modelContainer(for: [Exercise.self, WorkoutTemplate.self, WorkoutEntry.self])
+}
