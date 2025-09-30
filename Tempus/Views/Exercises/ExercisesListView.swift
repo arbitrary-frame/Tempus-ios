@@ -48,6 +48,11 @@ struct ExercisesListView: View {
                                         ExerciseRowView(exercise: exercise)
                                     }
                                     .buttonStyle(.plain)
+                                    .listRowBackground(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .fill(.ultraThinMaterial)
+                                            .padding(.vertical, 2)
+                                    )
                                 }
                             } header: {
                                 if let group = MuscleGroup(rawValue: muscleGroup) {
