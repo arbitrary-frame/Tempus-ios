@@ -324,6 +324,12 @@ struct ExerciseEntryView: View {
 // Individual set entry row with horizontal scroll
 struct SetEntryRow: View {
     @Binding var set: WorkoutSet
+    @FocusState private var focusedField: Field?
+
+    enum Field: Hashable {
+        case weight(UUID)
+        case reps(UUID)
+    }
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -343,6 +349,15 @@ struct SetEntryRow: View {
                         .keyboardType(.decimalPad)
                         .textFieldStyle(.roundedBorder)
                         .frame(width: 60)
+                        .focused($focusedField, equals: .weight(wr.id))
+                        .toolbar {
+                            ToolbarItemGroup(placement: .keyboard) {
+                                Spacer()
+                                Button("Done") {
+                                    focusedField = nil
+                                }
+                            }
+                        }
 
                         Image(systemName: "xmark")
                             .font(.caption2)
@@ -355,6 +370,15 @@ struct SetEntryRow: View {
                         .keyboardType(.numberPad)
                         .textFieldStyle(.roundedBorder)
                         .frame(width: 50)
+                        .focused($focusedField, equals: .reps(wr.id))
+                        .toolbar {
+                            ToolbarItemGroup(placement: .keyboard) {
+                                Spacer()
+                                Button("Done") {
+                                    focusedField = nil
+                                }
+                            }
+                        }
 
                         if set.weightsAndReps.count > 1 {
                             Button {
