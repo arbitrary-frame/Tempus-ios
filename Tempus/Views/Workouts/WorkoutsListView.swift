@@ -60,7 +60,7 @@ struct WorkoutsListView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
+            Group {
                 if workouts.isEmpty {
                     ContentUnavailableView {
                         Label("No Workouts Yet", systemImage: "figure.strengthtraining.traditional")
@@ -68,18 +68,20 @@ struct WorkoutsListView: View {
                         Text("Tap + to log your first workout")
                     }
                 } else {
-                    // Statistics Summary Card - distinct header section
-                    WorkoutStatsCard(
-                        workoutsThisWeek: workoutsThisWeek,
-                        totalExercises: totalExercisesCompleted,
-                        totalSets: totalSetsCompleted,
-                        currentStreak: currentStreak
-                    )
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 8)
-
-                    // Workouts List
                     List {
+                        // Statistics Summary - scrolls with content
+                        Section {
+                            WorkoutStatsCard(
+                                workoutsThisWeek: workoutsThisWeek,
+                                totalExercises: totalExercisesCompleted,
+                                totalSets: totalSetsCompleted,
+                                currentStreak: currentStreak
+                            )
+                        }
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 12, trailing: 16))
+                        .listRowSeparator(.hidden)
+
                         ForEach(workouts) { workout in
                             WorkoutCardView(workout: workout)
                                 .onTapGesture {
@@ -357,24 +359,24 @@ struct StatBubble: View {
     var accentColor: Color = .accentColor
 
     var body: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 6) {
             Image(systemName: icon)
-                .font(.caption)
+                .font(.title3)
                 .foregroundStyle(accentColor)
                 .symbolRenderingMode(.hierarchical)
 
             Text(value)
-                .font(.title3.bold())
+                .font(.title2.bold())
                 .foregroundStyle(.primary)
 
             Text(label)
-                .font(.caption2)
+                .font(.caption)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
-        .padding(.horizontal, 4)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
+        .padding(.vertical, 12)
+        .padding(.horizontal, 8)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
     }
 }
 
