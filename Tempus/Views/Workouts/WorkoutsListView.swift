@@ -34,6 +34,7 @@ struct WorkoutsListView: View {
                             }
                             .buttonStyle(.plain)
                         }
+                        .onDelete(perform: deleteWorkouts)
                     }
                     .listStyle(.insetGrouped)
                 }
@@ -55,6 +56,14 @@ struct WorkoutsListView: View {
             .fullScreenCover(item: $selectedWorkout) { workout in
                 WorkoutEditView(workout: workout)
             }
+        }
+    }
+
+    private func deleteWorkouts(at offsets: IndexSet) {
+        for index in offsets {
+            let workout = workouts[index]
+            modelContext.delete(workout)
+            print("DEBUG: Deleted workout - \(workout.workoutName)")
         }
     }
 }

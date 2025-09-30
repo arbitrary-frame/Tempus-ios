@@ -20,6 +20,7 @@ struct WorkoutEditView: View {
     @State private var workoutExercises: [WorkoutExerciseEntry]
     @State private var workoutNotes: String
     @State private var showingExercisePicker = false
+    @State private var showingDeleteConfirmation = false
 
     init(workout: WorkoutEntry) {
         self.workout = workout
@@ -103,6 +104,13 @@ struct WorkoutEditView: View {
                         dismiss()
                     }
                 }
+                ToolbarItem(placement: .destructiveAction) {
+                    Button(role: .destructive) {
+                        showingDeleteConfirmation = true
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         saveWorkout()
@@ -112,6 +120,14 @@ struct WorkoutEditView: View {
             }
             .sheet(isPresented: $showingExercisePicker) {
                 ExercisePickerView(selectedExercises: $workoutExercises)
+            }
+            .confirmationDialog("Delete this workout?", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
+                Button("Delete Workout", role: .destructive) {
+                    deleteWorkout()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This action cannot be undone.")
             }
         }
     }
@@ -139,6 +155,12 @@ struct WorkoutEditView: View {
         workout.notes = workoutNotes.isEmpty ? nil : workoutNotes
 
         print("DEBUG: Workout updated - \(workoutName) with \(exercisesData.count) exercises")
+        dismiss()
+    }
+
+    private func deleteWorkout() {
+        modelContext.delete(workout)
+        print("DEBUG: Workout deleted - \(workout.workoutName)")
         dismiss()
     }
 }
