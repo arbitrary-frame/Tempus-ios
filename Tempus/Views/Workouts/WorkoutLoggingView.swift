@@ -28,7 +28,7 @@ struct WorkoutLoggingView: View {
             print("DEBUG: WorkoutLoggingView init with template - \(template.name)")
             print("DEBUG: Template has \(template.exercises.count) exercises")
 
-            _workoutName = State(initialValue: template.name)
+            _workoutName = State(initialValue: "\(template.name) - \(formatter.string(from: date))")
             _workoutDate = State(initialValue: date)
 
             // Pre-populate exercises from template
