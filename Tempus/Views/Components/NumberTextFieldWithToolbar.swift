@@ -17,7 +17,16 @@ class TextFieldManager {
     }
 
     func focusField(_ index: Int) {
-        textFields[index]?.becomeFirstResponder()
+        // If field exists, focus it immediately
+        if let textField = textFields[index] {
+            textField.becomeFirstResponder()
+        } else {
+            // Field doesn't exist yet (SwiftUI hasn't rendered it)
+            // Wait a bit and try again
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+                self?.textFields[index]?.becomeFirstResponder()
+            }
+        }
     }
 
     func dismissKeyboard() {
