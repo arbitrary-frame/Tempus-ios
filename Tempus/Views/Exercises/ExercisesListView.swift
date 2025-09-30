@@ -76,26 +76,12 @@ struct ExercisesListView: View {
 struct ExerciseRowView: View {
     let exercise: Exercise
 
-    var muscleGroupIcon: String? {
-        MuscleGroup(rawValue: exercise.muscleGroup)?.icon
-    }
-
     var body: some View {
-        HStack(spacing: 12) {
-            // Muscle group icon
-            if let icon = muscleGroupIcon {
-                Image(systemName: icon)
-                    .font(.title2)
-                    .foregroundStyle(.secondary)
-                    .frame(width: 40, height: 40)
-                    .background(Color.accentColor.opacity(0.1))
-                    .clipShape(Circle())
-            }
+        VStack(alignment: .leading, spacing: 4) {
+            Text(exercise.name)
+                .font(.headline)
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text(exercise.name)
-                    .font(.headline)
-
+            if !exercise.tags.isEmpty {
                 HStack(spacing: 8) {
                     ForEach(exercise.tags.prefix(3), id: \.self) { tag in
                         Text(tag)

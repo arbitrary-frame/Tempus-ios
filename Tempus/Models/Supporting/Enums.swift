@@ -23,7 +23,7 @@ enum MuscleGroup: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 
     /// SF Symbols 7 icon for each muscle group
-    /// Icons selected to visually represent the exercises and movements for each group
+    /// Each icon is unique and represents the exercises for that group
     var icon: String {
         switch self {
         case .chest:
@@ -31,7 +31,7 @@ enum MuscleGroup: String, CaseIterable, Identifiable {
             return "figure.strengthtraining.functional"
         case .back:
             // Pulling movements - rows, pull-ups, deadlifts
-            return "figure.strengthtraining.traditional"
+            return "figure.cooldown"
         case .shoulders:
             // Overhead pressing, lateral raises
             return "figure.arms.open"
