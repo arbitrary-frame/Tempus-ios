@@ -363,35 +363,41 @@ struct SetEntryRow: View {
                     let repsFieldIndex = baseFieldIndex + (wrIndex * 2) + 1
 
                     HStack(spacing: 4) {
-                        TextField("kg", text: Binding(
-                            get: { set.weightsAndReps[wrIndex].weight == 0 ? "" : "\(set.weightsAndReps[wrIndex].weight)" },
-                            set: { set.weightsAndReps[wrIndex].weight = Double($0) ?? 0 }
-                        ))
-                        .keyboardType(.decimalPad)
-                        .textFieldStyle(.roundedBorder)
-                        .frame(width: 60)
-                        .keyboardToolbar(
+                        NumberTextFieldWithToolbar(
+                            text: Binding(
+                                get: { set.weightsAndReps[wrIndex].weight == 0 ? "" : "\(set.weightsAndReps[wrIndex].weight)" },
+                                set: { set.weightsAndReps[wrIndex].weight = Double($0) ?? 0 }
+                            ),
+                            placeholder: "kg",
+                            keyboardType: .decimalPad,
                             focusedField: $focusedField,
                             currentField: weightFieldIndex,
-                            fieldCount: totalFieldCount
+                            fieldCount: totalFieldCount,
+                            onPrevious: nil,
+                            onNext: nil,
+                            onDone: nil
                         )
+                        .frame(width: 60)
 
                         Image(systemName: "xmark")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
 
-                        TextField("reps", text: Binding(
-                            get: { set.weightsAndReps[wrIndex].reps == 0 ? "" : "\(set.weightsAndReps[wrIndex].reps)" },
-                            set: { set.weightsAndReps[wrIndex].reps = Int($0) ?? 0 }
-                        ))
-                        .keyboardType(.numberPad)
-                        .textFieldStyle(.roundedBorder)
-                        .frame(width: 50)
-                        .keyboardToolbar(
+                        NumberTextFieldWithToolbar(
+                            text: Binding(
+                                get: { set.weightsAndReps[wrIndex].reps == 0 ? "" : "\(set.weightsAndReps[wrIndex].reps)" },
+                                set: { set.weightsAndReps[wrIndex].reps = Int($0) ?? 0 }
+                            ),
+                            placeholder: "reps",
+                            keyboardType: .numberPad,
                             focusedField: $focusedField,
                             currentField: repsFieldIndex,
-                            fieldCount: totalFieldCount
+                            fieldCount: totalFieldCount,
+                            onPrevious: nil,
+                            onNext: nil,
+                            onDone: nil
                         )
+                        .frame(width: 50)
 
                         if set.weightsAndReps.count > 1 {
                             Button {
