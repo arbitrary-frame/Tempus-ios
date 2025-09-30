@@ -144,7 +144,8 @@ struct WorkoutExerciseEntry: Identifiable {
     init(exerciseID: UUID, exerciseName: String) {
         self.exerciseID = exerciseID
         self.exerciseName = exerciseName
-        self.sets = [WorkoutSet(setNumber: 1)]
+        // Initialize with one empty set (no default weight/reps)
+        self.sets = [WorkoutSet(setNumber: 1, weightsAndReps: [WeightRep(weight: 0, reps: 0)])]
         self.notes = nil
     }
 }
@@ -180,7 +181,7 @@ struct ExerciseEntryView: View {
 
     private func addSet() {
         let newSetNumber = exerciseEntry.sets.count + 1
-        exerciseEntry.sets.append(WorkoutSet(setNumber: newSetNumber))
+        exerciseEntry.sets.append(WorkoutSet(setNumber: newSetNumber, weightsAndReps: [WeightRep(weight: 0, reps: 0)]))
         print("DEBUG: Added set \(newSetNumber) to \(exerciseEntry.exerciseName)")
     }
 }
@@ -198,18 +199,24 @@ struct SetEntryRow: View {
             // Weight/Rep pairs (for drop sets)
             ForEach($set.weightsAndReps) { $wr in
                 HStack(spacing: 4) {
-                    TextField("kg", value: $wr.weight, format: .number)
-                        .keyboardType(.decimalPad)
-                        .textFieldStyle(.roundedBorder)
-                        .frame(width: 60)
+                    TextField("kg", text: Binding(
+                        get: { wr.weight == 0 ? "" : "\(wr.weight)" },
+                        set: { wr.weight = Double($0) ?? 0 }
+                    ))
+                    .keyboardType(.decimalPad)
+                    .textFieldStyle(.roundedBorder)
+                    .frame(width: 60)
 
                     Text("×")
                         .foregroundStyle(.secondary)
 
-                    TextField("reps", value: $wr.reps, format: .number)
-                        .keyboardType(.numberPad)
-                        .textFieldStyle(.roundedBorder)
-                        .frame(width: 50)
+                    TextField("reps", text: Binding(
+                        get: { wr.reps == 0 ? "" : "\(wr.reps)" },
+                        set: { wr.reps = Int($0) ?? 0 }
+                    ))
+                    .keyboardType(.numberPad)
+                    .textFieldStyle(.roundedBorder)
+                    .frame(width: 50)
 
                     if set.weightsAndReps.count > 1 {
                         Button {
