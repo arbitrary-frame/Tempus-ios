@@ -224,10 +224,30 @@ struct WorkoutExerciseEntry: Identifiable {
     }
 }
 
+// Field identifier for keyboard navigation
+struct FieldID: Hashable {
+    let setIndex: Int
+    let dropSetIndex: Int
+    let isWeight: Bool
+}
+
 // Exercise entry view with sets
 struct ExerciseEntryView: View {
     @Binding var exerciseEntry: WorkoutExerciseEntry
     let previousData: WorkoutExerciseData?
+    @FocusState private var focusedField: FieldID?
+
+    // Calculate all fields in order for keyboard navigation
+    private var allFields: [FieldID] {
+        var fields: [FieldID] = []
+        for setIndex in exerciseEntry.sets.indices {
+            for dropSetIndex in exerciseEntry.sets[setIndex].weightsAndReps.indices {
+                fields.append(FieldID(setIndex: setIndex, dropSetIndex: dropSetIndex, isWeight: true))
+                fields.append(FieldID(setIndex: setIndex, dropSetIndex: dropSetIndex, isWeight: false))
+            }
+        }
+        return fields
+    }
 
     var body: some View {
         VStack(spacing: 12) {
@@ -259,14 +279,18 @@ struct ExerciseEntryView: View {
             }
 
             // Sets
-            ForEach(exerciseEntry.sets.indices, id: \.self) { index in
+            ForEach(exerciseEntry.sets.indices, id: \.self) { setIndex in
                 HStack {
-                    SetEntryRow(set: $exerciseEntry.sets[index])
+                    SetEntryRow(
+                        set: $exerciseEntry.sets[setIndex],
+                        setIndex: setIndex,
+                        focusedField: $focusedField
+                    )
 
                     // Delete set button (only show if more than 1 set)
                     if exerciseEntry.sets.count > 1 {
                         Button(role: .destructive) {
-                            deleteSet(exerciseEntry.sets[index])
+                            deleteSet(exerciseEntry.sets[setIndex])
                         } label: {
                             Image(systemName: "minus.circle.fill")
                                 .foregroundStyle(.red)
@@ -294,6 +318,7 @@ struct ExerciseEntryView: View {
                 .font(.caption)
             }
         }
+        .keyboardToolbar(focusedField: $focusedField, allFields: allFields)
     }
 
     private func addSet() {
@@ -328,6 +353,8 @@ struct ExerciseEntryView: View {
 // Individual set entry row with horizontal scroll
 struct SetEntryRow: View {
     @Binding var set: WorkoutSet
+    let setIndex: Int
+    @FocusState.Binding var focusedField: FieldID?
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -338,32 +365,40 @@ struct SetEntryRow: View {
                     .frame(width: 50, alignment: .leading)
 
                 // Weight/Rep pairs (for drop sets)
-                ForEach($set.weightsAndReps) { $wr in
+                ForEach(set.weightsAndReps.indices, id: \.self) { dropSetIndex in
                     HStack(spacing: 4) {
                         TextField("kg", text: Binding(
-                            get: { wr.weight == 0 ? "" : "\(wr.weight)" },
-                            set: { wr.weight = Double($0) ?? 0 }
+                            get: {
+                                let weight = set.weightsAndReps[dropSetIndex].weight
+                                return weight == 0 ? "" : String(format: "%.10g", weight)
+                            },
+                            set: { set.weightsAndReps[dropSetIndex].weight = Double($0) ?? 0 }
                         ))
                         .keyboardType(.decimalPad)
                         .textFieldStyle(.roundedBorder)
                         .frame(width: 60)
+                        .focused($focusedField, equals: FieldID(setIndex: setIndex, dropSetIndex: dropSetIndex, isWeight: true))
 
                         Image(systemName: "xmark")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
 
                         TextField("reps", text: Binding(
-                            get: { wr.reps == 0 ? "" : "\(wr.reps)" },
-                            set: { wr.reps = Int($0) ?? 0 }
+                            get: {
+                                let reps = set.weightsAndReps[dropSetIndex].reps
+                                return reps == 0 ? "" : "\(reps)"
+                            },
+                            set: { set.weightsAndReps[dropSetIndex].reps = Int($0) ?? 0 }
                         ))
                         .keyboardType(.numberPad)
                         .textFieldStyle(.roundedBorder)
                         .frame(width: 50)
+                        .focused($focusedField, equals: FieldID(setIndex: setIndex, dropSetIndex: dropSetIndex, isWeight: false))
 
                         if set.weightsAndReps.count > 1 {
                             Button {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                    removeWeightRep(wr)
+                                    removeWeightRep(at: dropSetIndex)
                                 }
                             } label: {
                                 Image(systemName: "minus.circle.fill")
@@ -392,9 +427,9 @@ struct SetEntryRow: View {
         set.weightsAndReps.append(WeightRep())
     }
 
-    private func removeWeightRep(_ wr: WeightRep) {
+    private func removeWeightRep(at index: Int) {
         HapticManager.shared.trigger(.light)
-        set.weightsAndReps.removeAll { $0.id == wr.id }
+        set.weightsAndReps.remove(at: index)
     }
 }
 
