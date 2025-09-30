@@ -11,81 +11,135 @@ import SwiftData
 struct WorkoutEditView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Query private var allExercises: [Exercise]
 
     let workout: WorkoutEntry
+
+    @State private var workoutName: String
+    @State private var workoutDate: Date
+    @State private var workoutExercises: [WorkoutExerciseEntry]
+    @State private var workoutNotes: String
+    @State private var showingExercisePicker = false
+
+    init(workout: WorkoutEntry) {
+        self.workout = workout
+        _workoutName = State(initialValue: workout.workoutName)
+        _workoutDate = State(initialValue: workout.workoutDate)
+        _workoutNotes = State(initialValue: workout.notes ?? "")
+
+        // Convert WorkoutExerciseData to WorkoutExerciseEntry for editing
+        let entries = workout.exercisesData.map { data in
+            WorkoutExerciseEntry(
+                exerciseID: data.exerciseID,
+                exerciseName: data.exerciseName,
+                sets: data.sets,
+                notes: data.notes
+            )
+        }
+        _workoutExercises = State(initialValue: entries)
+    }
 
     var body: some View {
         NavigationStack {
             List {
                 // Header Section - Workout Name and Date
                 Section {
-                    Text(workout.workoutName)
+                    TextField("Workout Name", text: $workoutName)
                         .font(.title2.bold())
 
-                    HStack {
-                        Text("Date:")
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Text(workout.workoutDate, style: .date)
-                    }
+                    DatePicker("Date", selection: $workoutDate, displayedComponents: .date)
+                        .environment(\.locale, Locale(identifier: "en_GB"))
                 } header: {
                     Text("Workout Details")
                 }
 
                 // Exercises Section
-                ForEach(workout.exercisesData) { exerciseData in
-                    Section {
-                        ForEach(exerciseData.sets) { set in
-                            HStack(spacing: 12) {
-                                Text("Set \(set.setNumber)")
-                                    .font(.subheadline)
-                                    .frame(width: 50, alignment: .leading)
-
-                                ForEach(set.weightsAndReps) { wr in
-                                    HStack(spacing: 4) {
-                                        Text("\(wr.weight, specifier: "%.1f") kg")
-                                            .font(.caption)
-                                        Text("×")
-                                            .foregroundStyle(.secondary)
-                                            .font(.caption)
-                                        Text("\(wr.reps)")
-                                            .font(.caption)
-                                    }
+                if !workoutExercises.isEmpty {
+                    ForEach($workoutExercises) { $exerciseEntry in
+                        Section {
+                            ExerciseEntryView(exerciseEntry: $exerciseEntry)
+                        } header: {
+                            HStack {
+                                Text(exerciseEntry.exerciseName)
+                                    .font(.headline)
+                                Spacer()
+                                Button(role: .destructive) {
+                                    removeExercise(exerciseEntry)
+                                } label: {
+                                    Image(systemName: "trash")
+                                        .font(.caption)
                                 }
+                                .buttonStyle(.borderless)
                             }
                         }
+                    }
+                }
 
-                        if let notes = exerciseData.notes, !notes.isEmpty {
-                            Text(notes)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    } header: {
-                        Text(exerciseData.exerciseName)
-                            .font(.headline)
+                // Add Exercise Button
+                Section {
+                    Button {
+                        showingExercisePicker = true
+                        print("DEBUG: Add exercise button tapped (edit mode)")
+                    } label: {
+                        Label("Add Exercise", systemImage: "plus.circle.fill")
                     }
                 }
 
                 // Notes Section
-                if let notes = workout.notes, !notes.isEmpty {
-                    Section {
-                        Text(notes)
-                    } header: {
-                        Text("Workout Notes")
-                    }
+                Section {
+                    TextField("Workout notes (optional)", text: $workoutNotes, axis: .vertical)
+                        .lineLimit(3...6)
+                } header: {
+                    Text("Notes")
                 }
             }
             .listStyle(.insetGrouped)
-            .navigationTitle("View Workout")
+            .navigationTitle("Edit Workout")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        print("DEBUG: Workout edit cancelled")
                         dismiss()
                     }
                 }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        saveWorkout()
+                    }
+                    .disabled(workoutExercises.isEmpty || workoutName.isEmpty)
+                }
+            }
+            .sheet(isPresented: $showingExercisePicker) {
+                ExercisePickerView(selectedExercises: $workoutExercises)
             }
         }
+    }
+
+    private func removeExercise(_ exercise: WorkoutExerciseEntry) {
+        workoutExercises.removeAll { $0.id == exercise.id }
+        print("DEBUG: Removed exercise - \(exercise.exerciseName)")
+    }
+
+    private func saveWorkout() {
+        // Convert WorkoutExerciseEntry back to WorkoutExerciseData
+        let exercisesData = workoutExercises.map { entry in
+            WorkoutExerciseData(
+                exerciseID: entry.exerciseID,
+                exerciseName: entry.exerciseName,
+                sets: entry.sets,
+                notes: entry.notes
+            )
+        }
+
+        // Update the existing workout
+        workout.workoutName = workoutName
+        workout.workoutDate = workoutDate
+        workout.exercisesData = exercisesData
+        workout.notes = workoutNotes.isEmpty ? nil : workoutNotes
+
+        print("DEBUG: Workout updated - \(workoutName) with \(exercisesData.count) exercises")
+        dismiss()
     }
 }
 

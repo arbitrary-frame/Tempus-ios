@@ -141,12 +141,21 @@ struct WorkoutExerciseEntry: Identifiable {
     var sets: [WorkoutSet]
     var notes: String?
 
+    // Init for new exercise (empty set)
     init(exerciseID: UUID, exerciseName: String) {
         self.exerciseID = exerciseID
         self.exerciseName = exerciseName
         // Initialize with one empty set (no default weight/reps)
         self.sets = [WorkoutSet(setNumber: 1, weightsAndReps: [WeightRep(weight: 0, reps: 0)])]
         self.notes = nil
+    }
+
+    // Init for editing existing exercise
+    init(exerciseID: UUID, exerciseName: String, sets: [WorkoutSet], notes: String?) {
+        self.exerciseID = exerciseID
+        self.exerciseName = exerciseName
+        self.sets = sets
+        self.notes = notes
     }
 }
 
@@ -157,8 +166,21 @@ struct ExerciseEntryView: View {
     var body: some View {
         VStack(spacing: 12) {
             // Sets
-            ForEach($exerciseEntry.sets) { $set in
-                SetEntryRow(set: $set)
+            ForEach(exerciseEntry.sets.indices, id: \.self) { index in
+                HStack {
+                    SetEntryRow(set: $exerciseEntry.sets[index])
+
+                    // Delete set button (only show if more than 1 set)
+                    if exerciseEntry.sets.count > 1 {
+                        Button(role: .destructive) {
+                            deleteSet(exerciseEntry.sets[index])
+                        } label: {
+                            Image(systemName: "minus.circle.fill")
+                                .foregroundStyle(.red)
+                        }
+                        .buttonStyle(.borderless)
+                    }
+                }
             }
 
             // Add Set Button
@@ -183,6 +205,18 @@ struct ExerciseEntryView: View {
         let newSetNumber = exerciseEntry.sets.count + 1
         exerciseEntry.sets.append(WorkoutSet(setNumber: newSetNumber, weightsAndReps: [WeightRep(weight: 0, reps: 0)]))
         print("DEBUG: Added set \(newSetNumber) to \(exerciseEntry.exerciseName)")
+    }
+
+    private func deleteSet(_ set: WorkoutSet) {
+        exerciseEntry.sets.removeAll { $0.id == set.id }
+        // Renumber remaining sets
+        for (index, _) in exerciseEntry.sets.enumerated() {
+            exerciseEntry.sets[index] = WorkoutSet(
+                setNumber: index + 1,
+                weightsAndReps: exerciseEntry.sets[index].weightsAndReps
+            )
+        }
+        print("DEBUG: Deleted set from \(exerciseEntry.exerciseName), \(exerciseEntry.sets.count) sets remaining")
     }
 }
 
