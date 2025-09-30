@@ -38,7 +38,7 @@ struct AnalyticsView: View {
                                                 .foregroundStyle(Color.tempusTextSecondary)
                                             Text("\(workouts.count)")
                                                 .font(.system(size: 48, weight: .bold))
-                                                .foregroundStyle(Color.tempusTeal)
+                                                .foregroundStyle(Color.tempusTextPrimary)
                                         }
 
                                         Spacer()
@@ -46,7 +46,7 @@ struct AnalyticsView: View {
                                         Image(systemName: "figure.strengthtraining.traditional")
                                             .font(.system(size: 48))
                                             .symbolRenderingMode(.hierarchical)
-                                            .foregroundStyle(Color.tempusTeal)
+                                            .foregroundStyle(.secondary)
                                     }
                                 }
                                 .padding(24)
