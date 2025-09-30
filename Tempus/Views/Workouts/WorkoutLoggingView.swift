@@ -250,6 +250,7 @@ struct ExerciseEntryView: View {
                         }
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.vertical, 4)
             }
 
@@ -279,13 +280,15 @@ struct ExerciseEntryView: View {
             }
             .buttonStyle(.borderless)
 
-            // Exercise Notes
-            TextField("Exercise notes (optional)", text: Binding(
-                get: { exerciseEntry.notes ?? "" },
-                set: { exerciseEntry.notes = $0.isEmpty ? nil : $0 }
-            ), axis: .vertical)
-            .lineLimit(2...4)
-            .font(.caption)
+            // Exercise Notes (only show if notes exist)
+            if let notes = exerciseEntry.notes, !notes.isEmpty {
+                TextField("Exercise notes", text: Binding(
+                    get: { exerciseEntry.notes ?? "" },
+                    set: { exerciseEntry.notes = $0.isEmpty ? nil : $0 }
+                ), axis: .vertical)
+                .lineLimit(2...4)
+                .font(.caption)
+            }
         }
     }
 
