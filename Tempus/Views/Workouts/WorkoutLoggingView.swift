@@ -38,7 +38,9 @@ struct WorkoutLoggingView: View {
                     DatePicker("Date", selection: $workoutDate, displayedComponents: .date)
                         .environment(\.locale, Locale(identifier: "en_GB"))
                 } header: {
-                    Text("Workout Details")
+                    Label("Workout Details", systemImage: "figure.strengthtraining.traditional")
+                        .symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(.accent)
                 }
 
                 // Exercises Section
@@ -52,10 +54,13 @@ struct WorkoutLoggingView: View {
                                     .font(.headline)
                                 Spacer()
                                 Button(role: .destructive) {
-                                    removeExercise(exerciseEntry)
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                        removeExercise(exerciseEntry)
+                                    }
                                 } label: {
                                     Image(systemName: "trash")
                                         .font(.caption)
+                                        .symbolRenderingMode(.hierarchical)
                                 }
                                 .buttonStyle(.borderless)
                             }
@@ -70,6 +75,7 @@ struct WorkoutLoggingView: View {
                         print("DEBUG: Add exercise button tapped")
                     } label: {
                         Label("Add Exercise", systemImage: "plus.circle.fill")
+                            .symbolRenderingMode(.hierarchical)
                     }
                 }
 
@@ -78,7 +84,9 @@ struct WorkoutLoggingView: View {
                     TextField("Workout notes (optional)", text: $workoutNotes, axis: .vertical)
                         .lineLimit(3...6)
                 } header: {
-                    Text("Notes")
+                    Label("Notes", systemImage: "note.text")
+                        .symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(.secondary)
                 }
             }
             .listStyle(.insetGrouped)
@@ -220,14 +228,15 @@ struct ExerciseEntryView: View {
     }
 }
 
-// Individual set entry row
+// Individual set entry row with enhanced visuals
 struct SetEntryRow: View {
     @Binding var set: WorkoutSet
 
     var body: some View {
         HStack(spacing: 12) {
             Text("Set \(set.setNumber)")
-                .font(.subheadline)
+                .font(.subheadline.bold())
+                .foregroundStyle(.accent)
                 .frame(width: 50, alignment: .leading)
 
             // Weight/Rep pairs (for drop sets)
@@ -241,8 +250,10 @@ struct SetEntryRow: View {
                     .textFieldStyle(.roundedBorder)
                     .frame(width: 60)
 
-                    Text("×")
+                    Image(systemName: "xmark")
+                        .font(.caption2)
                         .foregroundStyle(.secondary)
+                        .symbolRenderingMode(.hierarchical)
 
                     TextField("reps", text: Binding(
                         get: { wr.reps == 0 ? "" : "\(wr.reps)" },
@@ -254,10 +265,13 @@ struct SetEntryRow: View {
 
                     if set.weightsAndReps.count > 1 {
                         Button {
-                            removeWeightRep(wr)
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                removeWeightRep(wr)
+                            }
                         } label: {
                             Image(systemName: "minus.circle.fill")
                                 .foregroundStyle(.red)
+                                .symbolRenderingMode(.hierarchical)
                         }
                         .buttonStyle(.borderless)
                     }
@@ -269,6 +283,7 @@ struct SetEntryRow: View {
                 addDropSet()
             } label: {
                 Image(systemName: "plus.circle")
+                    .symbolRenderingMode(.hierarchical)
             }
             .buttonStyle(.borderless)
         }
@@ -312,21 +327,30 @@ struct ExercisePickerView: View {
                     Section {
                         ForEach(groupedExercises[muscleGroup]!) { exercise in
                             Button {
-                                addExercise(exercise)
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                    addExercise(exercise)
+                                }
                             } label: {
                                 HStack {
                                     Text(exercise.name)
                                     Spacer()
                                     if isSelected(exercise) {
-                                        Image(systemName: "checkmark")
+                                        Image(systemName: "checkmark.circle.fill")
                                             .foregroundStyle(.accent)
+                                            .symbolRenderingMode(.hierarchical)
                                     }
                                 }
                             }
                         }
                     } header: {
                         if let group = MuscleGroup(rawValue: muscleGroup) {
-                            Label(muscleGroup, systemImage: group.icon)
+                            Label {
+                                Text(muscleGroup)
+                            } icon: {
+                                Image(systemName: group.icon)
+                                    .symbolRenderingMode(.hierarchical)
+                                    .symbolEffect(.pulse.byLayer, options: .repeating.speed(0.4))
+                            }
                         } else {
                             Text(muscleGroup)
                         }

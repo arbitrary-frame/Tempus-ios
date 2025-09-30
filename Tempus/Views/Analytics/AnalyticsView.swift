@@ -18,36 +18,71 @@ struct AnalyticsView: View {
                 if workouts.isEmpty {
                     ContentUnavailableView {
                         Label("No Analytics Yet", systemImage: "chart.line.uptrend.xyaxis")
+                            .symbolRenderingMode(.multicolor)
+                            .symbolEffect(.bounce, value: workouts.isEmpty)
                     } description: {
                         Text("Log your first workout to see progress")
+                            .foregroundStyle(.secondary)
                     }
                 } else {
-                    List {
-                        Section("Overview") {
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text("Total Workouts")
+                    ScrollView {
+                        LazyVStack(spacing: 16) {
+                            // Statistics Card
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(.ultraThinMaterial)
+                                    .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+
+                                VStack(spacing: 16) {
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text("Total Workouts")
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                            Text("\(workouts.count)")
+                                                .font(.system(size: 48, weight: .bold))
+                                                .foregroundStyle(.primary)
+                                        }
+
+                                        Spacer()
+
+                                        Image(systemName: "figure.strengthtraining.traditional")
+                                            .font(.system(size: 48))
+                                            .symbolRenderingMode(.multicolor)
+                                            .symbolEffect(.pulse.byLayer, options: .repeating.speed(0.5))
+                                    }
+                                }
+                                .padding(24)
+                            }
+                            .padding(.horizontal)
+
+                            // Coming Soon Card
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(.regularMaterial)
+                                    .shadow(color: .black.opacity(0.08), radius: 6, x: 0, y: 3)
+
+                                VStack(spacing: 12) {
+                                    Image(systemName: "chart.xyaxis.line")
+                                        .font(.system(size: 36))
+                                        .symbolRenderingMode(.hierarchical)
+                                        .foregroundStyle(.accent)
+                                        .symbolEffect(.variableColor.iterative, options: .repeating.speed(0.3))
+
+                                    Text("Coming Soon")
+                                        .font(.headline)
+
+                                    Text("Charts and progress tracking")
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
-                                    Text("\(workouts.count)")
-                                        .font(.title2.bold())
+                                        .multilineTextAlignment(.center)
                                 }
-
-                                Spacer()
-
-                                Image(systemName: "figure.strengthtraining.traditional")
-                                    .font(.title)
-                                    .foregroundStyle(.secondary)
+                                .padding(32)
                             }
-                            .padding(.vertical, 8)
+                            .padding(.horizontal)
                         }
-
-                        Section("Coming Soon") {
-                            Text("Charts and progress tracking")
-                                .foregroundStyle(.secondary)
-                        }
+                        .padding(.top)
                     }
-                    .listStyle(.insetGrouped)
                 }
             }
             .navigationTitle("Analytics")

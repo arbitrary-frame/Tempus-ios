@@ -13,6 +13,7 @@ struct WorkoutsListView: View {
     @Query(sort: \WorkoutEntry.workoutDate, order: .reverse) private var workouts: [WorkoutEntry]
     @State private var showingWorkoutLogging = false
     @State private var selectedWorkout: WorkoutEntry?
+    @State private var addButtonTapped = false
 
     var body: some View {
         NavigationStack {
@@ -20,82 +21,98 @@ struct WorkoutsListView: View {
                 if workouts.isEmpty {
                     ContentUnavailableView {
                         Label("No Workouts Yet", systemImage: "figure.strengthtraining.traditional")
+                            .symbolRenderingMode(.multicolor)
+                            .symbolEffect(.bounce, value: workouts.isEmpty)
                     } description: {
                         Text("Tap + to log your first workout")
+                            .foregroundStyle(.secondary)
                     }
                 } else {
-                    List {
-                        ForEach(workouts) { workout in
-                            Button {
-                                selectedWorkout = workout
-                                print("DEBUG: Workout tapped - \(workout.workoutName)")
-                            } label: {
-                                WorkoutRowView(workout: workout)
+                    ScrollView {
+                        LazyVStack(spacing: 12) {
+                            ForEach(workouts) { workout in
+                                WorkoutCardView(workout: workout)
+                                    .onTapGesture {
+                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                            selectedWorkout = workout
+                                        }
+                                        print("DEBUG: Workout tapped - \(workout.workoutName)")
+                                    }
+                                    .contextMenu {
+                                        Button(role: .destructive) {
+                                            deleteWorkout(workout)
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                    }
+                                    .transition(.asymmetric(
+                                        insertion: .scale.combined(with: .opacity),
+                                        removal: .scale.combined(with: .opacity)
+                                    ))
                             }
-                            .buttonStyle(.plain)
                         }
-                        .onDelete(perform: deleteWorkouts)
+                        .padding()
                     }
-                    .listStyle(.insetGrouped)
                 }
             }
             .navigationTitle("Workouts")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
+                        addButtonTapped.toggle()
                         showingWorkoutLogging = true
                         print("DEBUG: Add workout button tapped")
                     } label: {
-                        Image(systemName: "plus")
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title2)
+                            .symbolRenderingMode(.hierarchical)
+                            .symbolEffect(.bounce, value: addButtonTapped)
                     }
                 }
             }
             .fullScreenCover(isPresented: $showingWorkoutLogging) {
                 WorkoutLoggingView()
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
             }
             .fullScreenCover(item: $selectedWorkout) { workout in
                 WorkoutEditView(workout: workout)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
     }
 
-    private func deleteWorkouts(at offsets: IndexSet) {
-        for index in offsets {
-            let workout = workouts[index]
+    private func deleteWorkout(_ workout: WorkoutEntry) {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
             modelContext.delete(workout)
-            print("DEBUG: Deleted workout - \(workout.workoutName)")
         }
+        print("DEBUG: Deleted workout - \(workout.workoutName)")
     }
 }
 
-struct WorkoutRowView: View {
+// Enhanced Workout Card with Liquid Glass effects
+struct WorkoutCardView: View {
     let workout: WorkoutEntry
+    @State private var isPressed = false
 
     var formattedDate: String {
         let calendar = Calendar.current
         let now = Date()
-
-        // Get time interval
         let interval = now.timeIntervalSince(workout.workoutDate)
 
-        // Less than 1 hour - show minutes
         if interval < 3600 {
             let minutes = Int(interval / 60)
             return minutes <= 1 ? "1 min ago" : "\(minutes) mins ago"
         }
 
-        // Less than 24 hours - show hours
         if interval < 86400 {
             let hours = Int(interval / 3600)
             return hours == 1 ? "1 hour ago" : "\(hours) hours ago"
         }
 
-        // Check if yesterday
         if calendar.isDateInYesterday(workout.workoutDate) {
             return "Yesterday"
         }
 
-        // More than 1 day - show actual date (UK format)
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_GB")
         formatter.dateStyle = .medium
@@ -104,22 +121,57 @@ struct WorkoutRowView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(workout.workoutName)
-                .font(.headline)
+        ZStack {
+            // Liquid Glass background with depth
+            RoundedRectangle(cornerRadius: 20)
+                .fill(.ultraThinMaterial)
+                .shadow(color: .black.opacity(0.1), radius: isPressed ? 2 : 8, x: 0, y: isPressed ? 1 : 4)
 
-            HStack {
-                Label("\(workout.exercisesData.count) exercises", systemImage: "figure.mixed.cardio")
-                    .font(.caption)
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    // Animated icon with gradient
+                    Image(systemName: "figure.strengthtraining.traditional")
+                        .font(.title)
+                        .symbolRenderingMode(.multicolor)
+                        .symbolEffect(.pulse.byLayer, options: .repeating.speed(0.5))
 
-                Spacer()
+                    Spacer()
 
-                Text(formattedDate)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    // Exercise count badge
+                    HStack(spacing: 4) {
+                        Image(systemName: "figure.mixed.cardio")
+                            .font(.caption)
+                            .symbolRenderingMode(.hierarchical)
+                        Text("\(workout.exercisesData.count)")
+                            .font(.caption.bold())
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(.regularMaterial, in: Capsule())
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(workout.workoutName)
+                        .font(.title3.bold())
+                        .foregroundStyle(.primary)
+
+                    HStack {
+                        Image(systemName: "clock")
+                            .font(.caption)
+                            .symbolRenderingMode(.hierarchical)
+                        Text(formattedDate)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
+            .padding(20)
         }
-        .padding(.vertical, 4)
+        .scaleEffect(isPressed ? 0.98 : 1.0)
+        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isPressed)
+        .onLongPressGesture(minimumDuration: .infinity, maximumDistance: .infinity, pressing: { pressing in
+            isPressed = pressing
+        }, perform: {})
     }
 }
 

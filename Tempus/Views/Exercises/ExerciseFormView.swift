@@ -54,16 +54,24 @@ struct ExerciseFormView: View {
                 Section("Classification") {
                     Picker("Muscle Group", selection: $muscleGroup) {
                         ForEach(MuscleGroup.allCases) { group in
-                            Label(group.rawValue, systemImage: group.icon).tag(group)
+                            Label {
+                                Text(group.rawValue)
+                            } icon: {
+                                Image(systemName: group.icon)
+                                    .symbolRenderingMode(.hierarchical)
+                                    .foregroundStyle(.accent)
+                            }
+                            .tag(group)
                         }
                     }
+                    .pickerStyle(.menu)
 
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Tags")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
 
-                        // Display current tags
+                        // Display current tags with animations
                         if !tags.isEmpty {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 8) {
@@ -72,16 +80,19 @@ struct ExerciseFormView: View {
                                             Text(tag)
                                                 .font(.caption)
                                             Button {
-                                                removeTag(tag)
+                                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                                    removeTag(tag)
+                                                }
                                             } label: {
                                                 Image(systemName: "xmark.circle.fill")
                                                     .font(.caption)
+                                                    .symbolRenderingMode(.hierarchical)
                                             }
                                         }
                                         .padding(.horizontal, 10)
                                         .padding(.vertical, 6)
-                                        .background(Color.secondary.opacity(0.2))
-                                        .clipShape(Capsule())
+                                        .background(.regularMaterial, in: Capsule())
+                                        .transition(.scale.combined(with: .opacity))
                                     }
                                 }
                             }

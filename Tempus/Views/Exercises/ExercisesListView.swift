@@ -14,6 +14,7 @@ struct ExercisesListView: View {
     @State private var searchText = ""
     @State private var showingCreateForm = false
     @State private var selectedExercise: Exercise?
+    @State private var addButtonTapped = false
 
     var filteredExercises: [Exercise] {
         if searchText.isEmpty {
@@ -33,32 +34,56 @@ struct ExercisesListView: View {
                 if filteredExercises.isEmpty {
                     ContentUnavailableView {
                         Label("No Exercises Yet", systemImage: "list.bullet.clipboard")
+                            .symbolRenderingMode(.multicolor)
+                            .symbolEffect(.bounce, value: filteredExercises.isEmpty)
                     } description: {
                         Text("Tap + to create your first exercise")
+                            .foregroundStyle(.secondary)
                     }
                 } else {
-                    List {
-                        ForEach(groupedExercises.keys.sorted(), id: \.self) { muscleGroup in
-                            Section {
-                                ForEach(groupedExercises[muscleGroup]!) { exercise in
-                                    Button {
-                                        selectedExercise = exercise
-                                        print("DEBUG: Exercise tapped - \(exercise.name)")
-                                    } label: {
-                                        ExerciseRowView(exercise: exercise)
+                    ScrollView {
+                        LazyVStack(spacing: 16, pinnedViews: [.sectionHeaders]) {
+                            ForEach(groupedExercises.keys.sorted(), id: \.self) { muscleGroup in
+                                Section {
+                                    LazyVStack(spacing: 12) {
+                                        ForEach(groupedExercises[muscleGroup]!) { exercise in
+                                            ExerciseCardView(exercise: exercise)
+                                                .onTapGesture {
+                                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                                        selectedExercise = exercise
+                                                    }
+                                                    print("DEBUG: Exercise tapped - \(exercise.name)")
+                                                }
+                                                .transition(.asymmetric(
+                                                    insertion: .scale.combined(with: .opacity),
+                                                    removal: .scale.combined(with: .opacity)
+                                                ))
+                                        }
                                     }
-                                    .buttonStyle(.plain)
-                                }
-                            } header: {
-                                if let group = MuscleGroup(rawValue: muscleGroup) {
-                                    Label(muscleGroup, systemImage: group.icon)
-                                } else {
-                                    Text(muscleGroup)
+                                } header: {
+                                    if let group = MuscleGroup(rawValue: muscleGroup) {
+                                        HStack {
+                                            Image(systemName: group.icon)
+                                                .font(.title3)
+                                                .symbolRenderingMode(.hierarchical)
+                                                .foregroundStyle(.accent)
+                                                .symbolEffect(.pulse.byLayer, options: .repeating.speed(0.3))
+
+                                            Text(muscleGroup)
+                                                .font(.title3.bold())
+                                                .foregroundStyle(.primary)
+
+                                            Spacer()
+                                        }
+                                        .padding(.horizontal)
+                                        .padding(.vertical, 8)
+                                        .background(.ultraThinMaterial)
+                                    }
                                 }
                             }
                         }
+                        .padding(.top)
                     }
-                    .listStyle(.insetGrouped)
                 }
             }
             .navigationTitle("Exercises")
@@ -66,10 +91,14 @@ struct ExercisesListView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
+                        addButtonTapped.toggle()
                         showingCreateForm = true
                         print("DEBUG: Add exercise button tapped")
                     } label: {
-                        Image(systemName: "plus")
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title2)
+                            .symbolRenderingMode(.hierarchical)
+                            .symbolEffect(.bounce, value: addButtonTapped)
                     }
                 }
             }
@@ -83,28 +112,58 @@ struct ExercisesListView: View {
     }
 }
 
-struct ExerciseRowView: View {
+// Liquid Glass Exercise Card
+struct ExerciseCardView: View {
     let exercise: Exercise
+    @State private var isPressed = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(exercise.name)
-                .font(.headline)
+        ZStack {
+            // Liquid Glass background
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.regularMaterial)
+                .shadow(color: .black.opacity(0.08), radius: isPressed ? 2 : 6, x: 0, y: isPressed ? 1 : 3)
 
-            if !exercise.tags.isEmpty {
-                HStack(spacing: 8) {
-                    ForEach(exercise.tags.prefix(3), id: \.self) { tag in
-                        Text(tag)
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text(exercise.name)
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+
+                    Spacer()
+
+                    // Muscle group badge
+                    if let group = MuscleGroup(rawValue: exercise.muscleGroup) {
+                        Image(systemName: group.icon)
                             .font(.caption)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.secondary.opacity(0.2))
-                            .clipShape(Capsule())
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundStyle(.accent)
+                            .padding(6)
+                            .background(.ultraThinMaterial, in: Circle())
+                    }
+                }
+
+                if !exercise.tags.isEmpty {
+                    HStack(spacing: 6) {
+                        ForEach(exercise.tags.prefix(3), id: \.self) { tag in
+                            Text(tag)
+                                .font(.caption2)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(.ultraThinMaterial, in: Capsule())
+                                .foregroundStyle(.secondary)
+                        }
                     }
                 }
             }
+            .padding(16)
         }
-        .padding(.vertical, 4)
+        .scaleEffect(isPressed ? 0.98 : 1.0)
+        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isPressed)
+        .onLongPressGesture(minimumDuration: .infinity, maximumDistance: .infinity, pressing: { pressing in
+            isPressed = pressing
+        }, perform: {})
+        .padding(.horizontal)
     }
 }
 
