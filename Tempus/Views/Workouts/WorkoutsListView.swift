@@ -39,23 +39,27 @@ struct WorkoutsListView: View {
         }
     }
 
-    private var currentStreak: Int {
+    private var totalWeightThisWeek: Double {
         let calendar = Calendar.current
-        var streak = 0
-        var currentDate = calendar.startOfDay(for: Date())
+        let now = Date()
+        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
+            return 0
+        }
 
-        for workout in workouts {
-            let workoutDate = calendar.startOfDay(for: workout.workoutDate)
-            let daysDiff = calendar.dateComponents([.day], from: workoutDate, to: currentDate).day ?? 0
+        let workoutsThisWeek = workouts.filter { $0.workoutDate >= weekStart }
+        var totalWeight: Double = 0
 
-            if daysDiff == streak {
-                streak += 1
-            } else if daysDiff > streak {
-                break
+        for workout in workoutsThisWeek {
+            for exercise in workout.exercisesData {
+                for set in exercise.sets {
+                    for weightRep in set.weightsAndReps {
+                        totalWeight += weightRep.weight * Double(weightRep.reps)
+                    }
+                }
             }
         }
 
-        return streak
+        return totalWeight
     }
 
     var body: some View {
@@ -75,7 +79,7 @@ struct WorkoutsListView: View {
                                 workoutsThisWeek: workoutsThisWeek,
                                 totalExercises: totalExercisesCompleted,
                                 totalSets: totalSetsCompleted,
-                                currentStreak: currentStreak
+                                totalWeight: totalWeightThisWeek
                             )
                         }
                         .listRowBackground(Color.clear)
@@ -303,7 +307,15 @@ struct WorkoutStatsCard: View {
     let workoutsThisWeek: Int
     let totalExercises: Int
     let totalSets: Int
-    let currentStreak: Int
+    let totalWeight: Double
+
+    var formattedWeight: String {
+        let kg = Int(totalWeight)
+        if kg >= 1000 {
+            return String(format: "%.1fk", Double(kg) / 1000.0)
+        }
+        return "\(kg)"
+    }
 
     var body: some View {
         VStack(spacing: 8) {
@@ -338,14 +350,12 @@ struct WorkoutStatsCard: View {
                     icon: "square.stack.3d.up.fill"
                 )
 
-                if currentStreak > 0 {
-                    StatBubble(
-                        value: "\(currentStreak)",
-                        label: currentStreak == 1 ? "Day" : "Days",
-                        icon: "flame.fill",
-                        accentColor: .orange
-                    )
-                }
+                StatBubble(
+                    value: formattedWeight,
+                    label: "kg",
+                    icon: "dumbbell.fill",
+                    accentColor: .orange
+                )
             }
         }
     }
