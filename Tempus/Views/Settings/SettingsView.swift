@@ -102,62 +102,50 @@ struct SettingsView: View {
     }
 
     private func exportAllData() {
-        // Capture data on main thread
-        let workoutsSnapshot = workouts
-        let exercisesSnapshot = exercises
+        let exportModel = ExportData(
+            version: "1.0.0",
+            workouts: workouts.map { workout in
+                ExportWorkout(
+                    id: workout.id.uuidString,
+                    name: workout.workoutName,
+                    date: workout.workoutDate,
+                    notes: workout.notes,
+                    exercises: workout.exercisesData.map { exercise in
+                        ExportExercise(
+                            name: exercise.exerciseName,
+                            sets: exercise.sets.map { set in
+                                ExportSet(
+                                    setNumber: set.setNumber,
+                                    weightsAndReps: set.weightsAndReps.map { wr in
+                                        ExportWeightRep(weight: wr.weight, reps: wr.reps)
+                                    }
+                                )
+                            },
+                            notes: exercise.notes
+                        )
+                    }
+                )
+            },
+            exercises: exercises.map { exercise in
+                ExportExerciseDefinition(
+                    id: exercise.id.uuidString,
+                    name: exercise.name,
+                    description: exercise.exerciseDescription,
+                    muscleGroup: exercise.muscleGroup,
+                    tags: exercise.tags
+                )
+            },
+            exportDate: Date()
+        )
 
-        // Move expensive encoding to background thread
-        Task.detached(priority: .userInitiated) {
-            let exportModel = ExportData(
-                version: "1.0.0",
-                workouts: workoutsSnapshot.map { workout in
-                    ExportWorkout(
-                        id: workout.id.uuidString,
-                        name: workout.workoutName,
-                        date: workout.workoutDate,
-                        notes: workout.notes,
-                        exercises: workout.exercisesData.map { exercise in
-                            ExportExercise(
-                                name: exercise.exerciseName,
-                                sets: exercise.sets.map { set in
-                                    ExportSet(
-                                        setNumber: set.setNumber,
-                                        weightsAndReps: set.weightsAndReps.map { wr in
-                                            ExportWeightRep(weight: wr.weight, reps: wr.reps)
-                                        }
-                                    )
-                                },
-                                notes: exercise.notes
-                            )
-                        }
-                    )
-                },
-                exercises: exercisesSnapshot.map { exercise in
-                    ExportExerciseDefinition(
-                        id: exercise.id.uuidString,
-                        name: exercise.name,
-                        description: exercise.exerciseDescription,
-                        muscleGroup: exercise.muscleGroup,
-                        tags: exercise.tags
-                    )
-                },
-                exportDate: Date()
-            )
-
-            do {
-                let encoder = JSONEncoder()
-                encoder.dateEncodingStrategy = .iso8601
-                encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-                let data = try encoder.encode(exportModel)
-
-                // Update UI on main thread
-                await MainActor.run {
-                    exportData = data
-                    showingExportSheet = true
-                }
-            } catch {
-                // Handle error on main thread if needed
-            }
+        do {
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+            exportData = try encoder.encode(exportModel)
+            showingExportSheet = true
+        } catch {
+            // Handle error silently for now
         }
     }
 
@@ -193,14 +181,14 @@ struct SettingsView: View {
 
 // MARK: - Export Data Models
 
-struct ExportData: Codable {
+struct ExportData: Codable, Sendable {
     let version: String
     let workouts: [ExportWorkout]
     let exercises: [ExportExerciseDefinition]
     let exportDate: Date
 }
 
-struct ExportWorkout: Codable {
+struct ExportWorkout: Codable, Sendable {
     let id: String
     let name: String
     let date: Date
@@ -208,23 +196,23 @@ struct ExportWorkout: Codable {
     let exercises: [ExportExercise]
 }
 
-struct ExportExercise: Codable {
+struct ExportExercise: Codable, Sendable {
     let name: String
     let sets: [ExportSet]
     let notes: String?
 }
 
-struct ExportSet: Codable {
+struct ExportSet: Codable, Sendable {
     let setNumber: Int
     let weightsAndReps: [ExportWeightRep]
 }
 
-struct ExportWeightRep: Codable {
+struct ExportWeightRep: Codable, Sendable {
     let weight: Double
     let reps: Int
 }
 
-struct ExportExerciseDefinition: Codable {
+struct ExportExerciseDefinition: Codable, Sendable {
     let id: String
     let name: String
     let description: String?
