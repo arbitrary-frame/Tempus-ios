@@ -20,15 +20,18 @@
 2. Build and verify in Xcode frequently
 3. **MUST successfully build before requesting code review**
 4. Commit logical chunks of work with clear messages
+5. **Push feature branch to GitHub when ready for review**
 
 ### Code Review Process
 1. Assistant builds the feature in Xcode to verify it compiles
 2. Assistant commits changes with descriptive messages
-3. Assistant notifies user that code is ready for review
-4. **⛔️ CRITICAL: Assistant NEVER merges to master - EVER**
-5. **User tests the feature branch in simulator/device**
-6. **User approves and performs merge after testing**
-7. No automatic merging - merging is a human-only operation
+3. **Assistant pushes the feature branch to GitHub: `git push -u origin branch-name`**
+4. **Assistant creates a Pull Request using `gh pr create`**
+5. Assistant notifies user that PR is ready for review on GitHub
+6. **⛔️ CRITICAL: Assistant NEVER merges to master directly**
+7. **User reviews the PR on GitHub**
+8. **User approves and merges via GitHub PR or `gh pr merge`**
+9. All merges go through GitHub Pull Requests for proper review workflow
 
 ### Commit Messages
 - Clear, descriptive messages
@@ -60,8 +63,8 @@
 
 ### What NOT to Do
 - **⛔️ NEVER EVER work on master/main branch - This is the #1 rule**
-- **⛔️ NEVER EVER merge to master - User must test first**
-- **⛔️ NEVER EVER run `git merge` or `git checkout master` - Leave on feature branch**
+- **⛔️ NEVER EVER merge to master directly - All merges via GitHub PR**
+- **⛔️ NEVER EVER push directly to master - Protected branch**
 - **⛔️ ALWAYS check `git branch` before starting any work**
 - Don't push code that doesn't build
 - Don't implement Swift tests (user not comfortable with testing yet)
@@ -132,8 +135,9 @@ Before requesting user review:
 - [ ] Xcode build succeeds
 - [ ] Debug print statements added where helpful
 - [ ] Committed with clear message
-- [ ] **⛔️ LEFT ON FEATURE BRANCH for user to test**
-- [ ] Ready for user review and testing
+- [ ] **✅ Feature branch pushed to GitHub**
+- [ ] **✅ Pull Request created on GitHub**
+- [ ] Ready for user review on GitHub PR
 
 ## ⛔️ CRITICAL RULE - READ FIRST
 
