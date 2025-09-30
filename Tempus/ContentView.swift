@@ -16,6 +16,11 @@ struct ContentView: View {
                     Label("Workouts", systemImage: "figure.strengthtraining.traditional")
                 }
 
+            WorkoutTemplatesListView()
+                .tabItem {
+                    Label("Templates", systemImage: "doc.text")
+                }
+
             ExercisesListView()
                 .tabItem {
                     Label("Exercises", systemImage: "list.bullet.clipboard")

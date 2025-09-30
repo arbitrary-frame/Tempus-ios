@@ -19,12 +19,27 @@ struct WorkoutLoggingView: View {
     @State private var showingExercisePicker = false
     @State private var workoutNotes: String = ""
 
-    init(date: Date = Date()) {
+    init(date: Date = Date(), template: WorkoutTemplate? = nil) {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_GB")
         formatter.dateStyle = .medium
-        _workoutName = State(initialValue: "Workout - \(formatter.string(from: date))")
-        _workoutDate = State(initialValue: date)
+
+        if let template = template {
+            _workoutName = State(initialValue: template.name)
+            _workoutDate = State(initialValue: date)
+
+            // Pre-populate exercises from template
+            let entries = template.exercises.map { exercise in
+                WorkoutExerciseEntry(
+                    exerciseID: exercise.id,
+                    exerciseName: exercise.name
+                )
+            }
+            _workoutExercises = State(initialValue: entries)
+        } else {
+            _workoutName = State(initialValue: "Workout - \(formatter.string(from: date))")
+            _workoutDate = State(initialValue: date)
+        }
     }
 
     var body: some View {
