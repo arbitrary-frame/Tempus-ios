@@ -365,8 +365,18 @@ struct SetEntryRow: View {
                     HStack(spacing: 4) {
                         NumberTextFieldWithToolbar(
                             text: Binding(
-                                get: { set.weightsAndReps[wrIndex].weight == 0 ? "" : "\(set.weightsAndReps[wrIndex].weight)" },
-                                set: { set.weightsAndReps[wrIndex].weight = Double($0) ?? 0 }
+                                get: {
+                                    let weight = set.weightsAndReps[wrIndex].weight
+                                    if weight == 0 {
+                                        return ""
+                                    }
+                                    // Format to remove trailing zeros: 2.0 -> 2, 2.5 -> 2.5
+                                    let formatted = String(format: "%.10g", weight)
+                                    return formatted
+                                },
+                                set: { newValue in
+                                    set.weightsAndReps[wrIndex].weight = Double(newValue) ?? 0
+                                }
                             ),
                             placeholder: "kg",
                             keyboardType: .decimalPad,

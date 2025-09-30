@@ -86,7 +86,9 @@ struct NumberTextFieldWithToolbar: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: UITextField, context: Context) {
-        if uiView.text != text {
+        // Only update text if the field is not currently being edited
+        // This prevents the "2" -> "2.0" issue while typing
+        if !uiView.isFirstResponder && uiView.text != text {
             uiView.text = text
         }
         context.coordinator.updateButtonStates()
