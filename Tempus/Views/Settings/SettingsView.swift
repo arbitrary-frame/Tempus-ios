@@ -12,10 +12,14 @@ struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var workouts: [WorkoutEntry]
     @Query private var exercises: [Exercise]
+    @Query private var routines: [WorkoutRoutine]
     @EnvironmentObject var themeManager: ThemeManager
+    @AppStorage("userName") private var userName: String = ""
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = true
 
     @State private var showingExportSheet = false
     @State private var exportData: Data?
+    @State private var showingResetConfirmation = false
 
     var body: some View {
         NavigationStack {
@@ -46,6 +50,27 @@ struct SettingsView: View {
                         Text("\(exercises.count)")
                             .foregroundStyle(.secondary)
                     }
+
+                    HStack {
+                        Text("Routines")
+                        Spacer()
+                        Text("\(routines.count)")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                // Danger Zone Section
+                Section {
+                    Button(role: .destructive) {
+                        showingResetConfirmation = true
+                    } label: {
+                        Label("Reset App to Default", systemImage: "exclamationmark.triangle.fill")
+                    }
+                } header: {
+                    Text("Danger Zone")
+                } footer: {
+                    Text("This will delete all workouts, exercises, routines, and reset all settings. This action cannot be undone.")
+                        .foregroundStyle(.secondary)
                 }
 
                 // About Section
@@ -64,6 +89,18 @@ struct SettingsView: View {
                 if let data = exportData {
                     ShareSheet(items: [data])
                 }
+            }
+            .confirmationDialog(
+                "Reset App to Default?",
+                isPresented: $showingResetConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Cancel", role: .cancel) { }
+                Button("Reset App", role: .destructive) {
+                    resetAppToDefault()
+                }
+            } message: {
+                Text("This will permanently delete all your workouts, exercises, routines, and settings. You will need to go through onboarding again. This action cannot be undone.")
             }
         }
     }
@@ -113,6 +150,36 @@ struct SettingsView: View {
             showingExportSheet = true
         } catch {
         }
+    }
+
+    private func resetAppToDefault() {
+        HapticManager.shared.trigger(.warning)
+
+        // Delete all workouts
+        for workout in workouts {
+            modelContext.delete(workout)
+        }
+
+        // Delete all routines
+        for routine in routines {
+            modelContext.delete(routine)
+        }
+
+        // Delete all exercises
+        for exercise in exercises {
+            modelContext.delete(exercise)
+        }
+
+        // Save context
+        try? modelContext.save()
+
+        // Reset user preferences
+        userName = ""
+        hasCompletedOnboarding = false
+        themeManager.isDarkMode = false
+
+        // Trigger success haptic
+        HapticManager.shared.trigger(.success)
     }
 }
 
