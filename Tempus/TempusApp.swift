@@ -12,12 +12,17 @@ import SwiftData
 struct TempusApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Exercise.self,
+            WorkoutTemplate.self,
+            WorkoutEntry.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
+            // DEBUG: ModelContainer initialized successfully
+            print("DEBUG: Swift Data ModelContainer initialized with Exercise, WorkoutTemplate, WorkoutEntry models")
+            return container
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }
