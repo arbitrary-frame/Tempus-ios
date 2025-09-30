@@ -60,7 +60,7 @@ struct WorkoutsListView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
+            VStack(spacing: 0) {
                 if workouts.isEmpty {
                     ContentUnavailableView {
                         Label("No Workouts Yet", systemImage: "figure.strengthtraining.traditional")
@@ -68,19 +68,19 @@ struct WorkoutsListView: View {
                         Text("Tap + to log your first workout")
                     }
                 } else {
-                    List {
-                        // Statistics Summary Card
-                        Section {
-                            WorkoutStatsCard(
-                                workoutsThisWeek: workoutsThisWeek,
-                                totalExercises: totalExercisesCompleted,
-                                totalSets: totalSetsCompleted,
-                                currentStreak: currentStreak
-                            )
-                            .listRowBackground(Color.clear)
-                            .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-                        }
+                    // Statistics Summary Card - distinct header section
+                    WorkoutStatsCard(
+                        workoutsThisWeek: workoutsThisWeek,
+                        totalExercises: totalExercisesCompleted,
+                        totalSets: totalSetsCompleted,
+                        currentStreak: currentStreak
+                    )
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                    .padding(.bottom, 12)
 
+                    // Workouts List
+                    List {
                         ForEach(workouts) { workout in
                             WorkoutCardView(workout: workout)
                                 .onTapGesture {
