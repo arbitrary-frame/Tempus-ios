@@ -111,33 +111,37 @@ struct WorkoutsListView: View {
             return
         }
 
-        let hour = Calendar.current.component(.hour, from: Date())
-        let messages: [String]
+        currentGreeting = Self.generateGreeting(for: userName)
+    }
 
-        switch hour {
+    // Static method to generate greeting - can be precomputed or memoized
+    private static func generateGreeting(for userName: String) -> String {
+        let hour = Calendar.current.component(.hour, from: Date())
+
+        let messages: [String] = switch hour {
         case 5..<12:
-            messages = [
+            [
                 "Morning \(userName)",
                 "Let's go \(userName)",
                 "Ready \(userName)?",
                 "Time to train \(userName)"
             ]
         case 12..<17:
-            messages = [
+            [
                 "Hey \(userName)",
                 "Let's work \(userName)",
                 "Ready \(userName)?",
                 "Time to move \(userName)"
             ]
         case 17..<22:
-            messages = [
+            [
                 "Evening \(userName)",
                 "Let's go \(userName)",
                 "Ready \(userName)?",
                 "Time to push \(userName)"
             ]
         default:
-            messages = [
+            [
                 "Hey \(userName)",
                 "Can't sleep \(userName)?",
                 "Night owl \(userName)?",
@@ -145,7 +149,7 @@ struct WorkoutsListView: View {
             ]
         }
 
-        currentGreeting = messages.randomElement() ?? messages[0]
+        return messages.randomElement() ?? messages[0]
     }
 }
 

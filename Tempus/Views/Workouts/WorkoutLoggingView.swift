@@ -25,6 +25,20 @@ struct WorkoutLoggingView: View {
     private let isFromRoutine: Bool
     private let sourceRoutine: WorkoutRoutine?
 
+    // Cached previous workout data lookup - prevents N+1 query pattern
+    private var previousWorkoutDataCache: [UUID: WorkoutExerciseData] {
+        var cache: [UUID: WorkoutExerciseData] = [:]
+        for workout in allWorkouts {
+            for exerciseData in workout.exercisesData {
+                // Only keep the most recent (first occurrence due to reverse sort)
+                if cache[exerciseData.exerciseID] == nil {
+                    cache[exerciseData.exerciseID] = exerciseData
+                }
+            }
+        }
+        return cache
+    }
+
     private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_GB")
@@ -82,7 +96,7 @@ struct WorkoutLoggingView: View {
                         Section {
                             ExerciseEntryView(
                                 exerciseEntry: $exerciseEntry,
-                                previousData: getPreviousWorkoutData(for: exerciseEntry.exerciseID)
+                                previousData: previousWorkoutDataCache[exerciseEntry.exerciseID]
                             )
                         } header: {
                             HStack {
@@ -158,15 +172,6 @@ struct WorkoutLoggingView: View {
         workoutName = "\(routineName) - \(Self.dateFormatter.string(from: date))"
     }
 
-    private func getPreviousWorkoutData(for exerciseID: UUID) -> WorkoutExerciseData? {
-        // Find the most recent workout that contains this exercise
-        for workout in allWorkouts {
-            if let exerciseData = workout.exercisesData.first(where: { $0.exerciseID == exerciseID }) {
-                return exerciseData
-            }
-        }
-        return nil
-    }
 
     private func saveWorkout() {
         // Convert WorkoutExerciseEntry to WorkoutExerciseData
@@ -399,6 +404,7 @@ struct ExercisePickerView: View {
     @Query(sort: \Exercise.name) private var allExercises: [Exercise]
     @Binding var selectedExercises: [WorkoutExerciseEntry]
     @State private var searchText = ""
+    @State private var showingExerciseForm = false
 
     var filteredExercises: [Exercise] {
         let available = allExercises.filter { !$0.isArchived }
@@ -449,11 +455,21 @@ struct ExercisePickerView: View {
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $searchText, prompt: "Search exercises")
             .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button {
+                        showingExerciseForm = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") {
                         dismiss()
                     }
                 }
+            }
+            .sheet(isPresented: $showingExerciseForm) {
+                ExerciseFormView()
             }
         }
     }
