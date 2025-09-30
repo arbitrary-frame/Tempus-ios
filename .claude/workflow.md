@@ -25,8 +25,10 @@
 1. Assistant builds the feature in Xcode to verify it compiles
 2. Assistant commits changes with descriptive messages
 3. Assistant notifies user that code is ready for review
-4. **User reviews the branch before merging to master**
-5. No automatic merging - user approves and merges
+4. **⛔️ CRITICAL: Assistant NEVER merges to master - EVER**
+5. **User tests the feature branch in simulator/device**
+6. **User approves and performs merge after testing**
+7. No automatic merging - merging is a human-only operation
 
 ### Commit Messages
 - Clear, descriptive messages
@@ -58,11 +60,12 @@
 
 ### What NOT to Do
 - **⛔️ NEVER EVER work on master/main branch - This is the #1 rule**
+- **⛔️ NEVER EVER merge to master - User must test first**
+- **⛔️ NEVER EVER run `git merge` or `git checkout master` - Leave on feature branch**
 - **⛔️ ALWAYS check `git branch` before starting any work**
 - Don't push code that doesn't build
 - Don't implement Swift tests (user not comfortable with testing yet)
 - Don't deviate from requirements without asking first
-- Don't merge branches (user will do this after review)
 
 ## Debugging Approach
 
@@ -123,12 +126,14 @@ Tempus/
 
 Before requesting user review:
 - [ ] **⛔️ VERIFIED: Not on master branch (run `git branch` to confirm)**
+- [ ] **⛔️ VERIFIED: Still on feature branch (will NOT merge)**
 - [ ] Working on feature branch with descriptive name
 - [ ] Code follows requirements-ios.md
 - [ ] Xcode build succeeds
 - [ ] Debug print statements added where helpful
 - [ ] Committed with clear message
-- [ ] Ready for user review
+- [ ] **⛔️ LEFT ON FEATURE BRANCH for user to test**
+- [ ] Ready for user review and testing
 
 ## ⛔️ CRITICAL RULE - READ FIRST
 
