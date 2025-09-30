@@ -16,6 +16,7 @@ extension View {
     ) -> some View {
         self.toolbar {
             ToolbarItemGroup(placement: .keyboard) {
+                print("🎹 Keyboard toolbar created with \(allFields.count) fields")
                 HStack(spacing: 16) {
                     // Previous button
                     Button {

@@ -173,7 +173,13 @@ struct WorkoutLoggingView: View {
             .sheet(isPresented: $showingExercisePicker) {
                 ExercisePickerView(selectedExercises: $workoutExercises)
             }
-            .keyboardToolbar(focusedField: $focusedField, allFields: allFields)
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Button("TEST") {
+                        print("Test button tapped")
+                    }
+                }
+            }
         }
     }
 
