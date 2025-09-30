@@ -25,18 +25,24 @@ struct WorkoutLoggingView: View {
         formatter.dateStyle = .medium
 
         if let template = template {
+            print("DEBUG: WorkoutLoggingView init with template - \(template.name)")
+            print("DEBUG: Template has \(template.exercises.count) exercises")
+
             _workoutName = State(initialValue: template.name)
             _workoutDate = State(initialValue: date)
 
             // Pre-populate exercises from template
             let entries = template.exercises.map { exercise in
-                WorkoutExerciseEntry(
+                print("DEBUG: Adding exercise from template - \(exercise.name)")
+                return WorkoutExerciseEntry(
                     exerciseID: exercise.id,
                     exerciseName: exercise.name
                 )
             }
+            print("DEBUG: Created \(entries.count) workout entries from template")
             _workoutExercises = State(initialValue: entries)
         } else {
+            print("DEBUG: WorkoutLoggingView init without template")
             _workoutName = State(initialValue: "Workout - \(formatter.string(from: date))")
             _workoutDate = State(initialValue: date)
         }

@@ -11,8 +11,11 @@ import SwiftData
 struct WorkoutsListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \WorkoutEntry.workoutDate, order: .reverse) private var workouts: [WorkoutEntry]
+    @Query(sort: \WorkoutTemplate.name) private var templates: [WorkoutTemplate]
     @State private var showingWorkoutLogging = false
     @State private var selectedWorkout: WorkoutEntry?
+    @State private var showingTemplatePicker = false
+    @State private var templateToStart: WorkoutTemplate?
 
     var body: some View {
         NavigationStack {
@@ -54,9 +57,30 @@ struct WorkoutsListView: View {
             .navigationTitle("Workouts")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showingWorkoutLogging = true
-                        print("DEBUG: Add workout button tapped")
+                    Menu {
+                        Button {
+                            showingWorkoutLogging = true
+                            print("DEBUG: Quick log workout tapped")
+                        } label: {
+                            Label("Quick Log", systemImage: "plus.circle")
+                        }
+
+                        if !templates.isEmpty {
+                            Divider()
+
+                            Menu {
+                                ForEach(templates) { template in
+                                    Button {
+                                        templateToStart = template
+                                        print("DEBUG: Starting workout from template - \(template.name)")
+                                    } label: {
+                                        Text(template.name)
+                                    }
+                                }
+                            } label: {
+                                Label("Start from Template", systemImage: "doc.text")
+                            }
+                        }
                     } label: {
                         Image(systemName: "plus")
                     }
@@ -68,6 +92,10 @@ struct WorkoutsListView: View {
             }
             .fullScreenCover(item: $selectedWorkout) { workout in
                 WorkoutEditView(workout: workout)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+            .fullScreenCover(item: $templateToStart) { template in
+                WorkoutLoggingView(template: template)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
