@@ -19,6 +19,45 @@ struct WorkoutsListView: View {
     @AppStorage("userName") private var userName: String = ""
     @State private var currentGreeting: String = "Workouts"
 
+    // Statistics computed properties
+    private var workoutsThisWeek: Int {
+        let calendar = Calendar.current
+        let now = Date()
+        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
+            return 0
+        }
+        return workouts.filter { $0.workoutDate >= weekStart }.count
+    }
+
+    private var totalExercisesCompleted: Int {
+        workouts.reduce(0) { $0 + $1.exercisesData.count }
+    }
+
+    private var totalSetsCompleted: Int {
+        workouts.reduce(0) { total, workout in
+            total + workout.exercisesData.reduce(0) { $0 + $1.sets.count }
+        }
+    }
+
+    private var currentStreak: Int {
+        let calendar = Calendar.current
+        var streak = 0
+        var currentDate = calendar.startOfDay(for: Date())
+
+        for workout in workouts {
+            let workoutDate = calendar.startOfDay(for: workout.workoutDate)
+            let daysDiff = calendar.dateComponents([.day], from: workoutDate, to: currentDate).day ?? 0
+
+            if daysDiff == streak {
+                streak += 1
+            } else if daysDiff > streak {
+                break
+            }
+        }
+
+        return streak
+    }
+
     var body: some View {
         NavigationStack {
             Group {
@@ -30,6 +69,18 @@ struct WorkoutsListView: View {
                     }
                 } else {
                     List {
+                        // Statistics Summary Card
+                        Section {
+                            WorkoutStatsCard(
+                                workoutsThisWeek: workoutsThisWeek,
+                                totalExercises: totalExercisesCompleted,
+                                totalSets: totalSetsCompleted,
+                                currentStreak: currentStreak
+                            )
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                        }
+
                         ForEach(workouts) { workout in
                             WorkoutCardView(workout: workout)
                                 .onTapGesture {
@@ -243,6 +294,95 @@ struct WorkoutCardView: View {
         .onLongPressGesture(minimumDuration: .infinity, maximumDistance: .infinity, pressing: { pressing in
             isPressed = pressing
         }, perform: {})
+    }
+}
+
+// Workout Statistics Card
+struct WorkoutStatsCard: View {
+    let workoutsThisWeek: Int
+    let totalExercises: Int
+    let totalSets: Int
+    let currentStreak: Int
+
+    var body: some View {
+        ZStack {
+            // Liquid Glass background
+            RoundedRectangle(cornerRadius: 20)
+                .fill(.ultraThinMaterial)
+                .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+
+            VStack(spacing: 16) {
+                HStack(spacing: 4) {
+                    Image(systemName: "chart.bar.fill")
+                        .font(.title3)
+                        .foregroundStyle(.accent)
+                        .symbolRenderingMode(.hierarchical)
+                    Text("This Week")
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+                    Spacer()
+                }
+
+                // Statistics Grid
+                HStack(spacing: 12) {
+                    StatBubble(
+                        value: "\(workoutsThisWeek)",
+                        label: "Workouts",
+                        icon: "figure.strengthtraining.traditional"
+                    )
+
+                    StatBubble(
+                        value: "\(totalExercises)",
+                        label: "Exercises",
+                        icon: "list.bullet.clipboard"
+                    )
+
+                    StatBubble(
+                        value: "\(totalSets)",
+                        label: "Sets",
+                        icon: "square.stack.3d.up.fill"
+                    )
+
+                    if currentStreak > 0 {
+                        StatBubble(
+                            value: "\(currentStreak)",
+                            label: currentStreak == 1 ? "Day" : "Days",
+                            icon: "flame.fill",
+                            accentColor: .orange
+                        )
+                    }
+                }
+            }
+            .padding(20)
+        }
+    }
+}
+
+// Individual Stat Bubble
+struct StatBubble: View {
+    let value: String
+    let label: String
+    let icon: String
+    var accentColor: Color = .accentColor
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundStyle(accentColor)
+                .symbolRenderingMode(.hierarchical)
+
+            Text(value)
+                .font(.title2.bold())
+                .foregroundStyle(.primary)
+
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
     }
 }
 
