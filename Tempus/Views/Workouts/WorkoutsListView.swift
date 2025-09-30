@@ -16,6 +16,16 @@ struct WorkoutsListView: View {
     @State private var selectedWorkout: WorkoutEntry?
     @State private var showingRoutinePicker = false
     @State private var routineToStart: WorkoutRoutine?
+    @AppStorage("userName") private var userName: String = ""
+
+    private var greeting: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 0..<12: return "Good Morning"
+        case 12..<17: return "Good Afternoon"
+        default: return "Good Evening"
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -48,7 +58,7 @@ struct WorkoutsListView: View {
                     .scrollContentBackground(.hidden)
                 }
             }
-            .navigationTitle("Workouts")
+            .navigationTitle(userName.isEmpty ? "Workouts" : "\(greeting), \(userName)")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
