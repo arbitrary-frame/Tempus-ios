@@ -233,59 +233,71 @@ struct SetEntryRow: View {
     @Binding var set: WorkoutSet
 
     var body: some View {
-        HStack(spacing: 12) {
+        VStack(alignment: .leading, spacing: 8) {
             Text("Set \(set.setNumber)")
                 .font(.subheadline.bold())
                 .foregroundStyle(.accent)
-                .frame(width: 50, alignment: .leading)
 
-            // Weight/Rep pairs (for drop sets)
-            ForEach($set.weightsAndReps) { $wr in
-                HStack(spacing: 4) {
-                    TextField("kg", text: Binding(
-                        get: { wr.weight == 0 ? "" : "\(wr.weight)" },
-                        set: { wr.weight = Double($0) ?? 0 }
-                    ))
-                    .keyboardType(.decimalPad)
-                    .textFieldStyle(.roundedBorder)
-                    .frame(width: 60)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    // Weight/Rep pairs (for drop sets)
+                    ForEach($set.weightsAndReps) { $wr in
+                        HStack(spacing: 4) {
+                            TextField("kg", text: Binding(
+                                get: { wr.weight == 0 ? "" : "\(wr.weight)" },
+                                set: { wr.weight = Double($0) ?? 0 }
+                            ))
+                            .keyboardType(.decimalPad)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 60)
 
-                    Image(systemName: "xmark")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .symbolRenderingMode(.hierarchical)
-
-                    TextField("reps", text: Binding(
-                        get: { wr.reps == 0 ? "" : "\(wr.reps)" },
-                        set: { wr.reps = Int($0) ?? 0 }
-                    ))
-                    .keyboardType(.numberPad)
-                    .textFieldStyle(.roundedBorder)
-                    .frame(width: 50)
-
-                    if set.weightsAndReps.count > 1 {
-                        Button {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                removeWeightRep(wr)
-                            }
-                        } label: {
-                            Image(systemName: "minus.circle.fill")
-                                .foregroundStyle(.red)
+                            Image(systemName: "xmark")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
                                 .symbolRenderingMode(.hierarchical)
+
+                            TextField("reps", text: Binding(
+                                get: { wr.reps == 0 ? "" : "\(wr.reps)" },
+                                set: { wr.reps = Int($0) ?? 0 }
+                            ))
+                            .keyboardType(.numberPad)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 50)
+
+                            if set.weightsAndReps.count > 1 {
+                                Button {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                        removeWeightRep(wr)
+                                    }
+                                } label: {
+                                    Image(systemName: "minus.circle.fill")
+                                        .foregroundStyle(.red)
+                                        .symbolRenderingMode(.hierarchical)
+                                }
+                                .buttonStyle(.borderless)
+                            }
                         }
-                        .buttonStyle(.borderless)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 6)
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
                     }
+
+                    // Add Drop Set Button
+                    Button {
+                        addDropSet()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "plus.circle")
+                            Text("Drop Set")
+                                .font(.caption)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+                    }
+                    .buttonStyle(.borderless)
                 }
             }
-
-            // Add Drop Set Button
-            Button {
-                addDropSet()
-            } label: {
-                Image(systemName: "plus.circle")
-                    .symbolRenderingMode(.hierarchical)
-            }
-            .buttonStyle(.borderless)
         }
     }
 
