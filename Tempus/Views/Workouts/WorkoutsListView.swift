@@ -55,9 +55,7 @@ struct WorkoutsListView: View {
             ]
         }
 
-        // Use day of year as seed for consistent daily rotation
-        let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0
-        return messages[dayOfYear % messages.count]
+        return messages.randomElement() ?? messages[0]
     }
 
     var body: some View {
