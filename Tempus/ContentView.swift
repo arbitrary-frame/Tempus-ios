@@ -44,5 +44,6 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environmentObject(ThemeManager())
         .modelContainer(for: [Exercise.self, WorkoutTemplate.self, WorkoutEntry.self])
 }
