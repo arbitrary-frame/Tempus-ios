@@ -27,31 +27,26 @@ struct WorkoutsListView: View {
                         Text("Tap + to log your first workout")
                     }
                 } else {
-                    ScrollView {
-                        LazyVStack(spacing: 12) {
-                            ForEach(workouts) { workout in
-                                WorkoutCardView(workout: workout)
-                                    .onTapGesture {
-                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                            selectedWorkout = workout
-                                        }
-                                        print("DEBUG: Workout tapped - \(workout.workoutName)")
+                    List {
+                        ForEach(workouts) { workout in
+                            WorkoutCardView(workout: workout)
+                                .onTapGesture {
+                                    selectedWorkout = workout
+                                    print("DEBUG: Workout tapped - \(workout.workoutName)")
+                                }
+                                .listRowBackground(Color.clear)
+                                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                    Button(role: .destructive) {
+                                        deleteWorkout(workout)
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
                                     }
-                                    .contextMenu {
-                                        Button(role: .destructive) {
-                                            deleteWorkout(workout)
-                                        } label: {
-                                            Label("Delete", systemImage: "trash")
-                                        }
-                                    }
-                                    .transition(.asymmetric(
-                                        insertion: .scale.combined(with: .opacity),
-                                        removal: .scale.combined(with: .opacity)
-                                    ))
-                            }
+                                }
                         }
-                        .padding()
                     }
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
                 }
             }
             .navigationTitle("Workouts")
