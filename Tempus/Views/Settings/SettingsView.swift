@@ -90,11 +90,7 @@ struct SettingsView: View {
                     ShareSheet(items: [data])
                 }
             }
-            .confirmationDialog(
-                "Reset App to Default?",
-                isPresented: $showingResetConfirmation,
-                titleVisibility: .visible
-            ) {
+            .alert("Reset App to Default?", isPresented: $showingResetConfirmation) {
                 Button("Cancel", role: .cancel) { }
                 Button("Reset App", role: .destructive) {
                     resetAppToDefault()
@@ -173,10 +169,9 @@ struct SettingsView: View {
         // Save context
         try? modelContext.save()
 
-        // Reset user preferences
+        // Reset user preferences (but keep theme preference)
         userName = ""
         hasCompletedOnboarding = false
-        themeManager.isDarkMode = false
 
         // Trigger success haptic
         HapticManager.shared.trigger(.success)
