@@ -13,7 +13,6 @@ struct WorkoutTemplatesListView: View {
     @Query(sort: \WorkoutTemplate.name) private var templates: [WorkoutTemplate]
     @State private var showingCreateForm = false
     @State private var selectedTemplate: WorkoutTemplate?
-    @State private var showingStartWorkout = false
     @State private var templateToStart: WorkoutTemplate?
 
     var body: some View {
@@ -49,7 +48,7 @@ struct WorkoutTemplatesListView: View {
 
                                 Button {
                                     templateToStart = template
-                                    showingStartWorkout = true
+                                    print("DEBUG: Starting workout from template - \(template.name)")
                                 } label: {
                                     Label("Start", systemImage: "play.fill")
                                 }
@@ -77,10 +76,8 @@ struct WorkoutTemplatesListView: View {
             .sheet(item: $selectedTemplate) { template in
                 WorkoutTemplateFormView(template: template)
             }
-            .fullScreenCover(isPresented: $showingStartWorkout) {
-                if let template = templateToStart {
-                    WorkoutLoggingView(template: template)
-                }
+            .fullScreenCover(item: $templateToStart) { template in
+                WorkoutLoggingView(template: template)
             }
         }
     }
