@@ -11,6 +11,7 @@ import SwiftData
 struct WorkoutsListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \WorkoutEntry.workoutDate, order: .reverse) private var workouts: [WorkoutEntry]
+    @State private var showingWorkoutLogging = false
 
     var body: some View {
         NavigationStack {
@@ -34,12 +35,15 @@ struct WorkoutsListView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        // TODO: Show new workout options
+                        showingWorkoutLogging = true
                         print("DEBUG: Add workout button tapped")
                     } label: {
                         Image(systemName: "plus")
                     }
                 }
+            }
+            .fullScreenCover(isPresented: $showingWorkoutLogging) {
+                WorkoutLoggingView()
             }
         }
     }
