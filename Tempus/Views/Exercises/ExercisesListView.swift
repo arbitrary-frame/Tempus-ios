@@ -43,7 +43,6 @@ struct ExercisesListView: View {
                                 ForEach(groupedExercises[muscleGroup]!) { exercise in
                                     Button {
                                         selectedExercise = exercise
-                                        print("DEBUG: Exercise tapped - \(exercise.name)")
                                     } label: {
                                         ExerciseRowView(exercise: exercise)
                                     }
@@ -72,7 +71,6 @@ struct ExercisesListView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showingCreateForm = true
-                        print("DEBUG: Add exercise button tapped")
                     } label: {
                         Image(systemName: "plus")
                     }

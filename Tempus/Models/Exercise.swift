@@ -34,8 +34,5 @@ final class Exercise {
         self.isArchived = false
         self.createdAt = Date()
         self.updatedAt = Date()
-
-        // DEBUG: Exercise created
-        print("DEBUG: Exercise created - \(name) (\(muscleGroup))")
     }
 }

@@ -130,7 +130,6 @@ struct ExerciseFormView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
-                        print("DEBUG: Exercise form cancelled")
                         dismiss()
                     }
                 }
@@ -152,12 +151,10 @@ struct ExerciseFormView: View {
         }
         tags.append(trimmedTag)
         tagInput = ""
-        print("DEBUG: Tag added - \(trimmedTag)")
     }
 
     private func removeTag(_ tag: String) {
         tags.removeAll { $0 == tag }
-        print("DEBUG: Tag removed - \(tag)")
     }
 
     private func saveExercise() {
@@ -172,7 +169,6 @@ struct ExerciseFormView: View {
         if isDuplicate {
             validationMessage = "An exercise with this name already exists"
             showingValidationError = true
-            print("DEBUG: Exercise save failed - duplicate name: \(trimmedName)")
             return
         }
 
@@ -183,7 +179,6 @@ struct ExerciseFormView: View {
             exercise.muscleGroup = muscleGroup.rawValue
             exercise.tags = tags
             exercise.updatedAt = Date()
-            print("DEBUG: Exercise updated - \(trimmedName)")
         } else {
             // Create new exercise
             let newExercise = Exercise(
@@ -193,7 +188,6 @@ struct ExerciseFormView: View {
                 exerciseDescription: exerciseDescription.isEmpty ? nil : exerciseDescription
             )
             modelContext.insert(newExercise)
-            print("DEBUG: Exercise created - \(trimmedName)")
         }
 
         dismiss()

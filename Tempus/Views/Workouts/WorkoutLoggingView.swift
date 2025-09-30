@@ -31,8 +31,6 @@ struct WorkoutLoggingView: View {
         formatter.dateStyle = .medium
 
         if let routine = routine {
-            print("DEBUG: WorkoutLoggingView init with routine - \(routine.name)")
-            print("DEBUG: Routine has \(routine.exercises.count) exercises")
 
             self.routineName = routine.name
             self.isFromRoutine = true
@@ -41,16 +39,13 @@ struct WorkoutLoggingView: View {
 
             // Pre-populate exercises from routine
             let entries = routine.exercises.map { exercise in
-                print("DEBUG: Adding exercise from routine - \(exercise.name)")
                 return WorkoutExerciseEntry(
                     exerciseID: exercise.id,
                     exerciseName: exercise.name
                 )
             }
-            print("DEBUG: Created \(entries.count) workout entries from routine")
             _workoutExercises = State(initialValue: entries)
         } else {
-            print("DEBUG: WorkoutLoggingView init without routine")
             self.routineName = nil
             self.isFromRoutine = false
             _workoutName = State(initialValue: "Workout - \(formatter.string(from: date))")
@@ -106,7 +101,6 @@ struct WorkoutLoggingView: View {
                 Section {
                     Button {
                         showingExercisePicker = true
-                        print("DEBUG: Add exercise button tapped")
                     } label: {
                         Label("Add Exercise", systemImage: "plus.circle.fill")
                             .symbolRenderingMode(.hierarchical)
@@ -129,7 +123,6 @@ struct WorkoutLoggingView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
-                        print("DEBUG: Workout logging cancelled")
                         dismiss()
                     }
                 }
@@ -148,7 +141,6 @@ struct WorkoutLoggingView: View {
 
     private func removeExercise(_ exercise: WorkoutExerciseEntry) {
         workoutExercises.removeAll { $0.id == exercise.id }
-        print("DEBUG: Removed exercise - \(exercise.exerciseName)")
     }
 
     private func updateWorkoutNameIfNeeded(for date: Date) {
@@ -160,7 +152,6 @@ struct WorkoutLoggingView: View {
         formatter.dateStyle = .medium
 
         workoutName = "\(routineName) - \(formatter.string(from: date))"
-        print("DEBUG: Updated workout name to: \(workoutName)")
     }
 
     private func saveWorkout() {
@@ -183,7 +174,6 @@ struct WorkoutLoggingView: View {
         )
 
         modelContext.insert(workout)
-        print("DEBUG: Workout saved - \(workoutName) with \(exercisesData.count) exercises, routine: \(sourceRoutine?.name ?? "none")")
         dismiss()
     }
 }
@@ -259,7 +249,6 @@ struct ExerciseEntryView: View {
     private func addSet() {
         let newSetNumber = exerciseEntry.sets.count + 1
         exerciseEntry.sets.append(WorkoutSet(setNumber: newSetNumber, weightsAndReps: [WeightRep(weight: 0, reps: 0)]))
-        print("DEBUG: Added set \(newSetNumber) to \(exerciseEntry.exerciseName)")
     }
 
     private func deleteSet(_ set: WorkoutSet) {
@@ -271,7 +260,6 @@ struct ExerciseEntryView: View {
                 weightsAndReps: exerciseEntry.sets[index].weightsAndReps
             )
         }
-        print("DEBUG: Deleted set from \(exerciseEntry.exerciseName), \(exerciseEntry.sets.count) sets remaining")
     }
 }
 
@@ -339,12 +327,10 @@ struct SetEntryRow: View {
 
     private func addDropSet() {
         set.weightsAndReps.append(WeightRep())
-        print("DEBUG: Added drop set to set \(set.setNumber)")
     }
 
     private func removeWeightRep(_ wr: WeightRep) {
         set.weightsAndReps.removeAll { $0.id == wr.id }
-        print("DEBUG: Removed drop set from set \(set.setNumber)")
     }
 }
 
@@ -421,7 +407,6 @@ struct ExercisePickerView: View {
         if isSelected(exercise) {
             // Remove if already selected
             selectedExercises.removeAll { $0.exerciseID == exercise.id }
-            print("DEBUG: Removed \(exercise.name) from workout")
         } else {
             // Add new exercise
             let entry = WorkoutExerciseEntry(
@@ -429,7 +414,6 @@ struct ExercisePickerView: View {
                 exerciseName: exercise.name
             )
             selectedExercises.append(entry)
-            print("DEBUG: Added \(exercise.name) to workout")
         }
     }
 }

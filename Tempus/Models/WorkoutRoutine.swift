@@ -32,8 +32,5 @@ final class WorkoutRoutine {
         self.exercises = exercises
         self.createdAt = Date()
         self.updatedAt = Date()
-
-        // DEBUG: Routine created
-        print("DEBUG: WorkoutRoutine created - \(name) with \(exercises.count) exercises")
     }
 }

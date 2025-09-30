@@ -21,10 +21,7 @@ struct TempusApp: App {
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
         do {
-            let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
-            // DEBUG: ModelContainer initialized successfully
-            print("DEBUG: Swift Data ModelContainer initialized with Exercise, WorkoutRoutine, WorkoutEntry models")
-            return container
+            return try ModelContainer(for: schema, configurations: [modelConfiguration])
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }

@@ -81,7 +81,6 @@ struct WorkoutEditView: View {
                 Section {
                     Button {
                         showingExercisePicker = true
-                        print("DEBUG: Add exercise button tapped (edit mode)")
                     } label: {
                         Label("Add Exercise", systemImage: "plus.circle.fill")
                     }
@@ -101,7 +100,6 @@ struct WorkoutEditView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
-                        print("DEBUG: Workout edit cancelled")
                         dismiss()
                     }
                 }
@@ -149,7 +147,6 @@ struct WorkoutEditView: View {
 
     private func removeExercise(_ exercise: WorkoutExerciseEntry) {
         workoutExercises.removeAll { $0.id == exercise.id }
-        print("DEBUG: Removed exercise - \(exercise.exerciseName)")
     }
 
     private func saveWorkout() {
@@ -169,13 +166,11 @@ struct WorkoutEditView: View {
         workout.exercisesData = exercisesData
         workout.notes = workoutNotes.isEmpty ? nil : workoutNotes
 
-        print("DEBUG: Workout updated - \(workoutName) with \(exercisesData.count) exercises")
         dismiss()
     }
 
     private func deleteWorkout() {
         modelContext.delete(workout)
-        print("DEBUG: Workout deleted - \(workout.workoutName)")
         dismiss()
     }
 }

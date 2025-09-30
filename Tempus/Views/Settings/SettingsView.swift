@@ -111,9 +111,7 @@ struct SettingsView: View {
             encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
             exportData = try encoder.encode(exportModel)
             showingExportSheet = true
-            print("DEBUG: Data exported successfully")
         } catch {
-            print("DEBUG: Export failed - \(error.localizedDescription)")
         }
     }
 }

@@ -29,7 +29,6 @@ struct WorkoutRoutinesListView: View {
                         ForEach(routines) { routine in
                             Button {
                                 selectedRoutine = routine
-                                print("DEBUG: Routine tapped - \(routine.name)")
                             } label: {
                                 RoutineRowView(routine: routine)
                             }
@@ -48,7 +47,6 @@ struct WorkoutRoutinesListView: View {
 
                                 Button {
                                     routineToStart = routine
-                                    print("DEBUG: Starting workout from routine - \(routine.name)")
                                 } label: {
                                     Label("Start", systemImage: "play.fill")
                                 }
@@ -64,7 +62,6 @@ struct WorkoutRoutinesListView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showingCreateForm = true
-                        print("DEBUG: Add routine button tapped")
                     } label: {
                         Image(systemName: "plus")
                     }
@@ -85,7 +82,6 @@ struct WorkoutRoutinesListView: View {
     private func deleteRoutine(_ routine: WorkoutRoutine) {
         withAnimation {
             modelContext.delete(routine)
-            print("DEBUG: Routine deleted - \(routine.name)")
         }
     }
 }

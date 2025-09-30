@@ -95,7 +95,6 @@ struct SaveWorkoutAsTemplateView: View {
         )
 
         modelContext.insert(routine)
-        print("DEBUG: Saved workout as routine - \(trimmedName)")
         dismiss()
     }
 }
