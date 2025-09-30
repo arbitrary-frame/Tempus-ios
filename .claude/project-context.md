@@ -37,9 +37,25 @@
 - **Charts:** Swift Charts with 3D support in iOS 26
 - **Localisation:** UK English (en_GB), metric system only
 
+### SF Symbols 7 - Iconography System
+- **Version:** SF Symbols 7 (released September 9, 2025)
+- **Library Size:** Over 6,900 symbols
+- **Integration:** Seamlessly integrates with San Francisco system font
+- **Key Features:**
+  - Draw animations (Draw On/Draw Off) - calligraphic movement inspired animations
+  - Variable Draw - convey strength or progress dynamically
+  - Automatic gradients from single source color
+  - Enhanced Magic Replace transitions between related symbols
+  - Extensive localization support (Latin, Greek, Cyrillic, Hebrew, Arabic, CJK, etc.)
+- **Compatibility:** iOS 26, iPadOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26
+- **Documentation:**
+  - https://developer.apple.com/sf-symbols/
+  - WWDC25 Session: https://developer.apple.com/videos/play/wwdc2025/337/
+- **Usage in Tempus:** All icons use SF Symbols 7 for consistent, scalable, and accessible iconography
+
 ### Design Principles
 - Embrace Liquid Glass translucency throughout
-- Use SF Symbols 8 for iconography
+- Use SF Symbols 7 for all iconography
 - Support Dynamic Type and accessibility
 - Implement haptic feedback for tactile responses
 - Privacy-first: offline-only, no tracking, no analytics

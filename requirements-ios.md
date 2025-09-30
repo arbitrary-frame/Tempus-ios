@@ -49,7 +49,7 @@ A minimalist workout logging app built natively for iOS that allows users to qui
 
 ### iOS Design Principles
 - **Native navigation patterns** - NavigationStack with proper hierarchy
-- **SF Symbols 8** - Consistent iconography throughout
+- **SF Symbols 7** - Consistent iconography throughout (6,900+ symbols with Draw animations, gradients)
 - **Dynamic Type** - Full support for accessibility text sizes
 - **Haptic Feedback** - UIFeedbackGenerator for tactile responses
 - **Context Menus** - Long-press actions following iOS conventions
