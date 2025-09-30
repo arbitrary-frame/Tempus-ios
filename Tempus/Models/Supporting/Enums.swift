@@ -22,28 +22,39 @@ enum MuscleGroup: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    /// SF Symbol icon for each muscle group
+    /// SF Symbols 7 icon for each muscle group
+    /// Icons selected to visually represent the exercises and movements for each group
     var icon: String {
         switch self {
         case .chest:
-            return "figure.strengthtraining.traditional"
+            // Pushing movements - bench press, push-ups
+            return "figure.strengthtraining.functional"
         case .back:
-            return "figure.cooldown"
+            // Pulling movements - rows, pull-ups, deadlifts
+            return "figure.strengthtraining.traditional"
         case .shoulders:
+            // Overhead pressing, lateral raises
             return "figure.arms.open"
         case .biceps:
-            return "figure.flexibility"
+            // Curling movements - bicep curls
+            return "dumbbell.fill"
         case .triceps:
-            return "figure.flexibility"
+            // Extension movements - tricep extensions, dips
+            return "figure.strengthtraining.traditional"
         case .legs:
+            // Squats, lunges, leg press
             return "figure.walk"
         case .core:
+            // Abs, planks, core stability (perfect symbol exists!)
             return "figure.core.training"
         case .cardio:
+            // Running, cycling, aerobic exercise
             return "figure.run"
         case .fullBody:
+            // Compound movements involving multiple muscle groups
             return "figure.mixed.cardio"
         case .other:
+            // General/miscellaneous exercises
             return "figure.play"
         }
     }
