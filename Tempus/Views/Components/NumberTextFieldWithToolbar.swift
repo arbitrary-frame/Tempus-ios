@@ -14,17 +14,27 @@ class TextFieldManager {
 
     func register(_ textField: UITextField, for index: Int) {
         textFields[index] = textField
+        print("📝 Registered field \(index), total registered: \(textFields.count)")
     }
 
     func focusField(_ index: Int) {
+        print("🎯 Trying to focus field \(index), registered fields: \(textFields.keys.sorted())")
+
         // If field exists, focus it immediately
         if let textField = textFields[index] {
+            print("✅ Found field \(index), focusing")
             textField.becomeFirstResponder()
         } else {
+            print("❌ Field \(index) not found, will retry")
             // Field doesn't exist yet (SwiftUI hasn't rendered it)
             // Wait a bit and try again
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-                self?.textFields[index]?.becomeFirstResponder()
+                if let textField = self?.textFields[index] {
+                    print("✅ Retry: Found field \(index), focusing")
+                    textField.becomeFirstResponder()
+                } else {
+                    print("❌ Retry: Field \(index) still not found. Registered: \(self?.textFields.keys.sorted() ?? [])")
+                }
             }
         }
     }
