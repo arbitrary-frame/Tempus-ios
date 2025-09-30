@@ -9,6 +9,8 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+    @EnvironmentObject var themeManager: ThemeManager
+
     var body: some View {
         TabView {
             WorkoutsListView()
@@ -30,7 +32,13 @@ struct ContentView: View {
                 .tabItem {
                     Label("Analytics", systemImage: "chart.line.uptrend.xyaxis")
                 }
+
+            SettingsView()
+                .tabItem {
+                    Label("Settings", systemImage: "gearshape")
+                }
         }
+        .preferredColorScheme(themeManager.colorScheme)
     }
 }
 

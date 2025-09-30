@@ -10,6 +10,8 @@ import SwiftData
 
 @main
 struct TempusApp: App {
+    @StateObject private var themeManager = ThemeManager()
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Exercise.self,
@@ -31,7 +33,7 @@ struct TempusApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .preferredColorScheme(.dark)
+                .environmentObject(themeManager)
         }
         .modelContainer(sharedModelContainer)
     }
