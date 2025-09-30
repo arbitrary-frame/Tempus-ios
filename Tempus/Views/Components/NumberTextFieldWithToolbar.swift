@@ -71,20 +71,27 @@ struct NumberTextFieldWithToolbar: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: UITextField, context: Context) {
-        uiView.text = text
+        // Only update text if different to avoid cursor issues
+        if uiView.text != text {
+            uiView.text = text
+        }
 
         // Update button states
         context.coordinator.previousButton?.isEnabled = currentField > 0
         context.coordinator.nextButton?.isEnabled = currentField < fieldCount - 1
 
-        // Manage focus
-        if focusedField == currentField {
-            if !uiView.isFirstResponder {
-                uiView.becomeFirstResponder()
-            }
-        } else {
-            if uiView.isFirstResponder {
-                uiView.resignFirstResponder()
+        // Manage focus - wrap in async to avoid conflicts during SwiftUI update cycle
+        DispatchQueue.main.async {
+            if self.focusedField == self.currentField {
+                // This field should be focused
+                if !uiView.isFirstResponder {
+                    uiView.becomeFirstResponder()
+                }
+            } else {
+                // This field should NOT be focused
+                if uiView.isFirstResponder {
+                    uiView.resignFirstResponder()
+                }
             }
         }
     }
