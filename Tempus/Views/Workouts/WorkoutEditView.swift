@@ -23,6 +23,21 @@ struct WorkoutEditView: View {
     @State private var showingExercisePicker = false
     @State private var showingDeleteConfirmation = false
     @State private var showingSaveAsRoutine = false
+    @FocusState private var focusedField: FieldID?
+
+    // Calculate all fields across all exercises for keyboard navigation
+    private var allFields: [FieldID] {
+        var fields: [FieldID] = []
+        for exercise in workoutExercises {
+            for setIndex in exercise.sets.indices {
+                for dropSetIndex in exercise.sets[setIndex].weightsAndReps.indices {
+                    fields.append(FieldID(setIndex: setIndex, dropSetIndex: dropSetIndex, isWeight: true))
+                    fields.append(FieldID(setIndex: setIndex, dropSetIndex: dropSetIndex, isWeight: false))
+                }
+            }
+        }
+        return fields
+    }
 
     // Cached previous workout data lookup - prevents N+1 query pattern
     private var previousWorkoutDataCache: [UUID: WorkoutExerciseData] {
@@ -80,7 +95,8 @@ struct WorkoutEditView: View {
                         Section {
                             ExerciseEntryView(
                                 exerciseEntry: $exerciseEntry,
-                                previousData: previousWorkoutDataCache[exerciseEntry.exerciseID]
+                                previousData: previousWorkoutDataCache[exerciseEntry.exerciseID],
+                                focusedField: $focusedField
                             )
                         } header: {
                             HStack {
@@ -153,6 +169,7 @@ struct WorkoutEditView: View {
             .sheet(isPresented: $showingExercisePicker) {
                 ExercisePickerView(selectedExercises: $workoutExercises)
             }
+            .keyboardToolbar(focusedField: $focusedField, allFields: allFields)
             .sheet(isPresented: $showingSaveAsRoutine) {
                 SaveWorkoutAsTemplateView(workoutExercises: workoutExercises, defaultName: workoutName)
             }

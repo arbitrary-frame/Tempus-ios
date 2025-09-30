@@ -19,6 +19,21 @@ struct WorkoutLoggingView: View {
     @State private var workoutExercises: [WorkoutExerciseEntry] = []
     @State private var showingExercisePicker = false
     @State private var workoutNotes: String = ""
+    @FocusState private var focusedField: FieldID?
+
+    // Calculate all fields across all exercises for keyboard navigation
+    private var allFields: [FieldID] {
+        var fields: [FieldID] = []
+        for exercise in workoutExercises {
+            for setIndex in exercise.sets.indices {
+                for dropSetIndex in exercise.sets[setIndex].weightsAndReps.indices {
+                    fields.append(FieldID(setIndex: setIndex, dropSetIndex: dropSetIndex, isWeight: true))
+                    fields.append(FieldID(setIndex: setIndex, dropSetIndex: dropSetIndex, isWeight: false))
+                }
+            }
+        }
+        return fields
+    }
 
     // Track if name was from routine to auto-update it
     private let routineName: String?
@@ -96,7 +111,8 @@ struct WorkoutLoggingView: View {
                         Section {
                             ExerciseEntryView(
                                 exerciseEntry: $exerciseEntry,
-                                previousData: previousWorkoutDataCache[exerciseEntry.exerciseID]
+                                previousData: previousWorkoutDataCache[exerciseEntry.exerciseID],
+                                focusedField: $focusedField
                             )
                         } header: {
                             HStack {
@@ -157,6 +173,7 @@ struct WorkoutLoggingView: View {
             .sheet(isPresented: $showingExercisePicker) {
                 ExercisePickerView(selectedExercises: $workoutExercises)
             }
+            .keyboardToolbar(focusedField: $focusedField, allFields: allFields)
         }
     }
 
@@ -235,19 +252,7 @@ struct FieldID: Hashable {
 struct ExerciseEntryView: View {
     @Binding var exerciseEntry: WorkoutExerciseEntry
     let previousData: WorkoutExerciseData?
-    @FocusState private var focusedField: FieldID?
-
-    // Calculate all fields in order for keyboard navigation
-    private var allFields: [FieldID] {
-        var fields: [FieldID] = []
-        for setIndex in exerciseEntry.sets.indices {
-            for dropSetIndex in exerciseEntry.sets[setIndex].weightsAndReps.indices {
-                fields.append(FieldID(setIndex: setIndex, dropSetIndex: dropSetIndex, isWeight: true))
-                fields.append(FieldID(setIndex: setIndex, dropSetIndex: dropSetIndex, isWeight: false))
-            }
-        }
-        return fields
-    }
+    @FocusState.Binding var focusedField: FieldID?
 
     var body: some View {
         VStack(spacing: 12) {
@@ -318,7 +323,6 @@ struct ExerciseEntryView: View {
                 .font(.caption)
             }
         }
-        .keyboardToolbar(focusedField: $focusedField, allFields: allFields)
     }
 
     private func addSet() {
