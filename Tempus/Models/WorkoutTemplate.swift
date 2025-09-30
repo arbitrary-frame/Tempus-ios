@@ -13,6 +13,7 @@ final class WorkoutTemplate {
     @Attribute(.unique) var id: UUID
     var name: String
     var templateDescription: String?
+    var emoji: String?
     var createdAt: Date
     var updatedAt: Date
 
@@ -23,10 +24,11 @@ final class WorkoutTemplate {
     @Relationship(deleteRule: .nullify, inverse: \WorkoutEntry.template)
     var workouts: [WorkoutEntry]?
 
-    init(name: String, templateDescription: String? = nil, exercises: [Exercise] = []) {
+    init(name: String, templateDescription: String? = nil, emoji: String? = nil, exercises: [Exercise] = []) {
         self.id = UUID()
         self.name = name
         self.templateDescription = templateDescription
+        self.emoji = emoji
         self.exercises = exercises
         self.createdAt = Date()
         self.updatedAt = Date()

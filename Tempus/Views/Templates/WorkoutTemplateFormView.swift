@@ -15,6 +15,7 @@ struct WorkoutTemplateFormView: View {
 
     @State private var name: String
     @State private var templateDescription: String
+    @State private var emoji: String
     @State private var selectedExercises: [Exercise]
     @State private var showingExercisePicker = false
 
@@ -28,10 +29,12 @@ struct WorkoutTemplateFormView: View {
         if let template = template {
             _name = State(initialValue: template.name)
             _templateDescription = State(initialValue: template.templateDescription ?? "")
+            _emoji = State(initialValue: template.emoji ?? "")
             _selectedExercises = State(initialValue: template.exercises)
         } else {
             _name = State(initialValue: "")
             _templateDescription = State(initialValue: "")
+            _emoji = State(initialValue: "")
             _selectedExercises = State(initialValue: [])
         }
     }
@@ -44,8 +47,15 @@ struct WorkoutTemplateFormView: View {
         NavigationStack {
             List {
                 Section("Template Details") {
-                    TextField("Template Name", text: $name)
-                        .autocorrectionDisabled()
+                    HStack(spacing: 12) {
+                        EmojiIconPicker(selectedEmoji: Binding(
+                            get: { emoji.isEmpty ? nil : emoji },
+                            set: { emoji = $0 ?? "" }
+                        ))
+
+                        TextField("Template Name", text: $name)
+                            .autocorrectionDisabled()
+                    }
 
                     TextField("Description (optional)", text: $templateDescription, axis: .vertical)
                         .lineLimit(3...6)
@@ -116,11 +126,13 @@ struct WorkoutTemplateFormView: View {
 
     private func saveTemplate() {
         let trimmedName = name.trimmingCharacters(in: .whitespaces)
+        let trimmedEmoji = emoji.trimmingCharacters(in: .whitespaces)
 
         if isEditing, let template = templateToEdit {
             // Update existing template
             template.name = trimmedName
             template.templateDescription = templateDescription.isEmpty ? nil : templateDescription
+            template.emoji = trimmedEmoji.isEmpty ? nil : trimmedEmoji
             template.exercises = selectedExercises
             template.updatedAt = Date()
             print("DEBUG: Template updated - \(trimmedName)")
@@ -129,6 +141,7 @@ struct WorkoutTemplateFormView: View {
             let newTemplate = WorkoutTemplate(
                 name: trimmedName,
                 templateDescription: templateDescription.isEmpty ? nil : templateDescription,
+                emoji: trimmedEmoji.isEmpty ? nil : trimmedEmoji,
                 exercises: selectedExercises
             )
             modelContext.insert(newTemplate)

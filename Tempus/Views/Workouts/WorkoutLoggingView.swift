@@ -22,8 +22,10 @@ struct WorkoutLoggingView: View {
     // Track if name was from template to auto-update it
     private let templateName: String?
     private let isFromTemplate: Bool
+    private let sourceTemplate: WorkoutTemplate?
 
     init(date: Date = Date(), template: WorkoutTemplate? = nil) {
+        self.sourceTemplate = template
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_GB")
         formatter.dateStyle = .medium
@@ -175,12 +177,13 @@ struct WorkoutLoggingView: View {
         let workout = WorkoutEntry(
             name: workoutName,
             date: workoutDate,
+            template: sourceTemplate,
             exercisesData: exercisesData,
             notes: workoutNotes.isEmpty ? nil : workoutNotes
         )
 
         modelContext.insert(workout)
-        print("DEBUG: Workout saved - \(workoutName) with \(exercisesData.count) exercises")
+        print("DEBUG: Workout saved - \(workoutName) with \(exercisesData.count) exercises, template: \(sourceTemplate?.name ?? "none")")
         dismiss()
     }
 }
