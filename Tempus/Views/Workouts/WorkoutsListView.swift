@@ -337,18 +337,21 @@ struct WorkoutStatsCard: View {
                     label: "Workouts",
                     icon: "figure.strengthtraining.traditional"
                 )
+                .frame(maxWidth: .infinity)
 
                 StatBubble(
                     value: "\(totalExercises)",
                     label: "Exercises",
                     icon: "list.bullet.clipboard"
                 )
+                .frame(maxWidth: .infinity)
 
                 StatBubble(
                     value: "\(totalSets)",
                     label: "Sets",
                     icon: "square.stack.3d.up.fill"
                 )
+                .frame(maxWidth: .infinity)
 
                 StatBubble(
                     value: formattedWeight,
@@ -356,6 +359,7 @@ struct WorkoutStatsCard: View {
                     icon: "dumbbell.fill",
                     accentColor: .orange
                 )
+                .frame(maxWidth: .infinity)
             }
         }
     }
@@ -374,14 +378,18 @@ struct StatBubble: View {
                 .font(.title3)
                 .foregroundStyle(accentColor)
                 .symbolRenderingMode(.hierarchical)
+                .frame(height: 22)
 
             Text(value)
                 .font(.title2.bold())
                 .foregroundStyle(.primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
 
             Text(label)
                 .font(.caption)
                 .foregroundStyle(.secondary)
+                .frame(height: 14)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
