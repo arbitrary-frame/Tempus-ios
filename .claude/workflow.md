@@ -31,7 +31,24 @@
 6. **⛔️ CRITICAL: Assistant NEVER merges to master directly**
 7. **User reviews the PR on GitHub**
 8. **User approves and merges via GitHub PR or `gh pr merge`**
-9. All merges go through GitHub Pull Requests for proper review workflow
+9. **⛔️ STAY ON FEATURE BRANCH: Assistant waits for user to test merged changes**
+10. **User confirms "looks good" or provides feedback**
+11. If feedback: Make changes, commit, push to same branch (PR updates automatically)
+12. If confirmed good: Assistant switches to master and pulls latest
+13. All merges go through GitHub Pull Requests for proper review workflow
+
+### After Merge - Sync Workflow
+**Once user confirms feature is tested and good:**
+```bash
+git checkout master
+git pull origin master
+git branch -d feature/branch-name  # Delete local feature branch
+```
+
+**If user has feedback after merge:**
+- Stay on feature branch (already there)
+- Make requested changes
+- Commit and push (PR updates automatically if still open, or push directly to master if already merged)
 
 ### Commit Messages
 - Clear, descriptive messages

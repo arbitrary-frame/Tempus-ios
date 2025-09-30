@@ -228,6 +228,14 @@ struct WorkoutExerciseEntry: Identifiable {
 struct ExerciseEntryView: View {
     @Binding var exerciseEntry: WorkoutExerciseEntry
     let previousData: WorkoutExerciseData?
+    @FocusState private var focusedField: Int?
+
+    // Calculate total field count for keyboard navigation
+    private var totalFieldCount: Int {
+        exerciseEntry.sets.reduce(0) { total, set in
+            total + (set.weightsAndReps.count * 2) // 2 fields per weight/rep pair
+        }
+    }
 
     var body: some View {
         VStack(spacing: 12) {
@@ -260,8 +268,17 @@ struct ExerciseEntryView: View {
 
             // Sets
             ForEach(exerciseEntry.sets.indices, id: \.self) { index in
+                let baseFieldIndex = exerciseEntry.sets[..<index].reduce(0) { total, set in
+                    total + (set.weightsAndReps.count * 2)
+                }
+
                 HStack {
-                    SetEntryRow(set: $exerciseEntry.sets[index])
+                    SetEntryRow(
+                        set: $exerciseEntry.sets[index],
+                        focusedField: $focusedField,
+                        baseFieldIndex: baseFieldIndex,
+                        totalFieldCount: totalFieldCount
+                    )
 
                     // Delete set button (only show if more than 1 set)
                     if exerciseEntry.sets.count > 1 {
@@ -328,6 +345,9 @@ struct ExerciseEntryView: View {
 // Individual set entry row with horizontal scroll
 struct SetEntryRow: View {
     @Binding var set: WorkoutSet
+    @FocusState.Binding var focusedField: Int?
+    let baseFieldIndex: Int
+    let totalFieldCount: Int
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -338,32 +358,45 @@ struct SetEntryRow: View {
                     .frame(width: 50, alignment: .leading)
 
                 // Weight/Rep pairs (for drop sets)
-                ForEach($set.weightsAndReps) { $wr in
+                ForEach(set.weightsAndReps.indices, id: \.self) { wrIndex in
+                    let weightFieldIndex = baseFieldIndex + (wrIndex * 2)
+                    let repsFieldIndex = baseFieldIndex + (wrIndex * 2) + 1
+
                     HStack(spacing: 4) {
                         TextField("kg", text: Binding(
-                            get: { wr.weight == 0 ? "" : "\(wr.weight)" },
-                            set: { wr.weight = Double($0) ?? 0 }
+                            get: { set.weightsAndReps[wrIndex].weight == 0 ? "" : "\(set.weightsAndReps[wrIndex].weight)" },
+                            set: { set.weightsAndReps[wrIndex].weight = Double($0) ?? 0 }
                         ))
                         .keyboardType(.decimalPad)
                         .textFieldStyle(.roundedBorder)
                         .frame(width: 60)
+                        .keyboardToolbar(
+                            focusedField: $focusedField,
+                            currentField: weightFieldIndex,
+                            fieldCount: totalFieldCount
+                        )
 
                         Image(systemName: "xmark")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
 
                         TextField("reps", text: Binding(
-                            get: { wr.reps == 0 ? "" : "\(wr.reps)" },
-                            set: { wr.reps = Int($0) ?? 0 }
+                            get: { set.weightsAndReps[wrIndex].reps == 0 ? "" : "\(set.weightsAndReps[wrIndex].reps)" },
+                            set: { set.weightsAndReps[wrIndex].reps = Int($0) ?? 0 }
                         ))
                         .keyboardType(.numberPad)
                         .textFieldStyle(.roundedBorder)
                         .frame(width: 50)
+                        .keyboardToolbar(
+                            focusedField: $focusedField,
+                            currentField: repsFieldIndex,
+                            fieldCount: totalFieldCount
+                        )
 
                         if set.weightsAndReps.count > 1 {
                             Button {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                    removeWeightRep(wr)
+                                    removeWeightRep(at: wrIndex)
                                 }
                             } label: {
                                 Image(systemName: "minus.circle.fill")
@@ -392,9 +425,9 @@ struct SetEntryRow: View {
         set.weightsAndReps.append(WeightRep())
     }
 
-    private func removeWeightRep(_ wr: WeightRep) {
+    private func removeWeightRep(at index: Int) {
         HapticManager.shared.trigger(.light)
-        set.weightsAndReps.removeAll { $0.id == wr.id }
+        set.weightsAndReps.remove(at: index)
     }
 }
 

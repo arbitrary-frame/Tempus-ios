@@ -8,24 +8,27 @@
 - Workout history with editing
 - Data export (JSON)
 - Dark/light mode
-- Basic analytics
+- Basic analytics (workout statistics card)
 - Settings screen
+- Performance optimizations (caching, N+1 queries fixed)
+- Haptic feedback for key interactions
+- Workout calendar visualization
 
 ## MVP Polish (In Progress)
 
 ### High Impact (Immediate)
-- [ ] Remove DEBUG print statements across codebase
-- [ ] Delete unused Item.swift template file
-- [ ] Add haptic feedback for key interactions (saves, deletes, completions)
+- [x] ~~Remove DEBUG print statements across codebase~~ ✅
+- [x] ~~Delete unused Item.swift template file~~ ✅
+- [x] ~~Add haptic feedback for key interactions~~ ✅
 - [ ] Add keyboard "Done" toolbar to number pads in workout logging
 - [ ] Improve empty state CTAs with action buttons
 
 ### Medium Impact (Next Phase)
-- [ ] Implement basic analytics charts
+- [ ] Implement analytics charts
   - Volume over time (total weight × reps)
-  - Workout frequency calendar heatmap
   - Exercise performance trends
   - Personal records tracking
+- [x] ~~Workout frequency calendar visualization~~ ✅
 - [ ] Add data import to complement existing export
 - [ ] Add app icon and launch screen
 - [ ] Smart defaults: pre-fill weight/reps from previous workout
