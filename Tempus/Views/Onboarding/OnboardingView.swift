@@ -24,6 +24,7 @@ struct OnboardingView: View {
                             currentPage += 1
                         }
                     })
+                    .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
                 case 1:
                     FeatureScreen(
                         icon: "figure.strengthtraining.traditional",
@@ -35,6 +36,7 @@ struct OnboardingView: View {
                             }
                         }
                     )
+                    .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
                 case 2:
                     FeatureScreen(
                         icon: "arrow.triangle.2.circlepath",
@@ -46,15 +48,16 @@ struct OnboardingView: View {
                             }
                         }
                     )
+                    .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
                 case 3:
                     FinalScreen(userName: userName, onComplete: {
                         completeOnboarding()
                     })
+                    .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
                 default:
                     EmptyView()
                 }
             }
-            .transition(.slide)
 
             // Skip button (hide on last screen)
             if currentPage < 3 {
