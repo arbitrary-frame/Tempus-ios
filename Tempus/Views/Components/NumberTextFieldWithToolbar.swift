@@ -150,7 +150,10 @@ struct NumberTextFieldWithToolbar: UIViewRepresentable {
             if let onPrevious = onPrevious {
                 onPrevious()
             } else if currentField > 0 {
-                focusedField = currentField - 1
+                // Use async to ensure SwiftUI processes the focus state change
+                DispatchQueue.main.async {
+                    self.focusedField = self.currentField - 1
+                }
             }
         }
 
@@ -159,7 +162,10 @@ struct NumberTextFieldWithToolbar: UIViewRepresentable {
             if let onNext = onNext {
                 onNext()
             } else if currentField < fieldCount - 1 {
-                focusedField = currentField + 1
+                // Use async to ensure SwiftUI processes the focus state change
+                DispatchQueue.main.async {
+                    self.focusedField = self.currentField + 1
+                }
             }
         }
 
@@ -168,7 +174,10 @@ struct NumberTextFieldWithToolbar: UIViewRepresentable {
             if let onDone = onDone {
                 onDone()
             } else {
-                focusedField = nil
+                // Use async to ensure SwiftUI processes the focus state change
+                DispatchQueue.main.async {
+                    self.focusedField = nil
+                }
             }
         }
     }
