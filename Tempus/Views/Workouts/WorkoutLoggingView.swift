@@ -228,7 +228,7 @@ struct WorkoutExerciseEntry: Identifiable {
 struct ExerciseEntryView: View {
     @Binding var exerciseEntry: WorkoutExerciseEntry
     let previousData: WorkoutExerciseData?
-    @FocusState private var focusedField: Int?
+    @State private var textFieldManager = TextFieldManager()
 
     // Calculate total field count for keyboard navigation
     private var totalFieldCount: Int {
@@ -275,7 +275,7 @@ struct ExerciseEntryView: View {
                 HStack {
                     SetEntryRow(
                         set: $exerciseEntry.sets[index],
-                        focusedField: $focusedField,
+                        textFieldManager: textFieldManager,
                         baseFieldIndex: baseFieldIndex,
                         totalFieldCount: totalFieldCount
                     )
@@ -345,7 +345,7 @@ struct ExerciseEntryView: View {
 // Individual set entry row with horizontal scroll
 struct SetEntryRow: View {
     @Binding var set: WorkoutSet
-    @FocusState.Binding var focusedField: Int?
+    let textFieldManager: TextFieldManager
     let baseFieldIndex: Int
     let totalFieldCount: Int
 
@@ -370,12 +370,9 @@ struct SetEntryRow: View {
                             ),
                             placeholder: "kg",
                             keyboardType: .decimalPad,
-                            focusedField: $focusedField,
-                            currentField: weightFieldIndex,
-                            fieldCount: totalFieldCount,
-                            onPrevious: nil,
-                            onNext: nil,
-                            onDone: nil
+                            fieldIndex: weightFieldIndex,
+                            totalFields: totalFieldCount,
+                            manager: textFieldManager
                         )
                         .frame(width: 60)
 
@@ -390,12 +387,9 @@ struct SetEntryRow: View {
                             ),
                             placeholder: "reps",
                             keyboardType: .numberPad,
-                            focusedField: $focusedField,
-                            currentField: repsFieldIndex,
-                            fieldCount: totalFieldCount,
-                            onPrevious: nil,
-                            onNext: nil,
-                            onDone: nil
+                            fieldIndex: repsFieldIndex,
+                            totalFields: totalFieldCount,
+                            manager: textFieldManager
                         )
                         .frame(width: 50)
 
