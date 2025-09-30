@@ -76,8 +76,7 @@ struct WorkoutsListView: View {
                         currentStreak: currentStreak
                     )
                     .padding(.horizontal, 16)
-                    .padding(.top, 8)
-                    .padding(.bottom, 12)
+                    .padding(.bottom, 8)
 
                     // Workouts List
                     List {
@@ -305,55 +304,47 @@ struct WorkoutStatsCard: View {
     let currentStreak: Int
 
     var body: some View {
-        ZStack {
-            // Liquid Glass background
-            RoundedRectangle(cornerRadius: 20)
-                .fill(.ultraThinMaterial)
-                .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+        VStack(spacing: 8) {
+            HStack(spacing: 4) {
+                Image(systemName: "chart.bar.fill")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .symbolRenderingMode(.hierarchical)
+                Text("This Week")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer()
+            }
 
-            VStack(spacing: 16) {
-                HStack(spacing: 4) {
-                    Image(systemName: "chart.bar.fill")
-                        .font(.title3)
-                        .foregroundStyle(.accent)
-                        .symbolRenderingMode(.hierarchical)
-                    Text("This Week")
-                        .font(.headline)
-                        .foregroundStyle(.primary)
-                    Spacer()
-                }
+            // Statistics Grid
+            HStack(spacing: 8) {
+                StatBubble(
+                    value: "\(workoutsThisWeek)",
+                    label: "Workouts",
+                    icon: "figure.strengthtraining.traditional"
+                )
 
-                // Statistics Grid
-                HStack(spacing: 12) {
+                StatBubble(
+                    value: "\(totalExercises)",
+                    label: "Exercises",
+                    icon: "list.bullet.clipboard"
+                )
+
+                StatBubble(
+                    value: "\(totalSets)",
+                    label: "Sets",
+                    icon: "square.stack.3d.up.fill"
+                )
+
+                if currentStreak > 0 {
                     StatBubble(
-                        value: "\(workoutsThisWeek)",
-                        label: "Workouts",
-                        icon: "figure.strengthtraining.traditional"
+                        value: "\(currentStreak)",
+                        label: currentStreak == 1 ? "Day" : "Days",
+                        icon: "flame.fill",
+                        accentColor: .orange
                     )
-
-                    StatBubble(
-                        value: "\(totalExercises)",
-                        label: "Exercises",
-                        icon: "list.bullet.clipboard"
-                    )
-
-                    StatBubble(
-                        value: "\(totalSets)",
-                        label: "Sets",
-                        icon: "square.stack.3d.up.fill"
-                    )
-
-                    if currentStreak > 0 {
-                        StatBubble(
-                            value: "\(currentStreak)",
-                            label: currentStreak == 1 ? "Day" : "Days",
-                            icon: "flame.fill",
-                            accentColor: .orange
-                        )
-                    }
                 }
             }
-            .padding(20)
         }
     }
 }
@@ -366,23 +357,24 @@ struct StatBubble: View {
     var accentColor: Color = .accentColor
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 4) {
             Image(systemName: icon)
-                .font(.title3)
+                .font(.caption)
                 .foregroundStyle(accentColor)
                 .symbolRenderingMode(.hierarchical)
 
             Text(value)
-                .font(.title2.bold())
+                .font(.title3.bold())
                 .foregroundStyle(.primary)
 
             Text(label)
-                .font(.caption)
+                .font(.caption2)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .padding(.vertical, 8)
+        .padding(.horizontal, 4)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
     }
 }
 
