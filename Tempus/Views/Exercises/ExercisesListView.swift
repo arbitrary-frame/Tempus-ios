@@ -22,6 +22,10 @@ struct ExercisesListView: View {
         }
     }
 
+    var groupedExercises: [String: [Exercise]] {
+        Dictionary(grouping: filteredExercises) { $0.muscleGroup }
+    }
+
     var body: some View {
         NavigationStack {
             Group {
@@ -33,8 +37,18 @@ struct ExercisesListView: View {
                     }
                 } else {
                     List {
-                        ForEach(filteredExercises) { exercise in
-                            ExerciseRowView(exercise: exercise)
+                        ForEach(groupedExercises.keys.sorted(), id: \.self) { muscleGroup in
+                            Section {
+                                ForEach(groupedExercises[muscleGroup]!) { exercise in
+                                    ExerciseRowView(exercise: exercise)
+                                }
+                            } header: {
+                                if let group = MuscleGroup(rawValue: muscleGroup) {
+                                    Label(muscleGroup, systemImage: group.icon)
+                                } else {
+                                    Text(muscleGroup)
+                                }
+                            }
                         }
                     }
                     .listStyle(.insetGrouped)
@@ -62,26 +76,35 @@ struct ExercisesListView: View {
 struct ExerciseRowView: View {
     let exercise: Exercise
 
+    var muscleGroupIcon: String? {
+        MuscleGroup(rawValue: exercise.muscleGroup)?.icon
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(exercise.name)
-                .font(.headline)
+        HStack(spacing: 12) {
+            // Muscle group icon
+            if let icon = muscleGroupIcon {
+                Image(systemName: icon)
+                    .font(.title2)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 40, height: 40)
+                    .background(Color.accentColor.opacity(0.1))
+                    .clipShape(Circle())
+            }
 
-            HStack(spacing: 8) {
-                Text(exercise.muscleGroup)
-                    .font(.caption)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.accentColor.opacity(0.2))
-                    .clipShape(Capsule())
+            VStack(alignment: .leading, spacing: 4) {
+                Text(exercise.name)
+                    .font(.headline)
 
-                ForEach(exercise.tags.prefix(2), id: \.self) { tag in
-                    Text(tag)
-                        .font(.caption)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.secondary.opacity(0.2))
-                        .clipShape(Capsule())
+                HStack(spacing: 8) {
+                    ForEach(exercise.tags.prefix(3), id: \.self) { tag in
+                        Text(tag)
+                            .font(.caption)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.secondary.opacity(0.2))
+                            .clipShape(Capsule())
+                    }
                 }
             }
         }

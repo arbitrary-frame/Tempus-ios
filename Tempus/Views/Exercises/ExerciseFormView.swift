@@ -54,7 +54,7 @@ struct ExerciseFormView: View {
                 Section("Classification") {
                     Picker("Muscle Group", selection: $muscleGroup) {
                         ForEach(MuscleGroup.allCases) { group in
-                            Text(group.rawValue).tag(group)
+                            Label(group.rawValue, systemImage: group.icon).tag(group)
                         }
                     }
 
