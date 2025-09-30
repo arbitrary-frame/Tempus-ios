@@ -20,6 +20,7 @@ struct WorkoutLoggingView: View {
     @State private var showingExercisePicker = false
     @State private var workoutNotes: String = ""
     @FocusState private var focusedField: FieldID?
+    @State private var keyboardHeight: CGFloat = 0
 
     // Calculate all fields across all exercises for keyboard navigation
     private var allFields: [FieldID] {
@@ -388,6 +389,20 @@ struct SetEntryRow: View {
                         .textFieldStyle(.roundedBorder)
                         .frame(width: 60)
                         .focused($focusedField, equals: FieldID(setIndex: setIndex, dropSetIndex: dropSetIndex, isWeight: true))
+                        .toolbar {
+                            ToolbarItemGroup(placement: .keyboard) {
+                                Button("Prev") {
+                                    // Navigate to previous field
+                                }
+                                Button("Next") {
+                                    // Navigate to next field
+                                }
+                                Spacer()
+                                Button("Done") {
+                                    focusedField = nil
+                                }
+                            }
+                        }
 
                         Image(systemName: "xmark")
                             .font(.caption2)
