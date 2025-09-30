@@ -95,6 +95,7 @@ struct SaveWorkoutAsTemplateView: View {
         )
 
         modelContext.insert(routine)
+        HapticManager.shared.trigger(.success)
         dismiss()
     }
 }

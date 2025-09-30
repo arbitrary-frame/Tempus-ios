@@ -119,6 +119,7 @@ struct WorkoutRoutineFormView: View {
     }
 
     private func removeExercise(_ exercise: Exercise) {
+        HapticManager.shared.trigger(.light)
         selectedExercises.removeAll { $0.id == exercise.id }
     }
 
@@ -144,6 +145,7 @@ struct WorkoutRoutineFormView: View {
             modelContext.insert(newRoutine)
         }
 
+        HapticManager.shared.trigger(.success)
         dismiss()
     }
 }
@@ -216,6 +218,7 @@ struct RoutineExercisePickerView: View {
     }
 
     private func toggleExercise(_ exercise: Exercise) {
+        HapticManager.shared.trigger(.selection)
         if isSelected(exercise) {
             selectedExercises.removeAll { $0.id == exercise.id }
         } else {
