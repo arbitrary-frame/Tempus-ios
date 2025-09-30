@@ -13,6 +13,7 @@ struct ExercisesListView: View {
     @Query(sort: \Exercise.name) private var exercises: [Exercise]
     @State private var searchText = ""
     @State private var showingCreateForm = false
+    @State private var selectedExercise: Exercise?
 
     var filteredExercises: [Exercise] {
         if searchText.isEmpty {
@@ -40,7 +41,13 @@ struct ExercisesListView: View {
                         ForEach(groupedExercises.keys.sorted(), id: \.self) { muscleGroup in
                             Section {
                                 ForEach(groupedExercises[muscleGroup]!) { exercise in
-                                    ExerciseRowView(exercise: exercise)
+                                    Button {
+                                        selectedExercise = exercise
+                                        print("DEBUG: Exercise tapped - \(exercise.name)")
+                                    } label: {
+                                        ExerciseRowView(exercise: exercise)
+                                    }
+                                    .buttonStyle(.plain)
                                 }
                             } header: {
                                 if let group = MuscleGroup(rawValue: muscleGroup) {
@@ -68,6 +75,9 @@ struct ExercisesListView: View {
             }
             .sheet(isPresented: $showingCreateForm) {
                 ExerciseFormView()
+            }
+            .sheet(item: $selectedExercise) { exercise in
+                ExerciseFormView(exercise: exercise)
             }
         }
     }
