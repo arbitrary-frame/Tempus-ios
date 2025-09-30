@@ -1,5 +1,5 @@
 //
-//  WorkoutTemplate.swift
+//  WorkoutRoutine.swift
 //  Tempus
 //
 //  Created by Ronak Pattani on 30/09/2025.
@@ -9,10 +9,10 @@ import Foundation
 import SwiftData
 
 @Model
-final class WorkoutTemplate {
+final class WorkoutRoutine {
     @Attribute(.unique) var id: UUID
     var name: String
-    var templateDescription: String?
+    var routineDescription: String?
     var emoji: String?
     var createdAt: Date
     var updatedAt: Date
@@ -21,19 +21,19 @@ final class WorkoutTemplate {
     @Relationship(deleteRule: .nullify)
     var exercises: [Exercise]
 
-    @Relationship(deleteRule: .nullify, inverse: \WorkoutEntry.template)
+    @Relationship(deleteRule: .nullify, inverse: \WorkoutEntry.routine)
     var workouts: [WorkoutEntry]?
 
-    init(name: String, templateDescription: String? = nil, emoji: String? = nil, exercises: [Exercise] = []) {
+    init(name: String, routineDescription: String? = nil, emoji: String? = nil, exercises: [Exercise] = []) {
         self.id = UUID()
         self.name = name
-        self.templateDescription = templateDescription
+        self.routineDescription = routineDescription
         self.emoji = emoji
         self.exercises = exercises
         self.createdAt = Date()
         self.updatedAt = Date()
 
-        // DEBUG: Template created
-        print("DEBUG: WorkoutTemplate created - \(name) with \(exercises.count) exercises")
+        // DEBUG: Routine created
+        print("DEBUG: WorkoutRoutine created - \(name) with \(exercises.count) exercises")
     }
 }

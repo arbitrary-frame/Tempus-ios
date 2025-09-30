@@ -18,17 +18,17 @@ final class WorkoutEntry {
 
     // Relationships
     @Relationship(deleteRule: .nullify)
-    var template: WorkoutTemplate?
+    var routine: WorkoutRoutine?
 
     // Embedded exercises data (not relationships to preserve history)
     // This ensures workout data remains intact even if exercises are modified/deleted
     var exercisesData: [WorkoutExerciseData]
 
-    init(name: String, date: Date, template: WorkoutTemplate? = nil, exercisesData: [WorkoutExerciseData] = [], notes: String? = nil) {
+    init(name: String, date: Date, routine: WorkoutRoutine? = nil, exercisesData: [WorkoutExerciseData] = [], notes: String? = nil) {
         self.id = UUID()
         self.workoutName = name
         self.workoutDate = date
-        self.template = template
+        self.routine = routine
         self.exercisesData = exercisesData
         self.notes = notes
         self.createdAt = Date()

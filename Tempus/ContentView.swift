@@ -18,9 +18,9 @@ struct ContentView: View {
                     Label("Workouts", systemImage: "figure.strengthtraining.traditional")
                 }
 
-            WorkoutTemplatesListView()
+            WorkoutRoutinesListView()
                 .tabItem {
-                    Label("Templates", systemImage: "doc.text")
+                    Label("Routines", systemImage: "arrow.triangle.2.circlepath")
                 }
 
             ExercisesListView()
@@ -45,5 +45,5 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .environmentObject(ThemeManager())
-        .modelContainer(for: [Exercise.self, WorkoutTemplate.self, WorkoutEntry.self])
+        .modelContainer(for: [Exercise.self, WorkoutRoutine.self, WorkoutEntry.self])
 }

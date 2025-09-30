@@ -175,5 +175,5 @@ struct ShareSheet: UIViewControllerRepresentable {
 #Preview {
     SettingsView()
         .environmentObject(ThemeManager())
-        .modelContainer(for: [Exercise.self, WorkoutTemplate.self, WorkoutEntry.self])
+        .modelContainer(for: [Exercise.self, WorkoutRoutine.self, WorkoutEntry.self])
 }

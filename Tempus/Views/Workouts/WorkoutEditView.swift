@@ -21,7 +21,7 @@ struct WorkoutEditView: View {
     @State private var workoutNotes: String
     @State private var showingExercisePicker = false
     @State private var showingDeleteConfirmation = false
-    @State private var showingSaveAsTemplate = false
+    @State private var showingSaveAsRoutine = false
 
     init(workout: WorkoutEntry) {
         self.workout = workout
@@ -115,9 +115,9 @@ struct WorkoutEditView: View {
                 ToolbarItem(placement: .primaryAction) {
                     Menu {
                         Button {
-                            showingSaveAsTemplate = true
+                            showingSaveAsRoutine = true
                         } label: {
-                            Label("Save as Template", systemImage: "doc.badge.plus")
+                            Label("Save as Routine", systemImage: "arrow.triangle.2.circlepath")
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
@@ -133,7 +133,7 @@ struct WorkoutEditView: View {
             .sheet(isPresented: $showingExercisePicker) {
                 ExercisePickerView(selectedExercises: $workoutExercises)
             }
-            .sheet(isPresented: $showingSaveAsTemplate) {
+            .sheet(isPresented: $showingSaveAsRoutine) {
                 SaveWorkoutAsTemplateView(workoutExercises: workoutExercises, defaultName: workoutName)
             }
             .confirmationDialog("Delete this workout?", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {

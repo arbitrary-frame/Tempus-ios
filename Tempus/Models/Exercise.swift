@@ -21,8 +21,8 @@ final class Exercise {
     var updatedAt: Date
 
     // Relationships
-    @Relationship(deleteRule: .nullify, inverse: \WorkoutTemplate.exercises)
-    var templates: [WorkoutTemplate]?
+    @Relationship(deleteRule: .nullify, inverse: \WorkoutRoutine.exercises)
+    var routines: [WorkoutRoutine]?
 
     init(name: String, muscleGroup: String, tags: [String] = [], exerciseDescription: String? = nil, imageURL: String? = nil) {
         self.id = UUID()

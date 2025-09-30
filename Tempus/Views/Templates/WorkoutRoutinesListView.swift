@@ -1,5 +1,5 @@
 //
-//  WorkoutTemplatesListView.swift
+//  WorkoutRoutinesListView.swift
 //  Tempus
 //
 //  Created by Ronak Pattani on 30/09/2025.
@@ -8,30 +8,30 @@
 import SwiftUI
 import SwiftData
 
-struct WorkoutTemplatesListView: View {
+struct WorkoutRoutinesListView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \WorkoutTemplate.name) private var templates: [WorkoutTemplate]
+    @Query(sort: \WorkoutRoutine.name) private var routines: [WorkoutRoutine]
     @State private var showingCreateForm = false
-    @State private var selectedTemplate: WorkoutTemplate?
-    @State private var templateToStart: WorkoutTemplate?
+    @State private var selectedRoutine: WorkoutRoutine?
+    @State private var routineToStart: WorkoutRoutine?
 
     var body: some View {
         NavigationStack {
             Group {
-                if templates.isEmpty {
+                if routines.isEmpty {
                     ContentUnavailableView {
-                        Label("No Templates Yet", systemImage: "doc.text")
+                        Label("No Routines Yet", systemImage: "arrow.triangle.2.circlepath")
                     } description: {
-                        Text("Create templates from your workouts to quickly start familiar routines")
+                        Text("Create routines from your workouts to quickly start familiar training sessions")
                     }
                 } else {
                     List {
-                        ForEach(templates) { template in
+                        ForEach(routines) { routine in
                             Button {
-                                selectedTemplate = template
-                                print("DEBUG: Template tapped - \(template.name)")
+                                selectedRoutine = routine
+                                print("DEBUG: Routine tapped - \(routine.name)")
                             } label: {
-                                TemplateRowView(template: template)
+                                RoutineRowView(routine: routine)
                             }
                             .buttonStyle(.plain)
                             .listRowBackground(
@@ -41,14 +41,14 @@ struct WorkoutTemplatesListView: View {
                             )
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                 Button(role: .destructive) {
-                                    deleteTemplate(template)
+                                    deleteRoutine(routine)
                                 } label: {
                                     Label("Delete", systemImage: "trash")
                                 }
 
                                 Button {
-                                    templateToStart = template
-                                    print("DEBUG: Starting workout from template - \(template.name)")
+                                    routineToStart = routine
+                                    print("DEBUG: Starting workout from routine - \(routine.name)")
                                 } label: {
                                     Label("Start", systemImage: "play.fill")
                                 }
@@ -59,50 +59,50 @@ struct WorkoutTemplatesListView: View {
                     .listStyle(.insetGrouped)
                 }
             }
-            .navigationTitle("Templates")
+            .navigationTitle("Routines")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showingCreateForm = true
-                        print("DEBUG: Add template button tapped")
+                        print("DEBUG: Add routine button tapped")
                     } label: {
                         Image(systemName: "plus")
                     }
                 }
             }
             .sheet(isPresented: $showingCreateForm) {
-                WorkoutTemplateFormView()
+                WorkoutRoutineFormView()
             }
-            .sheet(item: $selectedTemplate) { template in
-                WorkoutTemplateFormView(template: template)
+            .sheet(item: $selectedRoutine) { routine in
+                WorkoutRoutineFormView(routine: routine)
             }
-            .fullScreenCover(item: $templateToStart) { template in
-                WorkoutLoggingView(template: template)
+            .fullScreenCover(item: $routineToStart) { routine in
+                WorkoutLoggingView(routine: routine)
             }
         }
     }
 
-    private func deleteTemplate(_ template: WorkoutTemplate) {
+    private func deleteRoutine(_ routine: WorkoutRoutine) {
         withAnimation {
-            modelContext.delete(template)
-            print("DEBUG: Template deleted - \(template.name)")
+            modelContext.delete(routine)
+            print("DEBUG: Routine deleted - \(routine.name)")
         }
     }
 }
 
-struct TemplateRowView: View {
-    let template: WorkoutTemplate
+struct RoutineRowView: View {
+    let routine: WorkoutRoutine
 
     var body: some View {
         HStack(spacing: 12) {
             // Show emoji icon or default icon
-            if let emoji = template.emoji, !emoji.isEmpty {
+            if let emoji = routine.emoji, !emoji.isEmpty {
                 Text(emoji)
                     .font(.title2)
                     .frame(width: 44, height: 44)
                     .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
             } else {
-                Image(systemName: "doc.text")
+                Image(systemName: "arrow.triangle.2.circlepath")
                     .font(.title3)
                     .foregroundStyle(.secondary)
                     .frame(width: 44, height: 44)
@@ -110,19 +110,19 @@ struct TemplateRowView: View {
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(template.name)
+                Text(routine.name)
                     .font(.headline)
 
                 HStack {
                     Image(systemName: "figure.mixed.cardio")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
-                    Text("\(template.exercises.count) exercises")
+                    Text("\(routine.exercises.count) exercises")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
 
-                if let description = template.templateDescription, !description.isEmpty {
+                if let description = routine.routineDescription, !description.isEmpty {
                     Text(description)
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -135,6 +135,6 @@ struct TemplateRowView: View {
 }
 
 #Preview {
-    WorkoutTemplatesListView()
-        .modelContainer(for: [Exercise.self, WorkoutTemplate.self, WorkoutEntry.self])
+    WorkoutRoutinesListView()
+        .modelContainer(for: [Exercise.self, WorkoutRoutine.self, WorkoutEntry.self])
 }

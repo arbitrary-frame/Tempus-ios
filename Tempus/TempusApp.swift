@@ -15,7 +15,7 @@ struct TempusApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Exercise.self,
-            WorkoutTemplate.self,
+            WorkoutRoutine.self,
             WorkoutEntry.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
@@ -23,7 +23,7 @@ struct TempusApp: App {
         do {
             let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
             // DEBUG: ModelContainer initialized successfully
-            print("DEBUG: Swift Data ModelContainer initialized with Exercise, WorkoutTemplate, WorkoutEntry models")
+            print("DEBUG: Swift Data ModelContainer initialized with Exercise, WorkoutRoutine, WorkoutEntry models")
             return container
         } catch {
             fatalError("Could not create ModelContainer: \(error)")

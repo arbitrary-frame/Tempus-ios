@@ -11,11 +11,11 @@ import SwiftData
 struct WorkoutsListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \WorkoutEntry.workoutDate, order: .reverse) private var workouts: [WorkoutEntry]
-    @Query(sort: \WorkoutTemplate.name) private var templates: [WorkoutTemplate]
+    @Query(sort: \WorkoutRoutine.name) private var routines: [WorkoutRoutine]
     @State private var showingWorkoutLogging = false
     @State private var selectedWorkout: WorkoutEntry?
-    @State private var showingTemplatePicker = false
-    @State private var templateToStart: WorkoutTemplate?
+    @State private var showingRoutinePicker = false
+    @State private var routineToStart: WorkoutRoutine?
 
     var body: some View {
         NavigationStack {
@@ -60,20 +60,20 @@ struct WorkoutsListView: View {
                             Label("Quick Log", systemImage: "plus.circle")
                         }
 
-                        if !templates.isEmpty {
+                        if !routines.isEmpty {
                             Divider()
 
                             Menu {
-                                ForEach(templates) { template in
+                                ForEach(routines) { routine in
                                     Button {
-                                        templateToStart = template
-                                        print("DEBUG: Starting workout from template - \(template.name)")
+                                        routineToStart = routine
+                                        print("DEBUG: Starting workout from routine - \(routine.name)")
                                     } label: {
-                                        Text(template.name)
+                                        Text(routine.name)
                                     }
                                 }
                             } label: {
-                                Label("Start from Template", systemImage: "doc.text")
+                                Label("Start from Routine", systemImage: "arrow.triangle.2.circlepath")
                             }
                         }
                     } label: {
@@ -89,8 +89,8 @@ struct WorkoutsListView: View {
                 WorkoutEditView(workout: workout)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
-            .fullScreenCover(item: $templateToStart) { template in
-                WorkoutLoggingView(template: template)
+            .fullScreenCover(item: $routineToStart) { routine in
+                WorkoutLoggingView(routine: routine)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
@@ -144,8 +144,8 @@ struct WorkoutCardView: View {
 
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    // Show template emoji if workout created from template, otherwise default icon
-                    if let emoji = workout.template?.emoji, !emoji.isEmpty {
+                    // Show routine emoji if workout created from routine, otherwise default icon
+                    if let emoji = workout.routine?.emoji, !emoji.isEmpty {
                         Text(emoji)
                             .font(.largeTitle)
                     } else {
@@ -195,5 +195,5 @@ struct WorkoutCardView: View {
 
 #Preview {
     WorkoutsListView()
-        .modelContainer(for: [Exercise.self, WorkoutTemplate.self, WorkoutEntry.self])
+        .modelContainer(for: [Exercise.self, WorkoutRoutine.self, WorkoutEntry.self])
 }

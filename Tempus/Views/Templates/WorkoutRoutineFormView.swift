@@ -1,5 +1,5 @@
 //
-//  WorkoutTemplateFormView.swift
+//  WorkoutRoutineFormView.swift
 //  Tempus
 //
 //  Created by Ronak Pattani on 30/09/2025.
@@ -8,32 +8,32 @@
 import SwiftUI
 import SwiftData
 
-struct WorkoutTemplateFormView: View {
+struct WorkoutRoutineFormView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \Exercise.name) private var allExercises: [Exercise]
 
     @State private var name: String
-    @State private var templateDescription: String
+    @State private var routineDescription: String
     @State private var emoji: String
     @State private var selectedExercises: [Exercise]
     @State private var showingExercisePicker = false
 
     let isEditing: Bool
-    let templateToEdit: WorkoutTemplate?
+    let routineToEdit: WorkoutRoutine?
 
-    init(template: WorkoutTemplate? = nil) {
-        self.isEditing = template != nil
-        self.templateToEdit = template
+    init(routine: WorkoutRoutine? = nil) {
+        self.isEditing = routine != nil
+        self.routineToEdit = routine
 
-        if let template = template {
-            _name = State(initialValue: template.name)
-            _templateDescription = State(initialValue: template.templateDescription ?? "")
-            _emoji = State(initialValue: template.emoji ?? "")
-            _selectedExercises = State(initialValue: template.exercises)
+        if let routine = routine {
+            _name = State(initialValue: routine.name)
+            _routineDescription = State(initialValue: routine.routineDescription ?? "")
+            _emoji = State(initialValue: routine.emoji ?? "")
+            _selectedExercises = State(initialValue: routine.exercises)
         } else {
             _name = State(initialValue: "")
-            _templateDescription = State(initialValue: "")
+            _routineDescription = State(initialValue: "")
             _emoji = State(initialValue: "")
             _selectedExercises = State(initialValue: [])
         }
@@ -46,18 +46,18 @@ struct WorkoutTemplateFormView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Template Details") {
+                Section("Routine Details") {
                     HStack(spacing: 12) {
                         EmojiIconPicker(selectedEmoji: Binding(
                             get: { emoji.isEmpty ? nil : emoji },
                             set: { emoji = $0 ?? "" }
                         ))
 
-                        TextField("Template Name", text: $name)
+                        TextField("Routine Name", text: $name)
                             .autocorrectionDisabled()
                     }
 
-                    TextField("Description (optional)", text: $templateDescription, axis: .vertical)
+                    TextField("Description (optional)", text: $routineDescription, axis: .vertical)
                         .lineLimit(3...6)
                 }
 
@@ -97,63 +97,63 @@ struct WorkoutTemplateFormView: View {
                 }
             }
             .listStyle(.insetGrouped)
-            .navigationTitle(isEditing ? "Edit Template" : "New Template")
+            .navigationTitle(isEditing ? "Edit Routine" : "New Routine")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
-                        print("DEBUG: Template form cancelled")
+                        print("DEBUG: Routine form cancelled")
                         dismiss()
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(isEditing ? "Save" : "Create") {
-                        saveTemplate()
+                        saveRoutine()
                     }
                     .disabled(!isValid)
                 }
             }
             .sheet(isPresented: $showingExercisePicker) {
-                TemplateExercisePickerView(selectedExercises: $selectedExercises)
+                RoutineExercisePickerView(selectedExercises: $selectedExercises)
             }
         }
     }
 
     private func removeExercise(_ exercise: Exercise) {
         selectedExercises.removeAll { $0.id == exercise.id }
-        print("DEBUG: Removed exercise from template - \(exercise.name)")
+        print("DEBUG: Removed exercise from routine - \(exercise.name)")
     }
 
-    private func saveTemplate() {
+    private func saveRoutine() {
         let trimmedName = name.trimmingCharacters(in: .whitespaces)
         let trimmedEmoji = emoji.trimmingCharacters(in: .whitespaces)
 
-        if isEditing, let template = templateToEdit {
-            // Update existing template
-            template.name = trimmedName
-            template.templateDescription = templateDescription.isEmpty ? nil : templateDescription
-            template.emoji = trimmedEmoji.isEmpty ? nil : trimmedEmoji
-            template.exercises = selectedExercises
-            template.updatedAt = Date()
-            print("DEBUG: Template updated - \(trimmedName)")
+        if isEditing, let routine = routineToEdit {
+            // Update existing routine
+            routine.name = trimmedName
+            routine.routineDescription = routineDescription.isEmpty ? nil : routineDescription
+            routine.emoji = trimmedEmoji.isEmpty ? nil : trimmedEmoji
+            routine.exercises = selectedExercises
+            routine.updatedAt = Date()
+            print("DEBUG: Routine updated - \(trimmedName)")
         } else {
-            // Create new template
-            let newTemplate = WorkoutTemplate(
+            // Create new routine
+            let newRoutine = WorkoutRoutine(
                 name: trimmedName,
-                templateDescription: templateDescription.isEmpty ? nil : templateDescription,
+                routineDescription: routineDescription.isEmpty ? nil : routineDescription,
                 emoji: trimmedEmoji.isEmpty ? nil : trimmedEmoji,
                 exercises: selectedExercises
             )
-            modelContext.insert(newTemplate)
-            print("DEBUG: Template created - \(trimmedName)")
+            modelContext.insert(newRoutine)
+            print("DEBUG: Routine created - \(trimmedName)")
         }
 
         dismiss()
     }
 }
 
-// Exercise picker for templates
-struct TemplateExercisePickerView: View {
+// Exercise picker for routines
+struct RoutineExercisePickerView: View {
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \Exercise.name) private var allExercises: [Exercise]
     @Binding var selectedExercises: [Exercise]
@@ -222,15 +222,15 @@ struct TemplateExercisePickerView: View {
     private func toggleExercise(_ exercise: Exercise) {
         if isSelected(exercise) {
             selectedExercises.removeAll { $0.id == exercise.id }
-            print("DEBUG: Removed \(exercise.name) from template")
+            print("DEBUG: Removed \(exercise.name) from routine")
         } else {
             selectedExercises.append(exercise)
-            print("DEBUG: Added \(exercise.name) to template")
+            print("DEBUG: Added \(exercise.name) to routine")
         }
     }
 }
 
 #Preview {
-    WorkoutTemplateFormView()
-        .modelContainer(for: [Exercise.self, WorkoutTemplate.self, WorkoutEntry.self])
+    WorkoutRoutineFormView()
+        .modelContainer(for: [Exercise.self, WorkoutRoutine.self, WorkoutEntry.self])
 }

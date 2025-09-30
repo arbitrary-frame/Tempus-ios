@@ -87,5 +87,5 @@ struct AnalyticsView: View {
 
 #Preview {
     AnalyticsView()
-        .modelContainer(for: [Exercise.self, WorkoutTemplate.self, WorkoutEntry.self])
+        .modelContainer(for: [Exercise.self, WorkoutRoutine.self, WorkoutEntry.self])
 }

@@ -19,40 +19,40 @@ struct WorkoutLoggingView: View {
     @State private var showingExercisePicker = false
     @State private var workoutNotes: String = ""
 
-    // Track if name was from template to auto-update it
-    private let templateName: String?
-    private let isFromTemplate: Bool
-    private let sourceTemplate: WorkoutTemplate?
+    // Track if name was from routine to auto-update it
+    private let routineName: String?
+    private let isFromRoutine: Bool
+    private let sourceRoutine: WorkoutRoutine?
 
-    init(date: Date = Date(), template: WorkoutTemplate? = nil) {
-        self.sourceTemplate = template
+    init(date: Date = Date(), routine: WorkoutRoutine? = nil) {
+        self.sourceRoutine = routine
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_GB")
         formatter.dateStyle = .medium
 
-        if let template = template {
-            print("DEBUG: WorkoutLoggingView init with template - \(template.name)")
-            print("DEBUG: Template has \(template.exercises.count) exercises")
+        if let routine = routine {
+            print("DEBUG: WorkoutLoggingView init with routine - \(routine.name)")
+            print("DEBUG: Routine has \(routine.exercises.count) exercises")
 
-            self.templateName = template.name
-            self.isFromTemplate = true
-            _workoutName = State(initialValue: "\(template.name) - \(formatter.string(from: date))")
+            self.routineName = routine.name
+            self.isFromRoutine = true
+            _workoutName = State(initialValue: "\(routine.name) - \(formatter.string(from: date))")
             _workoutDate = State(initialValue: date)
 
-            // Pre-populate exercises from template
-            let entries = template.exercises.map { exercise in
-                print("DEBUG: Adding exercise from template - \(exercise.name)")
+            // Pre-populate exercises from routine
+            let entries = routine.exercises.map { exercise in
+                print("DEBUG: Adding exercise from routine - \(exercise.name)")
                 return WorkoutExerciseEntry(
                     exerciseID: exercise.id,
                     exerciseName: exercise.name
                 )
             }
-            print("DEBUG: Created \(entries.count) workout entries from template")
+            print("DEBUG: Created \(entries.count) workout entries from routine")
             _workoutExercises = State(initialValue: entries)
         } else {
-            print("DEBUG: WorkoutLoggingView init without template")
-            self.templateName = nil
-            self.isFromTemplate = false
+            print("DEBUG: WorkoutLoggingView init without routine")
+            self.routineName = nil
+            self.isFromRoutine = false
             _workoutName = State(initialValue: "Workout - \(formatter.string(from: date))")
             _workoutDate = State(initialValue: date)
         }
@@ -152,14 +152,14 @@ struct WorkoutLoggingView: View {
     }
 
     private func updateWorkoutNameIfNeeded(for date: Date) {
-        // Only auto-update if workout is from template
-        guard isFromTemplate, let templateName = templateName else { return }
+        // Only auto-update if workout is from routine
+        guard isFromRoutine, let routineName = routineName else { return }
 
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_GB")
         formatter.dateStyle = .medium
 
-        workoutName = "\(templateName) - \(formatter.string(from: date))"
+        workoutName = "\(routineName) - \(formatter.string(from: date))"
         print("DEBUG: Updated workout name to: \(workoutName)")
     }
 
@@ -177,13 +177,13 @@ struct WorkoutLoggingView: View {
         let workout = WorkoutEntry(
             name: workoutName,
             date: workoutDate,
-            template: sourceTemplate,
+            routine: sourceRoutine,
             exercisesData: exercisesData,
             notes: workoutNotes.isEmpty ? nil : workoutNotes
         )
 
         modelContext.insert(workout)
-        print("DEBUG: Workout saved - \(workoutName) with \(exercisesData.count) exercises, template: \(sourceTemplate?.name ?? "none")")
+        print("DEBUG: Workout saved - \(workoutName) with \(exercisesData.count) exercises, routine: \(sourceRoutine?.name ?? "none")")
         dismiss()
     }
 }
@@ -436,5 +436,5 @@ struct ExercisePickerView: View {
 
 #Preview {
     WorkoutLoggingView()
-        .modelContainer(for: [Exercise.self, WorkoutTemplate.self, WorkoutEntry.self])
+        .modelContainer(for: [Exercise.self, WorkoutRoutine.self, WorkoutEntry.self])
 }

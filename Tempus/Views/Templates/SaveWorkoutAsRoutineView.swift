@@ -1,5 +1,5 @@
 //
-//  SaveWorkoutAsTemplateView.swift
+//  SaveWorkoutAsRoutineView.swift
 //  Tempus
 //
 //  Created by Ronak Pattani on 30/09/2025.
@@ -14,34 +14,34 @@ struct SaveWorkoutAsTemplateView: View {
     @Query private var allExercises: [Exercise]
 
     let workoutExercises: [WorkoutExerciseEntry]
-    @State private var templateName: String
-    @State private var templateDescription: String = ""
+    @State private var routineName: String
+    @State private var routineDescription: String = ""
     @State private var emoji: String = ""
 
     init(workoutExercises: [WorkoutExerciseEntry], defaultName: String) {
         self.workoutExercises = workoutExercises
-        _templateName = State(initialValue: defaultName + " Template")
+        _routineName = State(initialValue: defaultName + " Routine")
     }
 
     var isValid: Bool {
-        !templateName.trimmingCharacters(in: .whitespaces).isEmpty
+        !routineName.trimmingCharacters(in: .whitespaces).isEmpty
     }
 
     var body: some View {
         NavigationStack {
             List {
-                Section("Template Details") {
+                Section("Routine Details") {
                     HStack(spacing: 12) {
                         EmojiIconPicker(selectedEmoji: Binding(
                             get: { emoji.isEmpty ? nil : emoji },
                             set: { emoji = $0 ?? "" }
                         ))
 
-                        TextField("Template Name", text: $templateName)
+                        TextField("Routine Name", text: $routineName)
                             .autocorrectionDisabled()
                     }
 
-                    TextField("Description (optional)", text: $templateDescription, axis: .vertical)
+                    TextField("Description (optional)", text: $routineDescription, axis: .vertical)
                         .lineLimit(3...6)
                 }
 
@@ -60,7 +60,7 @@ struct SaveWorkoutAsTemplateView: View {
                 }
             }
             .listStyle(.insetGrouped)
-            .navigationTitle("Save as Template")
+            .navigationTitle("Save as Routine")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -70,7 +70,7 @@ struct SaveWorkoutAsTemplateView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        saveTemplate()
+                        saveRoutine()
                     }
                     .disabled(!isValid)
                 }
@@ -78,8 +78,8 @@ struct SaveWorkoutAsTemplateView: View {
         }
     }
 
-    private func saveTemplate() {
-        let trimmedName = templateName.trimmingCharacters(in: .whitespaces)
+    private func saveRoutine() {
+        let trimmedName = routineName.trimmingCharacters(in: .whitespaces)
         let trimmedEmoji = emoji.trimmingCharacters(in: .whitespaces)
 
         // Get the actual Exercise objects
@@ -87,15 +87,15 @@ struct SaveWorkoutAsTemplateView: View {
             allExercises.first(where: { $0.id == entry.exerciseID })
         }
 
-        let template = WorkoutTemplate(
+        let routine = WorkoutRoutine(
             name: trimmedName,
-            templateDescription: templateDescription.isEmpty ? nil : templateDescription,
+            routineDescription: routineDescription.isEmpty ? nil : routineDescription,
             emoji: trimmedEmoji.isEmpty ? nil : trimmedEmoji,
             exercises: exercises
         )
 
-        modelContext.insert(template)
-        print("DEBUG: Saved workout as template - \(trimmedName)")
+        modelContext.insert(routine)
+        print("DEBUG: Saved workout as routine - \(trimmedName)")
         dismiss()
     }
 }
@@ -105,5 +105,5 @@ struct SaveWorkoutAsTemplateView: View {
         workoutExercises: [],
         defaultName: "Push Day"
     )
-    .modelContainer(for: [Exercise.self, WorkoutTemplate.self, WorkoutEntry.self])
+    .modelContainer(for: [Exercise.self, WorkoutRoutine.self, WorkoutEntry.self])
 }
