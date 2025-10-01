@@ -11,7 +11,7 @@ import SwiftData
 struct AnalyticsView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var workouts: [WorkoutEntry]
-    @AppStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
+    @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
 
     // Calculate total weeks where goal was met
     private var totalGoalsMet: Int {

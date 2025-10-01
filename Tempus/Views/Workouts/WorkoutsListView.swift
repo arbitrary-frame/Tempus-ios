@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 struct WorkoutsListView: View {
     @Environment(\.modelContext) private var modelContext
@@ -228,6 +229,21 @@ struct WorkoutsListView: View {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
             modelContext.delete(workout)
         }
+
+        // Save and refresh widgets after deletion
+        do {
+            try modelContext.save()
+            print("✅ Workout deleted from SwiftData")
+        } catch {
+            print("❌ Failed to save after deletion: \(error)")
+        }
+
+        print("🔄 Requesting widget refresh after deletion...")
+        WidgetCenter.shared.reloadAllTimelines()
+        WidgetCenter.shared.reloadTimelines(ofKind: "GoalProgressWidget")
+        WidgetCenter.shared.reloadTimelines(ofKind: "ExercisesWidget")
+        WidgetCenter.shared.reloadTimelines(ofKind: "WeightWidget")
+        WidgetCenter.shared.reloadTimelines(ofKind: "CombinedStatsWidget")
     }
 
     private func updateGreeting() {
@@ -378,7 +394,7 @@ struct WorkoutStatsCard: View {
     let totalWeight: Double
     let exercisesAbsoluteChange: Int?
     let weightChangePercentage: Double?
-    @AppStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
+    @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
 
     var formattedWeight: String {
         let kg = Int(totalWeight)

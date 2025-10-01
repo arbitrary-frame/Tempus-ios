@@ -11,7 +11,7 @@ import SwiftData
 struct WorkoutCalendarView: View {
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \WorkoutEntry.workoutDate, order: .reverse) private var workouts: [WorkoutEntry]
-    @AppStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
+    @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
 
     @State private var selectedMonth: Date = Date()
     @State private var selectedWeek: Date = Date() // Start of selected week

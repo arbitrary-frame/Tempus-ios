@@ -15,7 +15,7 @@ struct SettingsView: View {
     @Query private var routines: [WorkoutRoutine]
     @EnvironmentObject var themeManager: ThemeManager
     @AppStorage("userName") private var userName: String = ""
-    @AppStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
+    @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = true
 
     @State private var showingExportSheet = false
