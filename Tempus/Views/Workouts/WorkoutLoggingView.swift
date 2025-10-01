@@ -276,13 +276,30 @@ struct ExerciseEntryView: View {
                 }
             }
 
-            // Add Set Button
-            Button {
-                addSet()
-            } label: {
-                Label("Add Set", systemImage: "plus.circle")
+            // Add Set Buttons (Repeat and Blank)
+            HStack(spacing: 12) {
+                // Repeat Set (left, primary)
+                Button {
+                    repeatSet()
+                } label: {
+                    Label("Repeat Set", systemImage: "arrow.counterclockwise.circle.fill")
+                        .font(.subheadline)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(exerciseEntry.sets.isEmpty)
+
+                // Add Blank Set (right, secondary)
+                Button {
+                    addSet()
+                } label: {
+                    Label("Add Set", systemImage: "plus.circle")
+                        .font(.subheadline)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
             }
-            .buttonStyle(.borderless)
+            .labelStyle(.titleOnly)
 
             // Exercise Notes (only show if notes exist)
             if let notes = exerciseEntry.notes, !notes.isEmpty {
@@ -302,14 +319,27 @@ struct ExerciseEntryView: View {
         exerciseEntry.sets.append(WorkoutSet(setNumber: newSetNumber, weightsAndReps: [WeightRep(weight: 0, reps: 0)]))
     }
 
+    private func repeatSet() {
+        guard let lastSet = exerciseEntry.sets.last else { return }
+        let newSetNumber = exerciseEntry.sets.count + 1
+        HapticManager.shared.trigger(.light)
+
+        // Copy all weight/rep pairs from the last set (including drop sets)
+        let copiedWeightsAndReps = lastSet.weightsAndReps.map { wr in
+            WeightRep(weight: wr.weight, reps: wr.reps)
+        }
+
+        exerciseEntry.sets.append(WorkoutSet(setNumber: newSetNumber, weightsAndReps: copiedWeightsAndReps))
+    }
+
     private func deleteSet(_ set: WorkoutSet) {
         HapticManager.shared.trigger(.light)
         exerciseEntry.sets.removeAll { $0.id == set.id }
         // Renumber remaining sets
-        for (index, _) in exerciseEntry.sets.enumerated() {
-            exerciseEntry.sets[index] = WorkoutSet(
+        exerciseEntry.sets = exerciseEntry.sets.enumerated().map { index, existingSet in
+            WorkoutSet(
                 setNumber: index + 1,
-                weightsAndReps: exerciseEntry.sets[index].weightsAndReps
+                weightsAndReps: existingSet.weightsAndReps
             )
         }
     }
@@ -325,65 +355,91 @@ struct ExerciseEntryView: View {
     }
 }
 
-// Individual set entry row with horizontal scroll
+// Individual set entry row with vertical drop sets
 struct SetEntryRow: View {
     @Binding var set: WorkoutSet
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 12) {
-                Text("Set \(set.setNumber)")
-                    .font(.subheadline.bold())
-                    .foregroundStyle(.accent)
-                    .frame(width: 50, alignment: .leading)
-
-                // Weight/Rep pairs (for drop sets)
-                ForEach($set.weightsAndReps) { $wr in
-                    HStack(spacing: 4) {
-                        TextField("kg", text: Binding(
-                            get: { wr.weight == 0 ? "" : "\(wr.weight)" },
-                            set: { wr.weight = Double($0) ?? 0 }
-                        ))
-                        .keyboardType(.decimalPad)
-                        .textFieldStyle(.roundedBorder)
-                        .frame(width: 60)
-
-                        Image(systemName: "xmark")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-
-                        TextField("reps", text: Binding(
-                            get: { wr.reps == 0 ? "" : "\(wr.reps)" },
-                            set: { wr.reps = Int($0) ?? 0 }
-                        ))
-                        .keyboardType(.numberPad)
-                        .textFieldStyle(.roundedBorder)
-                        .frame(width: 50)
-
-                        if set.weightsAndReps.count > 1 {
-                            Button {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                    removeWeightRep(wr)
-                                }
-                            } label: {
-                                Image(systemName: "minus.circle.fill")
-                                    .foregroundStyle(.red)
-                                    .symbolRenderingMode(.hierarchical)
-                            }
-                            .buttonStyle(.borderless)
+        VStack(alignment: .leading, spacing: 8) {
+            // Main set and drop sets
+            ForEach(set.weightsAndReps.indices, id: \.self) { index in
+                HStack(spacing: 8) {
+                    // Set label - only show for first entry, indent for drops
+                    if index == 0 {
+                        Text("Set \(set.setNumber)")
+                            .font(.subheadline.bold())
+                            .foregroundStyle(.accent)
+                            .frame(width: 50, alignment: .leading)
+                    } else {
+                        HStack(spacing: 4) {
+                            Rectangle()
+                                .fill(.accent.opacity(0.3))
+                                .frame(width: 2, height: 20)
+                            Image(systemName: "arrow.turn.down.right")
+                                .font(.caption2)
+                                .foregroundStyle(.accent.opacity(0.6))
                         }
+                        .frame(width: 50, alignment: .leading)
                     }
-                }
 
-                // Add Drop Set Button
-                Button {
-                    addDropSet()
-                } label: {
+                    // Weight field
+                    TextField("kg", text: Binding(
+                        get: { set.weightsAndReps[index].weight == 0 ? "" : "\(set.weightsAndReps[index].weight)" },
+                        set: { newValue in
+                            set.weightsAndReps[index].weight = Double(newValue) ?? 0
+                        }
+                    ))
+                    .keyboardType(.decimalPad)
+                    .textFieldStyle(.roundedBorder)
+                    .frame(width: 60)
+
+                    Image(systemName: "xmark")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+
+                    // Reps field
+                    TextField("reps", text: Binding(
+                        get: { set.weightsAndReps[index].reps == 0 ? "" : "\(set.weightsAndReps[index].reps)" },
+                        set: { newValue in
+                            set.weightsAndReps[index].reps = Int(newValue) ?? 0
+                        }
+                    ))
+                    .keyboardType(.numberPad)
+                    .textFieldStyle(.roundedBorder)
+                    .frame(width: 50)
+
+                    // Delete drop set button (only for drops, not main set)
+                    if set.weightsAndReps.count > 1 && index > 0 {
+                        Button {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                removeWeightRep(set.weightsAndReps[index])
+                            }
+                        } label: {
+                            Image(systemName: "minus.circle.fill")
+                                .foregroundStyle(.red)
+                                .symbolRenderingMode(.hierarchical)
+                        }
+                        .buttonStyle(.borderless)
+                    }
+
+                    Spacer()
+                }
+            }
+
+            // Add Drop Set Button
+            Button {
+                addDropSet()
+            } label: {
+                HStack(spacing: 4) {
                     Image(systemName: "plus.circle")
                         .symbolRenderingMode(.hierarchical)
+                    Text("Add Drop")
+                        .font(.caption)
                 }
-                .buttonStyle(.borderless)
+                .foregroundStyle(.accent)
             }
+            .buttonStyle(.borderless)
+            .padding(.leading, 50)
         }
     }
 
@@ -393,6 +449,8 @@ struct SetEntryRow: View {
     }
 
     private func removeWeightRep(_ wr: WeightRep) {
+        // Don't allow deleting the last weight/rep entry
+        guard set.weightsAndReps.count > 1 else { return }
         HapticManager.shared.trigger(.light)
         set.weightsAndReps.removeAll { $0.id == wr.id }
     }
