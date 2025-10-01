@@ -40,6 +40,35 @@ struct WorkoutsListView: View {
         }
     }
 
+    private var exercisesThisWeek: Int {
+        let calendar = Calendar.current
+        let now = Date()
+        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
+            return 0
+        }
+
+        let workoutsThisWeek = workouts.filter { $0.workoutDate >= weekStart }
+        return workoutsThisWeek.reduce(0) { $0 + $1.exercisesData.count }
+    }
+
+    private var exercisesLastWeek: Int {
+        let calendar = Calendar.current
+        let now = Date()
+        guard let currentWeekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)),
+              let lastWeekStart = calendar.date(byAdding: .weekOfYear, value: -1, to: currentWeekStart) else {
+            return 0
+        }
+
+        let workoutsLastWeek = workouts.filter { $0.workoutDate >= lastWeekStart && $0.workoutDate < currentWeekStart }
+        return workoutsLastWeek.reduce(0) { $0 + $1.exercisesData.count }
+    }
+
+    private var exercisesChangePercentage: Double? {
+        guard exercisesLastWeek > 0 else { return nil }
+        let change = ((Double(exercisesThisWeek) - Double(exercisesLastWeek)) / Double(exercisesLastWeek)) * 100
+        return change
+    }
+
     private var totalWeightThisWeek: Double {
         let calendar = Calendar.current
         let now = Date()
@@ -63,6 +92,36 @@ struct WorkoutsListView: View {
         return totalWeight
     }
 
+    private var totalWeightLastWeek: Double {
+        let calendar = Calendar.current
+        let now = Date()
+        guard let currentWeekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)),
+              let lastWeekStart = calendar.date(byAdding: .weekOfYear, value: -1, to: currentWeekStart) else {
+            return 0
+        }
+
+        let workoutsLastWeek = workouts.filter { $0.workoutDate >= lastWeekStart && $0.workoutDate < currentWeekStart }
+        var totalWeight: Double = 0
+
+        for workout in workoutsLastWeek {
+            for exercise in workout.exercisesData {
+                for set in exercise.sets {
+                    for weightRep in set.weightsAndReps {
+                        totalWeight += weightRep.weight * Double(weightRep.reps)
+                    }
+                }
+            }
+        }
+
+        return totalWeight
+    }
+
+    private var weightChangePercentage: Double? {
+        guard totalWeightLastWeek > 0 else { return nil }
+        let change = ((totalWeightThisWeek - totalWeightLastWeek) / totalWeightLastWeek) * 100
+        return change
+    }
+
     var body: some View {
         NavigationStack {
             Group {
@@ -78,8 +137,10 @@ struct WorkoutsListView: View {
                         Section {
                             WorkoutStatsCard(
                                 workoutsThisWeek: workoutsThisWeek,
-                                totalExercises: totalExercisesCompleted,
-                                totalWeight: totalWeightThisWeek
+                                totalExercises: exercisesThisWeek,
+                                totalWeight: totalWeightThisWeek,
+                                exercisesChangePercentage: exercisesChangePercentage,
+                                weightChangePercentage: weightChangePercentage
                             )
                         }
                         .listRowBackground(Color.clear)
@@ -316,6 +377,8 @@ struct WorkoutStatsCard: View {
     let workoutsThisWeek: Int
     let totalExercises: Int
     let totalWeight: Double
+    let exercisesChangePercentage: Double?
+    let weightChangePercentage: Double?
     @AppStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
 
     var formattedWeight: String {
@@ -357,7 +420,8 @@ struct WorkoutStatsCard: View {
                 StatBubble(
                     value: "\(totalExercises)",
                     label: "Exercises",
-                    icon: "list.bullet.clipboard"
+                    icon: "list.bullet.clipboard",
+                    changePercentage: exercisesChangePercentage
                 )
                 .frame(maxWidth: .infinity)
 
@@ -366,7 +430,8 @@ struct WorkoutStatsCard: View {
                     value: formattedWeight,
                     label: "kg",
                     icon: "dumbbell.fill",
-                    accentColor: .orange
+                    accentColor: .orange,
+                    changePercentage: weightChangePercentage
                 )
                 .frame(maxWidth: .infinity)
             }
@@ -497,29 +562,50 @@ struct StatBubble: View {
     let label: String
     let icon: String
     var accentColor: Color = .accentColor
+    var changePercentage: Double? = nil
 
     var body: some View {
-        VStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.title3)
-                .foregroundStyle(accentColor)
-                .symbolRenderingMode(.hierarchical)
-                .frame(height: 50)
+        ZStack(alignment: .topLeading) {
+            VStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.title3)
+                    .foregroundStyle(accentColor)
+                    .symbolRenderingMode(.hierarchical)
+                    .frame(height: 50)
 
-            Text(value)
-                .font(.title2.bold())
-                .foregroundStyle(.primary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
+                Text(value)
+                    .font(.title2.bold())
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
 
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .frame(height: 14)
+                Text(label)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(height: 14)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .padding(.horizontal, 8)
+
+            // Change percentage badge (top-left corner)
+            if let percentage = changePercentage {
+                HStack(spacing: 2) {
+                    Image(systemName: percentage >= 0 ? "arrow.up" : "arrow.down")
+                        .font(.system(size: 8, weight: .bold))
+                    Text(String(format: "%.1f%%", abs(percentage)))
+                        .font(.system(size: 9, weight: .semibold))
+                }
+                .foregroundStyle(percentage >= 0 ? .green : .secondary)
+                .padding(.horizontal, 4)
+                .padding(.vertical, 2)
+                .background(
+                    (percentage >= 0 ? Color.green.opacity(0.15) : Color.secondary.opacity(0.1)),
+                    in: Capsule()
+                )
+                .padding(6)
+            }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .padding(.horizontal, 8)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
     }
 }
