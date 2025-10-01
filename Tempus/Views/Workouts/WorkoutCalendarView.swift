@@ -11,8 +11,10 @@ import SwiftData
 struct WorkoutCalendarView: View {
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \WorkoutEntry.workoutDate, order: .reverse) private var workouts: [WorkoutEntry]
+    @AppStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
 
     @State private var selectedMonth: Date = Date()
+    @State private var selectedWeek: Date = Date() // Start of selected week
     @State private var selectedWorkout: WorkoutEntry?
     @State private var workoutsForSelectedDay: [WorkoutEntry] = []
     @State private var showingWorkoutPicker = false
@@ -47,6 +49,48 @@ struct WorkoutCalendarView: View {
         }
 
         return days
+    }
+
+    // Get week start for initialization
+    private var currentWeekStart: Date {
+        calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: selectedWeek)) ?? selectedWeek
+    }
+
+    // Workouts for selected week
+    private var workoutsForSelectedWeek: [WorkoutEntry] {
+        guard let weekEnd = calendar.date(byAdding: .day, value: 7, to: currentWeekStart) else {
+            return []
+        }
+        return workouts.filter { $0.workoutDate >= currentWeekStart && $0.workoutDate < weekEnd }
+            .sorted { $0.workoutDate > $1.workoutDate }
+    }
+
+    // Weekly statistics
+    private var weeklyWorkoutCount: Int {
+        workoutsForSelectedWeek.count
+    }
+
+    private var weeklyExerciseCount: Int {
+        workoutsForSelectedWeek.reduce(0) { $0 + $1.exercisesData.count }
+    }
+
+    private var weeklyTotalWeight: Double {
+        var totalWeight: Double = 0
+        for workout in workoutsForSelectedWeek {
+            for exercise in workout.exercisesData {
+                for set in exercise.sets {
+                    for weightRep in set.weightsAndReps {
+                        totalWeight += weightRep.weight * Double(weightRep.reps)
+                    }
+                }
+            }
+        }
+        return totalWeight
+    }
+
+    private var weeklyProgress: Double {
+        guard weeklyWorkoutGoal > 0 else { return 0 }
+        return min(Double(weeklyWorkoutCount) / Double(weeklyWorkoutGoal), 1.0)
     }
 
     var body: some View {
@@ -101,22 +145,89 @@ struct WorkoutCalendarView: View {
                     .padding(.horizontal, 20)
                     .padding(.bottom, 12)
 
-                    // Calendar grid
+                    // Calendar grid and weekly content
                     ScrollView(showsIndicators: false) {
-                        LazyVGrid(columns: columns, spacing: 6) {
-                            ForEach(daysInMonth, id: \.self) { date in
-                                DayCell(
-                                    date: date,
-                                    workouts: workoutsByDate[date] ?? [],
-                                    isInCurrentMonth: calendar.isDate(date, equalTo: selectedMonth, toGranularity: .month),
-                                    isToday: calendar.isDateInToday(date)
+                        VStack(spacing: 20) {
+                            // Calendar grid
+                            LazyVGrid(columns: columns, spacing: 6) {
+                                ForEach(daysInMonth, id: \.self) { date in
+                                    DayCell(
+                                        date: date,
+                                        workouts: workoutsByDate[date] ?? [],
+                                        isInCurrentMonth: calendar.isDate(date, equalTo: selectedMonth, toGranularity: .month),
+                                        isToday: calendar.isDateInToday(date),
+                                        isInSelectedWeek: isDateInSelectedWeek(date)
+                                    )
+                                    .onTapGesture {
+                                        handleDayTap(date: date)
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 20)
+
+                            // Weekly statistics summary with navigation
+                            VStack(spacing: 0) {
+                                // Week navigation header
+                                HStack {
+                                    Button {
+                                        HapticManager.shared.trigger(.light)
+                                        changeWeek(by: -1)
+                                    } label: {
+                                        Image(systemName: "chevron.left.circle.fill")
+                                            .font(.title3)
+                                            .symbolRenderingMode(.hierarchical)
+                                            .foregroundStyle(.primary)
+                                    }
+
+                                    Spacer()
+
+                                    Text(weekRangeString)
+                                        .font(.subheadline.bold())
+                                        .foregroundStyle(.primary)
+
+                                    Spacer()
+
+                                    Button {
+                                        HapticManager.shared.trigger(.light)
+                                        changeWeek(by: 1)
+                                    } label: {
+                                        Image(systemName: "chevron.right.circle.fill")
+                                            .font(.title3)
+                                            .symbolRenderingMode(.hierarchical)
+                                            .foregroundStyle(.primary)
+                                    }
+                                }
+                                .padding(.horizontal, 20)
+                                .padding(.bottom, 12)
+
+                                WeeklyStatsSummary(
+                                    workoutCount: weeklyWorkoutCount,
+                                    exerciseCount: weeklyExerciseCount,
+                                    totalWeight: weeklyTotalWeight,
+                                    weeklyGoal: weeklyWorkoutGoal,
+                                    progress: weeklyProgress
                                 )
-                                .onTapGesture {
-                                    handleDayTap(date: date)
+                                .padding(.horizontal, 20)
+                            }
+
+                            // Workouts for selected week
+                            if !workoutsForSelectedWeek.isEmpty {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    Text("Workouts")
+                                        .font(.headline)
+                                        .foregroundStyle(.secondary)
+                                        .padding(.horizontal, 20)
+
+                                    ForEach(workoutsForSelectedWeek) { workout in
+                                        WorkoutCardView(workout: workout)
+                                            .padding(.horizontal, 20)
+                                            .onTapGesture {
+                                                selectedWorkout = workout
+                                            }
+                                    }
                                 }
                             }
                         }
-                        .padding(.horizontal, 20)
                         .padding(.bottom, 20)
                     }
                 }
@@ -158,24 +269,103 @@ struct WorkoutCalendarView: View {
         return formatter.string(from: selectedMonth)
     }
 
+    private var weekRangeString: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_GB")
+        formatter.dateFormat = "d MMM"
+
+        guard let weekEnd = calendar.date(byAdding: .day, value: 6, to: currentWeekStart) else {
+            return ""
+        }
+
+        let startString = formatter.string(from: currentWeekStart)
+        let endString = formatter.string(from: weekEnd)
+        return "Week: \(startString) - \(endString)"
+    }
+
     private func changeMonth(by value: Int) {
         if let newMonth = calendar.date(byAdding: .month, value: value, to: selectedMonth) {
             selectedMonth = newMonth
         }
     }
 
-    private func handleDayTap(date: Date) {
-        let dayWorkouts = workoutsByDate[date] ?? []
-        guard !dayWorkouts.isEmpty else { return }
+    private func changeWeek(by value: Int) {
+        if let newWeek = calendar.date(byAdding: .weekOfYear, value: value, to: selectedWeek) {
+            selectedWeek = newWeek
 
+            // Update selected month if week is in a different month
+            if !calendar.isDate(newWeek, equalTo: selectedMonth, toGranularity: .month) {
+                selectedMonth = newWeek
+            }
+        }
+    }
+
+    private func handleDayTap(date: Date) {
         HapticManager.shared.trigger(.light)
 
-        if dayWorkouts.count == 1 {
-            selectedWorkout = dayWorkouts[0]
-        } else {
-            workoutsForSelectedDay = dayWorkouts
-            showingWorkoutPicker = true
+        // Update selected week to the week containing this date
+        if let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)) {
+            selectedWeek = weekStart
         }
+    }
+
+    private func isDateInSelectedWeek(_ date: Date) -> Bool {
+        guard let dateWeekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)) else {
+            return false
+        }
+        return dateWeekStart == currentWeekStart
+    }
+}
+
+// Weekly Statistics Summary Card
+struct WeeklyStatsSummary: View {
+    let workoutCount: Int
+    let exerciseCount: Int
+    let totalWeight: Double
+    let weeklyGoal: Int
+    let progress: Double
+
+    private var formattedWeight: String {
+        let kg = Int(totalWeight)
+        if kg >= 1000 {
+            return String(format: "%.1fk", Double(kg) / 1000.0)
+        }
+        return "\(kg)"
+    }
+
+    var body: some View {
+        VStack(spacing: 12) {
+            // Stats grid (reusing same design as workout list)
+            HStack(spacing: 8) {
+                // Progress Ring
+                StatBubble(
+                    value: "\(workoutCount)/\(weeklyGoal)",
+                    label: "Workouts",
+                    icon: "figure.strengthtraining.traditional"
+                )
+                .frame(maxWidth: .infinity)
+
+                // Exercises
+                StatBubble(
+                    value: "\(exerciseCount)",
+                    label: "Exercises",
+                    icon: "list.bullet.clipboard"
+                )
+                .frame(maxWidth: .infinity)
+
+                // Weight
+                StatBubble(
+                    value: formattedWeight,
+                    label: "kg",
+                    icon: "dumbbell.fill",
+                    accentColor: .orange
+                )
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .padding()
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
+        .shadow(color: .black.opacity(0.08), radius: 6, x: 0, y: 3)
     }
 }
 
@@ -185,6 +375,7 @@ struct DayCell: View {
     let workouts: [WorkoutEntry]
     let isInCurrentMonth: Bool
     let isToday: Bool
+    let isInSelectedWeek: Bool
 
     private let calendar = Calendar.current
 
@@ -230,6 +421,12 @@ struct DayCell: View {
         .frame(maxWidth: .infinity, minHeight: 54)
         .background(
             ZStack {
+                // Selected week background
+                if isInSelectedWeek && isInCurrentMonth {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.accentColor.opacity(0.1))
+                }
+
                 if !workouts.isEmpty {
                     RoundedRectangle(cornerRadius: 10)
                         .fill(.ultraThinMaterial)

@@ -63,10 +63,9 @@ struct WorkoutsListView: View {
         return workoutsLastWeek.reduce(0) { $0 + $1.exercisesData.count }
     }
 
-    private var exercisesChangePercentage: Double? {
+    private var exercisesAbsoluteChange: Int? {
         guard exercisesLastWeek > 0 else { return nil }
-        let change = ((Double(exercisesThisWeek) - Double(exercisesLastWeek)) / Double(exercisesLastWeek)) * 100
-        return change
+        return exercisesThisWeek - exercisesLastWeek
     }
 
     private var totalWeightThisWeek: Double {
@@ -139,7 +138,7 @@ struct WorkoutsListView: View {
                                 workoutsThisWeek: workoutsThisWeek,
                                 totalExercises: exercisesThisWeek,
                                 totalWeight: totalWeightThisWeek,
-                                exercisesChangePercentage: exercisesChangePercentage,
+                                exercisesAbsoluteChange: exercisesAbsoluteChange,
                                 weightChangePercentage: weightChangePercentage
                             )
                         }
@@ -377,7 +376,7 @@ struct WorkoutStatsCard: View {
     let workoutsThisWeek: Int
     let totalExercises: Int
     let totalWeight: Double
-    let exercisesChangePercentage: Double?
+    let exercisesAbsoluteChange: Int?
     let weightChangePercentage: Double?
     @AppStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
 
@@ -421,7 +420,7 @@ struct WorkoutStatsCard: View {
                     value: "\(totalExercises)",
                     label: "Exercises",
                     icon: "list.bullet.clipboard",
-                    changePercentage: exercisesChangePercentage
+                    absoluteChange: exercisesAbsoluteChange
                 )
                 .frame(maxWidth: .infinity)
 
@@ -563,6 +562,7 @@ struct StatBubble: View {
     let icon: String
     var accentColor: Color = .accentColor
     var changePercentage: Double? = nil
+    var absoluteChange: Int? = nil
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -588,7 +588,7 @@ struct StatBubble: View {
             .padding(.vertical, 12)
             .padding(.horizontal, 8)
 
-            // Change percentage badge (top-left corner)
+            // Change badge (top-left corner)
             if let percentage = changePercentage {
                 HStack(spacing: 2) {
                     Image(systemName: percentage >= 0 ? "arrow.up" : "arrow.down")
@@ -601,6 +601,21 @@ struct StatBubble: View {
                 .padding(.vertical, 2)
                 .background(
                     (percentage >= 0 ? Color.green.opacity(0.15) : Color.secondary.opacity(0.1)),
+                    in: Capsule()
+                )
+                .padding(6)
+            } else if let absolute = absoluteChange {
+                HStack(spacing: 2) {
+                    Image(systemName: absolute >= 0 ? "arrow.up" : "arrow.down")
+                        .font(.system(size: 8, weight: .bold))
+                    Text(absolute >= 0 ? "+\(absolute)" : "\(absolute)")
+                        .font(.system(size: 9, weight: .semibold))
+                }
+                .foregroundStyle(absolute >= 0 ? .green : .secondary)
+                .padding(.horizontal, 4)
+                .padding(.vertical, 2)
+                .background(
+                    (absolute >= 0 ? Color.green.opacity(0.15) : Color.secondary.opacity(0.1)),
                     in: Capsule()
                 )
                 .padding(6)
