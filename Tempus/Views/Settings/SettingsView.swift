@@ -15,6 +15,7 @@ struct SettingsView: View {
     @Query private var routines: [WorkoutRoutine]
     @EnvironmentObject var themeManager: ThemeManager
     @AppStorage("userName") private var userName: String = ""
+    @AppStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = true
 
     @State private var showingExportSheet = false
@@ -29,6 +30,19 @@ struct SettingsView: View {
                 // Appearance Section
                 Section("Appearance") {
                     Toggle("Dark Mode", isOn: $themeManager.isDarkMode)
+                }
+
+                // Goals Section
+                Section {
+                    Picker("Weekly Workout Goal", selection: $weeklyWorkoutGoal) {
+                        ForEach(1...7, id: \.self) { number in
+                            Text("\(number) workout\(number == 1 ? "" : "s")").tag(number)
+                        }
+                    }
+                } header: {
+                    Text("Goals")
+                } footer: {
+                    Text("Set your target number of workouts per week to help you stay consistent.")
                 }
 
                 // Data Section
@@ -212,6 +226,7 @@ struct SettingsView: View {
 
         // Reset user preferences (but keep theme preference)
         userName = ""
+        weeklyWorkoutGoal = 3
         hasCompletedOnboarding = false
 
         // Trigger success haptic

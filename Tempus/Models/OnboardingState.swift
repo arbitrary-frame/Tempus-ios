@@ -12,6 +12,7 @@ import Combine
 class OnboardingState: ObservableObject {
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
     @AppStorage("userName") var userName: String = ""
+    @AppStorage("weeklyWorkoutGoal") var weeklyWorkoutGoal: Int = 3
 
     func completeOnboarding() {
         hasCompletedOnboarding = true
@@ -20,5 +21,6 @@ class OnboardingState: ObservableObject {
     func resetOnboarding() {
         hasCompletedOnboarding = false
         userName = ""
+        weeklyWorkoutGoal = 3
     }
 }

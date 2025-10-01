@@ -12,6 +12,7 @@ struct OnboardingView: View {
     @StateObject private var onboardingState = OnboardingState()
     @State private var currentPage = 0
     @State private var userName = ""
+    @State private var weeklyGoal = 3
 
     var body: some View {
         ZStack {
@@ -19,7 +20,7 @@ struct OnboardingView: View {
             Group {
                 switch currentPage {
                 case 0:
-                    WelcomeScreen(userName: $userName, onNext: {
+                    WelcomeScreen(userName: $userName, weeklyGoal: $weeklyGoal, onNext: {
                         withAnimation {
                             currentPage += 1
                         }
@@ -96,6 +97,7 @@ struct OnboardingView: View {
     private func completeOnboarding() {
         HapticManager.shared.trigger(.success)
         onboardingState.userName = userName.trimmingCharacters(in: .whitespaces)
+        onboardingState.weeklyWorkoutGoal = weeklyGoal
         onboardingState.completeOnboarding()
     }
 }
@@ -103,6 +105,7 @@ struct OnboardingView: View {
 // MARK: - Welcome Screen
 struct WelcomeScreen: View {
     @Binding var userName: String
+    @Binding var weeklyGoal: Int
     let onNext: () -> Void
     @FocusState private var isNameFieldFocused: Bool
 
@@ -127,23 +130,52 @@ struct WelcomeScreen: View {
 
             Spacer()
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text("What's your name?")
-                    .font(.headline)
-                    .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("What's your name?")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
 
-                TextField("Enter your name", text: $userName)
-                    .textFieldStyle(.roundedBorder)
-                    .font(.title3)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.words)
-                    .focused($isNameFieldFocused)
+                    TextField("Enter your name", text: $userName)
+                        .textFieldStyle(.roundedBorder)
+                        .font(.title3)
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.words)
+                        .focused($isNameFieldFocused)
+                        .toolbar {
+                            ToolbarItemGroup(placement: .keyboard) {
+                                Spacer()
+                                Button("Done") {
+                                    isNameFieldFocused = false
+                                }
+                            }
+                        }
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Weekly Workout Goal")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+
+                    Picker("Weekly Goal", selection: $weeklyGoal) {
+                        ForEach(1...7, id: \.self) { number in
+                            Text("\(number) workout\(number == 1 ? "" : "s")")
+                                .tag(number)
+                        }
+                    }
+                    .pickerStyle(.wheel)
+                    .frame(height: 100)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
             }
             .padding(.horizontal, 40)
 
             Button {
+                isNameFieldFocused = false
                 HapticManager.shared.trigger(.light)
-                onNext()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    onNext()
+                }
             } label: {
                 Text("Continue")
                     .font(.headline)
