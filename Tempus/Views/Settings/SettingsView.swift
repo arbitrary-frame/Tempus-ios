@@ -20,6 +20,8 @@ struct SettingsView: View {
     @State private var showingExportSheet = false
     @State private var exportData: Data?
     @State private var showingResetConfirmation = false
+    @State private var showingSampleDataLoaded = false
+    @State private var showingDataCleared = false
 
     var body: some View {
         NavigationStack {
@@ -79,6 +81,7 @@ struct SettingsView: View {
                     Button {
                         SampleDataManager.loadSampleData(into: modelContext)
                         HapticManager.shared.trigger(.success)
+                        showingSampleDataLoaded = true
                     } label: {
                         Label("Load Sample Data", systemImage: "tray.and.arrow.down.fill")
                     }
@@ -86,6 +89,7 @@ struct SettingsView: View {
                     Button(role: .destructive) {
                         SampleDataManager.clearAllData(from: modelContext)
                         HapticManager.shared.trigger(.success)
+                        showingDataCleared = true
                     } label: {
                         Label("Clear All Data", systemImage: "trash.fill")
                     }
@@ -122,6 +126,18 @@ struct SettingsView: View {
             } message: {
                 Text("This will permanently delete all your workouts, exercises, routines, and settings. You will need to go through onboarding again. This action cannot be undone.")
             }
+            #if DEBUG
+            .alert("Sample Data Loaded!", isPresented: $showingSampleDataLoaded) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("Successfully loaded 16 exercises, 3 routines, and 7 workouts. Check the Workouts and Exercises tabs to see them!")
+            }
+            .alert("Data Cleared!", isPresented: $showingDataCleared) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("All exercises, routines, and workouts have been deleted from the database.")
+            }
+            #endif
         }
     }
 
