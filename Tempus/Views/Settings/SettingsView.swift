@@ -73,6 +73,30 @@ struct SettingsView: View {
                         .foregroundStyle(.secondary)
                 }
 
+                #if DEBUG
+                // Developer Section (Debug only)
+                Section {
+                    Button {
+                        SampleDataManager.loadSampleData(into: modelContext)
+                        HapticManager.shared.trigger(.success)
+                    } label: {
+                        Label("Load Sample Data", systemImage: "tray.and.arrow.down.fill")
+                    }
+
+                    Button(role: .destructive) {
+                        SampleDataManager.clearAllData(from: modelContext)
+                        HapticManager.shared.trigger(.success)
+                    } label: {
+                        Label("Clear All Data", systemImage: "trash.fill")
+                    }
+                } header: {
+                    Text("Developer")
+                } footer: {
+                    Text("DEBUG BUILD ONLY: These options help with testing and will not appear in production builds.")
+                        .foregroundStyle(.orange)
+                }
+                #endif
+
                 // About Section
                 Section("About") {
                     HStack {
