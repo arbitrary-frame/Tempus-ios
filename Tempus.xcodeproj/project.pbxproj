@@ -6,19 +6,102 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		E14D7CF52E8D3815009BC1C4 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E14D7CF42E8D3815009BC1C4 /* WidgetKit.framework */; };
+		E14D7CF72E8D3815009BC1C4 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E14D7CF62E8D3815009BC1C4 /* SwiftUI.framework */; };
+		E14D7D062E8D3815009BC1C4 /* TempusWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E14D7CF22E8D3815009BC1C4 /* TempusWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		E14D7D042E8D3815009BC1C4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E1BCFC182E8B7A560021412E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E14D7CF12E8D3815009BC1C4;
+			remoteInfo = TempusWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E14D7D0B2E8D3815009BC1C4 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				E14D7D062E8D3815009BC1C4 /* TempusWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		E14D7CF22E8D3815009BC1C4 /* TempusWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TempusWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E14D7CF42E8D3815009BC1C4 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		E14D7CF62E8D3815009BC1C4 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		E14D7D232E8D4021009BC1C4 /* TempusWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TempusWidgetExtension.entitlements; sourceTree = "<group>"; };
 		E1BCFC202E8B7A560021412E /* Tempus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tempus.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		E14D7D072E8D3815009BC1C4 /* Exceptions for "TempusWidget" folder in "TempusWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = E14D7CF12E8D3815009BC1C4 /* TempusWidgetExtension */;
+		};
+		E14D7D0E2E8D388C009BC1C4 /* Exceptions for "Tempus" folder in "Tempus" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = E1BCFC1F2E8B7A560021412E /* Tempus */;
+		};
+		E14D7D102E8D39F7009BC1C4 /* Exceptions for "Tempus" folder in "TempusWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Models/Exercise.swift,
+				Models/Supporting/WorkoutExerciseData.swift,
+				Models/WorkoutEntry.swift,
+				Models/WorkoutRoutine.swift,
+				Utilities/AppGroupUserDefaults.swift,
+			);
+			target = E14D7CF12E8D3815009BC1C4 /* TempusWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		E14D7CF82E8D3815009BC1C4 /* TempusWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				E14D7D072E8D3815009BC1C4 /* Exceptions for "TempusWidget" folder in "TempusWidgetExtension" target */,
+			);
+			path = TempusWidget;
+			sourceTree = "<group>";
+		};
 		E1BCFC222E8B7A560021412E /* Tempus */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				E14D7D0E2E8D388C009BC1C4 /* Exceptions for "Tempus" folder in "Tempus" target */,
+				E14D7D102E8D39F7009BC1C4 /* Exceptions for "Tempus" folder in "TempusWidgetExtension" target */,
+			);
 			path = Tempus;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		E14D7CEF2E8D3815009BC1C4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E14D7CF72E8D3815009BC1C4 /* SwiftUI.framework in Frameworks */,
+				E14D7CF52E8D3815009BC1C4 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E1BCFC1D2E8B7A560021412E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -29,10 +112,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E14D7CF32E8D3815009BC1C4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E14D7CF42E8D3815009BC1C4 /* WidgetKit.framework */,
+				E14D7CF62E8D3815009BC1C4 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		E1BCFC172E8B7A560021412E = {
 			isa = PBXGroup;
 			children = (
+				E14D7D232E8D4021009BC1C4 /* TempusWidgetExtension.entitlements */,
 				E1BCFC222E8B7A560021412E /* Tempus */,
+				E14D7CF82E8D3815009BC1C4 /* TempusWidget */,
+				E14D7CF32E8D3815009BC1C4 /* Frameworks */,
 				E1BCFC212E8B7A560021412E /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +136,7 @@
 			isa = PBXGroup;
 			children = (
 				E1BCFC202E8B7A560021412E /* Tempus.app */,
+				E14D7CF22E8D3815009BC1C4 /* TempusWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,6 +144,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		E14D7CF12E8D3815009BC1C4 /* TempusWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E14D7D082E8D3815009BC1C4 /* Build configuration list for PBXNativeTarget "TempusWidgetExtension" */;
+			buildPhases = (
+				E14D7CEE2E8D3815009BC1C4 /* Sources */,
+				E14D7CEF2E8D3815009BC1C4 /* Frameworks */,
+				E14D7CF02E8D3815009BC1C4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				E14D7CF82E8D3815009BC1C4 /* TempusWidget */,
+			);
+			name = TempusWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = TempusWidgetExtension;
+			productReference = E14D7CF22E8D3815009BC1C4 /* TempusWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		E1BCFC1F2E8B7A560021412E /* Tempus */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = E1BCFC2D2E8B7A570021412E /* Build configuration list for PBXNativeTarget "Tempus" */;
@@ -55,10 +173,12 @@
 				E1BCFC1C2E8B7A560021412E /* Sources */,
 				E1BCFC1D2E8B7A560021412E /* Frameworks */,
 				E1BCFC1E2E8B7A560021412E /* Resources */,
+				E14D7D0B2E8D3815009BC1C4 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				E14D7D052E8D3815009BC1C4 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				E1BCFC222E8B7A560021412E /* Tempus */,
@@ -80,6 +200,9 @@
 				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
+					E14D7CF12E8D3815009BC1C4 = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
 					E1BCFC1F2E8B7A560021412E = {
 						CreatedOnToolsVersion = 26.0.1;
 					};
@@ -100,11 +223,19 @@
 			projectRoot = "";
 			targets = (
 				E1BCFC1F2E8B7A560021412E /* Tempus */,
+				E14D7CF12E8D3815009BC1C4 /* TempusWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		E14D7CF02E8D3815009BC1C4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E1BCFC1E2E8B7A560021412E /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -115,6 +246,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		E14D7CEE2E8D3815009BC1C4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E1BCFC1C2E8B7A560021412E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -124,7 +262,82 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		E14D7D052E8D3815009BC1C4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E14D7CF12E8D3815009BC1C4 /* TempusWidgetExtension */;
+			targetProxy = E14D7D042E8D3815009BC1C4 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		E14D7D092E8D3815009BC1C4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = TempusWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8259S3SF4M;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TempusWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TempusWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "tempus-ios.Tempus.TempusWidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		E14D7D0A2E8D3815009BC1C4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = TempusWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8259S3SF4M;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TempusWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TempusWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "tempus-ios.Tempus.TempusWidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		E1BCFC2B2E8B7A570021412E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -246,6 +459,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Tempus/Tempus.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 8259S3SF4M;
@@ -254,6 +468,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Tempus/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -290,6 +505,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Tempus/Tempus.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 8259S3SF4M;
@@ -298,6 +514,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Tempus/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -332,6 +549,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		E14D7D082E8D3815009BC1C4 /* Build configuration list for PBXNativeTarget "TempusWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E14D7D092E8D3815009BC1C4 /* Debug */,
+				E14D7D0A2E8D3815009BC1C4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		E1BCFC1B2E8B7A560021412E /* Build configuration list for PBXProject "Tempus" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 struct WorkoutEditView: View {
     @Environment(\.modelContext) private var modelContext
@@ -197,6 +198,22 @@ struct WorkoutEditView: View {
     private func deleteWorkout() {
         HapticManager.shared.trigger(.warning)
         modelContext.delete(workout)
+
+        // Save and refresh widgets after deletion
+        do {
+            try modelContext.save()
+            print("✅ Workout deleted from SwiftData (Edit View)")
+        } catch {
+            print("❌ Failed to save after deletion: \(error)")
+        }
+
+        print("🔄 Requesting widget refresh after deletion...")
+        WidgetCenter.shared.reloadAllTimelines()
+        WidgetCenter.shared.reloadTimelines(ofKind: "GoalProgressWidget")
+        WidgetCenter.shared.reloadTimelines(ofKind: "ExercisesWidget")
+        WidgetCenter.shared.reloadTimelines(ofKind: "WeightWidget")
+        WidgetCenter.shared.reloadTimelines(ofKind: "CombinedStatsWidget")
+
         dismiss()
     }
 }

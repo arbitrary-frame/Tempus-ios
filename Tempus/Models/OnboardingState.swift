@@ -12,7 +12,12 @@ import Combine
 class OnboardingState: ObservableObject {
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
     @AppStorage("userName") var userName: String = ""
-    @AppStorage("weeklyWorkoutGoal") var weeklyWorkoutGoal: Int = 3
+
+    @Published var weeklyWorkoutGoal: Int = UserDefaults.shared.integer(forKey: "weeklyWorkoutGoal") != 0 ? UserDefaults.shared.integer(forKey: "weeklyWorkoutGoal") : 3 {
+        didSet {
+            UserDefaults.shared.set(weeklyWorkoutGoal, forKey: "weeklyWorkoutGoal")
+        }
+    }
 
     func completeOnboarding() {
         hasCompletedOnboarding = true
@@ -22,5 +27,6 @@ class OnboardingState: ObservableObject {
         hasCompletedOnboarding = false
         userName = ""
         weeklyWorkoutGoal = 3
+        UserDefaults.shared.set(3, forKey: "weeklyWorkoutGoal")
     }
 }

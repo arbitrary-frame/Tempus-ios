@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 struct WorkoutLoggingView: View {
     @Environment(\.modelContext) private var modelContext
@@ -193,7 +194,25 @@ struct WorkoutLoggingView: View {
         )
 
         modelContext.insert(workout)
+
+        // Save to disk immediately so widgets can access the data
+        do {
+            try modelContext.save()
+            print("✅ Workout saved to SwiftData")
+        } catch {
+            print("❌ Failed to save workout: \(error)")
+        }
+
         HapticManager.shared.trigger(.success)
+
+        // Refresh all widgets immediately and specifically
+        print("🔄 Requesting widget refresh for all kinds...")
+        WidgetCenter.shared.reloadAllTimelines()
+        WidgetCenter.shared.reloadTimelines(ofKind: "GoalProgressWidget")
+        WidgetCenter.shared.reloadTimelines(ofKind: "ExercisesWidget")
+        WidgetCenter.shared.reloadTimelines(ofKind: "WeightWidget")
+        WidgetCenter.shared.reloadTimelines(ofKind: "CombinedStatsWidget")
+
         dismiss()
     }
 }

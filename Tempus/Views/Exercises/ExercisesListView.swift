@@ -40,7 +40,7 @@ struct ExercisesListView: View {
                     List {
                         ForEach(groupedExercises.keys.sorted(), id: \.self) { muscleGroup in
                             Section {
-                                ForEach(groupedExercises[muscleGroup]!) { exercise in
+                                ForEach(groupedExercises[muscleGroup] ?? []) { exercise in
                                     Button {
                                         selectedExercise = exercise
                                     } label: {

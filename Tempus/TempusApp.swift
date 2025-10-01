@@ -12,6 +12,7 @@ import SwiftData
 struct TempusApp: App {
     @StateObject private var themeManager = ThemeManager()
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
+    @State private var selectedTab: Int = 0
 
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
@@ -19,7 +20,12 @@ struct TempusApp: App {
             WorkoutRoutine.self,
             WorkoutEntry.self
         ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+
+        // Use default configuration (widgets will use fallback)
+        let modelConfiguration = ModelConfiguration(
+            schema: schema,
+            isStoredInMemoryOnly: false
+        )
 
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
@@ -31,13 +37,25 @@ struct TempusApp: App {
     var body: some Scene {
         WindowGroup {
             if hasCompletedOnboarding {
-                ContentView()
+                ContentView(selectedTab: $selectedTab)
                     .environmentObject(themeManager)
+                    .onOpenURL { url in
+                        handleDeepLink(url)
+                    }
             } else {
                 OnboardingView()
                     .environmentObject(themeManager)
             }
         }
         .modelContainer(sharedModelContainer)
+    }
+
+    private func handleDeepLink(_ url: URL) {
+        guard url.scheme == "tempus" else { return }
+
+        // All widget taps go to workouts tab (index 0)
+        if url.host == "workouts" {
+            selectedTab = 0
+        }
     }
 }
