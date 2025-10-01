@@ -50,7 +50,7 @@ struct CombinedStatsWidgetView: View {
                     icon: "list.bullet.clipboard",
                     value: "\(entry.exercisesThisWeek)",
                     label: "Exercises",
-                    accentColor: Color.accentColor
+                    accentColor: .orange
                 )
 
                 // Weight
@@ -82,7 +82,7 @@ struct CombinedStatsWidgetView: View {
                 Circle()
                     .trim(from: 0, to: entry.progress)
                     .stroke(
-                        entry.workoutsCompleted >= entry.weeklyGoal ? Color.green : Color.blue,
+                        entry.workoutsCompleted >= entry.weeklyGoal ? Color.green : .orange,
                         style: StrokeStyle(lineWidth: 4, lineCap: .round)
                     )
                     .rotationEffect(.degrees(-90))

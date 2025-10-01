@@ -49,7 +49,7 @@ struct GoalProgressWidgetView: View {
                 Circle()
                     .trim(from: 0, to: entry.progress)
                     .stroke(
-                        entry.workoutsCompleted >= entry.weeklyGoal ? Color.green : Color.blue,
+                        entry.workoutsCompleted >= entry.weeklyGoal ? Color.green : .orange,
                         style: StrokeStyle(lineWidth: 6, lineCap: .round)
                     )
                     .rotationEffect(.degrees(-90))

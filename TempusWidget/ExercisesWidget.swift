@@ -39,7 +39,7 @@ struct ExercisesWidgetView: View {
             // Icon
             Image(systemName: "list.bullet.clipboard")
                 .font(.system(size: 40))
-                .foregroundStyle(Color.accentColor)
+                .foregroundStyle(.orange)
                 .symbolRenderingMode(.hierarchical)
                 .frame(height: 50)
 
