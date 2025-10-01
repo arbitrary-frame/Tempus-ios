@@ -79,7 +79,6 @@ struct WorkoutsListView: View {
                             WorkoutStatsCard(
                                 workoutsThisWeek: workoutsThisWeek,
                                 totalExercises: totalExercisesCompleted,
-                                totalSets: totalSetsCompleted,
                                 totalWeight: totalWeightThisWeek
                             )
                         }
@@ -316,8 +315,8 @@ struct WorkoutCardView: View {
 struct WorkoutStatsCard: View {
     let workoutsThisWeek: Int
     let totalExercises: Int
-    let totalSets: Int
     let totalWeight: Double
+    @AppStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
 
     var formattedWeight: String {
         let kg = Int(totalWeight)
@@ -327,8 +326,13 @@ struct WorkoutStatsCard: View {
         return "\(kg)"
     }
 
+    var progress: Double {
+        guard weeklyWorkoutGoal > 0 else { return 0 }
+        return min(Double(workoutsThisWeek) / Double(weeklyWorkoutGoal), 1.0)
+    }
+
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 12) {
             HStack(spacing: 4) {
                 Image(systemName: "chart.bar.fill")
                     .font(.caption)
@@ -340,15 +344,16 @@ struct WorkoutStatsCard: View {
                 Spacer()
             }
 
-            // Statistics Grid
             HStack(spacing: 8) {
-                StatBubble(
-                    value: "\(workoutsThisWeek)",
-                    label: "Workouts",
-                    icon: "figure.strengthtraining.traditional"
+                // Circular Progress Ring
+                WeeklyGoalRing(
+                    workoutsCompleted: workoutsThisWeek,
+                    weeklyGoal: weeklyWorkoutGoal,
+                    progress: progress
                 )
                 .frame(maxWidth: .infinity)
 
+                // Exercises count
                 StatBubble(
                     value: "\(totalExercises)",
                     label: "Exercises",
@@ -356,13 +361,7 @@ struct WorkoutStatsCard: View {
                 )
                 .frame(maxWidth: .infinity)
 
-                StatBubble(
-                    value: "\(totalSets)",
-                    label: "Sets",
-                    icon: "square.stack.3d.up.fill"
-                )
-                .frame(maxWidth: .infinity)
-
+                // Weight stat
                 StatBubble(
                     value: formattedWeight,
                     label: "kg",
@@ -372,6 +371,123 @@ struct WorkoutStatsCard: View {
                 .frame(maxWidth: .infinity)
             }
         }
+    }
+}
+
+// Weekly Goal Progress Ring
+struct WeeklyGoalRing: View {
+    let workoutsCompleted: Int
+    let weeklyGoal: Int
+    let progress: Double
+    @State private var animatedProgress: Double = 0
+    @State private var showCelebration = false
+    @State private var hasReachedGoal = false
+
+    var body: some View {
+        VStack(spacing: 6) {
+            // Ring as icon replacement
+            ZStack {
+                // Background ring
+                Circle()
+                    .stroke(
+                        Color.secondary.opacity(0.2),
+                        lineWidth: 4
+                    )
+
+                // Progress ring
+                Circle()
+                    .trim(from: 0, to: animatedProgress)
+                    .stroke(
+                        workoutsCompleted >= weeklyGoal ? Color.green : Color.accentColor,
+                        style: StrokeStyle(lineWidth: 4, lineCap: .round)
+                    )
+                    .rotationEffect(.degrees(-90))
+                    .animation(.spring(response: 0.6, dampingFraction: 0.8), value: animatedProgress)
+
+                // Celebration confetti
+                if showCelebration {
+                    ForEach(0..<12, id: \.self) { index in
+                        Circle()
+                            .fill(Color.accentColor)
+                            .frame(width: 4, height: 4)
+                            .modifier(ParticleModifier(index: index))
+                    }
+                }
+            }
+            .frame(height: 50)
+            .aspectRatio(1, contentMode: .fit)
+
+            // Value below ring (like other stat bubbles)
+            Text("\(workoutsCompleted)/\(weeklyGoal)")
+                .font(.title2.bold())
+                .foregroundStyle(.primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .contentTransition(.numericText())
+
+            // Label
+            Text("Workouts")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .frame(height: 14)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 8)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .onAppear {
+            animatedProgress = progress
+            checkForGoalReached()
+        }
+        .onChange(of: progress) { oldValue, newValue in
+            animatedProgress = newValue
+            checkForGoalReached()
+        }
+    }
+
+    private func checkForGoalReached() {
+        let goalReached = workoutsCompleted >= weeklyGoal
+        if goalReached && !hasReachedGoal {
+            // First time reaching goal this week
+            hasReachedGoal = true
+            triggerCelebration()
+        } else if !goalReached {
+            hasReachedGoal = false
+        }
+    }
+
+    private func triggerCelebration() {
+        HapticManager.shared.trigger(.success)
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
+            showCelebration = true
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            withAnimation {
+                showCelebration = false
+            }
+        }
+    }
+}
+
+// Particle animation for celebration
+struct ParticleModifier: ViewModifier {
+    let index: Int
+    @State private var isActive = false
+
+    func body(content: Content) -> some View {
+        content
+            .offset(
+                x: isActive ? cos(Double(index) * .pi / 6) * 50 : 0,
+                y: isActive ? sin(Double(index) * .pi / 6) * 50 : 0
+            )
+            .opacity(isActive ? 0 : 1)
+            .scaleEffect(isActive ? 1.5 : 0.5)
+            .onAppear {
+                withAnimation(.easeOut(duration: 1.0)) {
+                    isActive = true
+                }
+            }
     }
 }
 
@@ -388,7 +504,7 @@ struct StatBubble: View {
                 .font(.title3)
                 .foregroundStyle(accentColor)
                 .symbolRenderingMode(.hierarchical)
-                .frame(height: 22)
+                .frame(height: 50)
 
             Text(value)
                 .font(.title2.bold())
