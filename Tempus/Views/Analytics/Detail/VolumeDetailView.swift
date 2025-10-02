@@ -50,22 +50,6 @@ struct VolumeDetailView: View {
         volumeData.reduce(0.0) { $0 + $1.volume }
     }
 
-    private var chartXDomain: ClosedRange<Date> {
-        let calendar = Calendar.current
-        let now = Date()
-
-        if let days = selectedPeriod.days {
-            let startDate = calendar.date(byAdding: .day, value: -days, to: now) ?? now
-            return startDate...now
-        } else {
-            // For "All", use actual data range
-            if let firstDate = volumeData.first?.date,
-               let lastDate = volumeData.last?.date {
-                return firstDate...lastDate
-            }
-            return now...now
-        }
-    }
 
     private func formatXAxisLabel(_ date: Date) -> String {
         switch selectedPeriod {
@@ -193,7 +177,6 @@ struct VolumeDetailView: View {
                                     }
                                 }
                             }
-                            .chartXScale(domain: chartXDomain)
                             .frame(height: 300)
                             .padding()
                             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))

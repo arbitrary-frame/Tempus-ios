@@ -55,22 +55,6 @@ struct VolumeChartCard: View {
         return ((secondAvg - firstAvg) / firstAvg) * 100
     }
 
-    private var chartXDomain: ClosedRange<Date> {
-        let calendar = Calendar.current
-        let now = Date()
-
-        if let days = selectedPeriod.days {
-            let startDate = calendar.date(byAdding: .day, value: -days, to: now) ?? now
-            return startDate...now
-        } else {
-            // For "All", use actual data range
-            if let firstDate = volumeData.first?.date,
-               let lastDate = volumeData.last?.date {
-                return firstDate...lastDate
-            }
-            return now...now
-        }
-    }
 
     private func formatXAxisLabel(_ date: Date) -> String {
         switch selectedPeriod {
@@ -190,7 +174,6 @@ struct VolumeChartCard: View {
                             }
                         }
                     }
-                    .chartXScale(domain: chartXDomain)
                     .frame(height: 120)
                 }
 
