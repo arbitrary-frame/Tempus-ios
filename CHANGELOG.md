@@ -4,6 +4,59 @@ All notable changes to Tempus iOS workout tracking app.
 
 ## [Unreleased]
 
+### [Analytics v1.1.0 - Phase 2] - Interactive Charts UI - 2025-10-02
+
+**Added:**
+- **VolumeChartCard** - Dashboard-level volume trend visualization
+  - Mini line chart with area gradient
+  - Period selector (7D/30D/90D/All Time)
+  - Trend percentage indicator (vs first half of period)
+  - Tap to expand to full-screen detail view
+- **PersonalRecordsCard** - Recent PRs showcase
+  - Shows 3 most recent personal records
+  - Exercise name, weight×reps, relative date
+  - Tap to view all PRs grouped by muscle group
+- **VolumeDetailView** - Full-screen volume analysis
+  - Large line chart with smooth interpolation
+  - 7-day moving average overlay (dashed blue line)
+  - Summary statistics: Total, Average, Best workout
+  - Period filtering with live updates
+- **PersonalRecordsListView** - Comprehensive PR tracking
+  - All exercises with PRs grouped by muscle group
+  - Shows latest PR, estimated 1RM, total PR count
+  - Tap exercise to view detailed progression
+- **ExerciseDetailView** - Individual exercise analytics
+  - Max weight progression chart (highlights PRs in green)
+  - Volume trend bar chart
+  - Quick stats: Frequency, Total Sets, PR Count
+  - Average weight & reps display
+  - PR timeline with dates and estimated 1RM
+
+**Design:**
+- Swift Charts framework for native iOS charting
+- Liquid Glass aesthetic matching existing UI
+- Progressive disclosure UX (Dashboard → Detail → Exercise)
+- Orange accent for primary data, blue for comparisons, green for PRs
+- Smooth spring animations throughout
+- Haptic feedback on all interactions
+
+**User Experience:**
+- No overwhelming statistics - key insights first
+- Tap any chart to drill down for more detail
+- Visual trends at a glance with gradient fills
+- PR celebrations with trophy badges
+- Accessible relative date formatting
+- Period filtering across all views
+
+**Technical:**
+- Uses existing AnalyticsService for calculations
+- 3-level navigation hierarchy
+- Bindings for period state management
+- Identifiable protocol for sheet presentations
+- Chart customization with Swift Charts DSL
+
+---
+
 ### [Analytics v1.1.0 - Phase 1] - Data Foundation - 2025-10-02
 
 **Added:**
