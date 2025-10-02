@@ -1,0 +1,183 @@
+//
+//  VolumeChartCard.swift
+//  Tempus
+//
+//  Created by Ronak Pattani on 02/10/2025.
+//
+
+import SwiftUI
+import Charts
+
+struct VolumeChartCard: View {
+    let workouts: [WorkoutEntry]
+    @State private var selectedPeriod: TimePeriod = .thirtyDays
+    @State private var showingDetailView = false
+
+    enum TimePeriod: String, CaseIterable {
+        case sevenDays = "7D"
+        case thirtyDays = "30D"
+        case ninetyDays = "90D"
+        case all = "All"
+
+        var days: Int? {
+            switch self {
+            case .sevenDays: return 7
+            case .thirtyDays: return 30
+            case .ninetyDays: return 90
+            case .all: return nil
+            }
+        }
+    }
+
+    private var filteredWorkouts: [WorkoutEntry] {
+        guard let days = selectedPeriod.days else { return workouts }
+        let cutoffDate = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
+        return workouts.filter { $0.workoutDate >= cutoffDate }
+    }
+
+    private var volumeData: [(date: Date, volume: Double)] {
+        filteredWorkouts
+            .sorted { $0.workoutDate < $1.workoutDate }
+            .map { (date: $0.workoutDate, volume: $0.totalVolume) }
+    }
+
+    private var trendPercentage: Double? {
+        guard volumeData.count >= 4 else { return nil }
+
+        let midpoint = volumeData.count / 2
+        let firstHalf = volumeData.prefix(midpoint)
+        let secondHalf = volumeData.suffix(midpoint)
+
+        let firstAvg = firstHalf.reduce(0.0) { $0 + $1.volume } / Double(firstHalf.count)
+        let secondAvg = secondHalf.reduce(0.0) { $0 + $1.volume } / Double(secondHalf.count)
+
+        guard firstAvg > 0 else { return nil }
+        return ((secondAvg - firstAvg) / firstAvg) * 100
+    }
+
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 20)
+                .fill(.ultraThinMaterial)
+                .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+
+            VStack(alignment: .leading, spacing: 16) {
+                // Header
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Volume Trend")
+                            .font(.headline)
+                            .foregroundStyle(.primary)
+
+                        if let trend = trendPercentage {
+                            HStack(spacing: 4) {
+                                Image(systemName: trend >= 0 ? "arrow.up.right" : "arrow.down.right")
+                                    .font(.caption2)
+                                Text(String(format: "%.1f%% vs first half", abs(trend)))
+                                    .font(.caption)
+                            }
+                            .foregroundStyle(trend >= 0 ? .green : .secondary)
+                        }
+                    }
+
+                    Spacer()
+
+                    // Period selector
+                    Picker("Period", selection: $selectedPeriod) {
+                        ForEach(TimePeriod.allCases, id: \.self) { period in
+                            Text(period.rawValue).tag(period)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 180)
+                }
+
+                // Mini chart
+                if volumeData.isEmpty {
+                    VStack(spacing: 8) {
+                        Image(systemName: "chart.line.uptrend.xyaxis")
+                            .font(.title)
+                            .foregroundStyle(.secondary)
+                        Text("No workouts in this period")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(height: 120)
+                    .frame(maxWidth: .infinity)
+                } else {
+                    Chart(volumeData, id: \.date) { point in
+                        LineMark(
+                            x: .value("Date", point.date),
+                            y: .value("Volume", point.volume)
+                        )
+                        .foregroundStyle(.orange)
+                        .interpolationMethod(.catmullRom)
+
+                        AreaMark(
+                            x: .value("Date", point.date),
+                            y: .value("Volume", point.volume)
+                        )
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [.orange.opacity(0.3), .orange.opacity(0.05)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .interpolationMethod(.catmullRom)
+                    }
+                    .chartYAxis {
+                        AxisMarks(position: .leading) { value in
+                            AxisValueLabel {
+                                if let kg = value.as(Double.self) {
+                                    Text(formatVolume(kg))
+                                        .font(.caption2)
+                                }
+                            }
+                        }
+                    }
+                    .chartXAxis {
+                        AxisMarks { value in
+                            AxisValueLabel(format: .dateTime.month(.narrow).day())
+                                .font(.caption2)
+                        }
+                    }
+                    .frame(height: 120)
+                }
+
+                // Tap to view more
+                Button {
+                    HapticManager.shared.trigger(.light)
+                    showingDetailView = true
+                } label: {
+                    HStack {
+                        Text("View Details")
+                            .font(.subheadline.bold())
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                    }
+                    .foregroundStyle(.orange)
+                }
+            }
+            .padding(20)
+        }
+        .sheet(isPresented: $showingDetailView) {
+            VolumeDetailView(workouts: workouts, selectedPeriod: $selectedPeriod)
+        }
+    }
+
+    private func formatVolume(_ volume: Double) -> String {
+        let kg = Int(volume)
+        if kg >= 10000 {
+            return String(format: "%.0fk", Double(kg) / 1000.0)
+        } else if kg >= 1000 {
+            return String(format: "%.1fk", Double(kg) / 1000.0)
+        }
+        return "\(kg)"
+    }
+}
+
+#Preview {
+    VolumeChartCard(workouts: [])
+        .padding()
+}

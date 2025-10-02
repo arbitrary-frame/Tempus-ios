@@ -11,6 +11,7 @@ import SwiftData
 struct AnalyticsView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var workouts: [WorkoutEntry]
+    @Query private var exercises: [Exercise]
     @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
 
     // Calculate total weeks where goal was met
@@ -186,28 +187,13 @@ struct AnalyticsView: View {
                             }
                             .padding(.horizontal)
 
-                            // Coming Soon Card
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 20)
-                                    .fill(.regularMaterial)
-                                    .shadow(color: .black.opacity(0.08), radius: 6, x: 0, y: 3)
+                            // Volume Trend Chart
+                            VolumeChartCard(workouts: workouts)
+                                .padding(.horizontal)
 
-                                VStack(spacing: 12) {
-                                    Image(systemName: "chart.xyaxis.line")
-                                        .font(.system(size: 36))
-                                        .foregroundStyle(.secondary)
-
-                                    Text("Coming Soon")
-                                        .font(.headline)
-
-                                    Text("Charts and progress tracking")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                        .multilineTextAlignment(.center)
-                                }
-                                .padding(32)
-                            }
-                            .padding(.horizontal)
+                            // Personal Records Card
+                            PersonalRecordsCard(workouts: workouts, exercises: exercises)
+                                .padding(.horizontal)
                         }
                         .padding(.top)
                     }
