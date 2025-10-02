@@ -181,12 +181,20 @@ struct SettingsView: View {
             dateRange: dateRange
         )
 
+        // Create user settings
+        let userSettings = ExportUserSettings(
+            userName: userName,
+            weeklyWorkoutGoal: weeklyWorkoutGoal
+        )
+
         let exportModel = ExportData(
-            version: "1.0.0",
+            version: "1.1.0",
+            userSettings: userSettings,
             metadata: metadata,
             workouts: workouts.map { workout in
                 ExportWorkout(
                     id: workout.id.uuidString,
+                    routineID: workout.routine?.id.uuidString,
                     name: workout.workoutName,
                     date: workout.workoutDate,
                     notes: workout.notes,
@@ -195,6 +203,7 @@ struct SettingsView: View {
                         let muscleGroup = exercises.first(where: { $0.id == exerciseData.exerciseID })?.muscleGroup
 
                         return ExportExercise(
+                            exerciseID: exerciseData.exerciseID.uuidString,
                             name: exerciseData.exerciseName,
                             muscleGroup: muscleGroup,
                             sets: exerciseData.sets.map { set in
@@ -299,11 +308,17 @@ struct SettingsView: View {
 
 struct ExportData: Codable, Sendable {
     let version: String
+    let userSettings: ExportUserSettings
     let metadata: ExportMetadata
     let workouts: [ExportWorkout]
     let exercises: [ExportExerciseDefinition]
     let routines: [ExportRoutine]
     let exportDate: Date
+}
+
+struct ExportUserSettings: Codable, Sendable {
+    let userName: String
+    let weeklyWorkoutGoal: Int
 }
 
 struct ExportMetadata: Codable, Sendable {
@@ -322,6 +337,7 @@ struct ExportDateRange: Codable, Sendable {
 
 struct ExportWorkout: Codable, Sendable {
     let id: String
+    let routineID: String?
     let name: String
     let date: Date
     let notes: String?
@@ -329,6 +345,7 @@ struct ExportWorkout: Codable, Sendable {
 }
 
 struct ExportExercise: Codable, Sendable {
+    let exerciseID: String
     let name: String
     let muscleGroup: String?
     let sets: [ExportSet]
