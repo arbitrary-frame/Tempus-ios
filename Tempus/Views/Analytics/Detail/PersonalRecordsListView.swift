@@ -181,8 +181,9 @@ struct PRDetailRow: View {
 
                     Spacer()
 
-                    Text("🏆")
-                        .font(.title2)
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
                 }
 
                 Divider()

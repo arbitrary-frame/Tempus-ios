@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Charts
 
 struct ExerciseDetailView: View {
     @Environment(\.dismiss) private var dismiss
@@ -23,14 +22,6 @@ struct ExerciseDetailView: View {
 
     private var muscleGroup: String {
         exercises.first { $0.name == exerciseName }?.muscleGroup ?? "Unknown"
-    }
-
-    private var maxWeightProgression: [(date: Date, maxWeight: Double)] {
-        AnalyticsService.maxWeightProgression(for: exerciseName, in: workouts)
-    }
-
-    private var volumeProgression: [(date: Date, volume: Double)] {
-        AnalyticsService.calculateExerciseVolume(exerciseName: exerciseName, in: workouts)
     }
 
     private var personalRecords: [PersonalRecord] {
@@ -104,121 +95,6 @@ struct ExerciseDetailView: View {
                     }
                     .padding(.horizontal)
 
-                    // Max weight progression chart
-                    if !maxWeightProgression.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Max Weight Progression")
-                                .font(.headline)
-                                .padding(.horizontal)
-
-                            Chart(maxWeightProgression, id: \.date) { point in
-                                LineMark(
-                                    x: .value("Date", point.date),
-                                    y: .value("Weight", point.maxWeight)
-                                )
-                                .foregroundStyle(.orange)
-                                .interpolationMethod(.monotone)
-                                .lineStyle(StrokeStyle(lineWidth: 3))
-                                .symbol(Circle().strokeBorder(lineWidth: 2))
-                                .symbolSize(40)
-
-                                AreaMark(
-                                    x: .value("Date", point.date),
-                                    y: .value("Weight", point.maxWeight)
-                                )
-                                .foregroundStyle(
-                                    LinearGradient(
-                                        colors: [.orange.opacity(0.3), .orange.opacity(0.05)],
-                                        startPoint: .top,
-                                        endPoint: .bottom
-                                    )
-                                )
-                                .interpolationMethod(.monotone)
-
-                                // Highlight PRs
-                                ForEach(personalRecords.prefix(5), id: \.id) { pr in
-                                    if Calendar.current.isDate(pr.date, inSameDayAs: point.date) {
-                                        PointMark(
-                                            x: .value("Date", pr.date),
-                                            y: .value("Weight", pr.weight)
-                                        )
-                                        .foregroundStyle(.green)
-                                        .symbolSize(60)
-                                    }
-                                }
-                            }
-                            .chartYAxis {
-                                AxisMarks(position: .leading) { value in
-                                    AxisGridLine()
-                                    AxisValueLabel {
-                                        if let kg = value.as(Double.self) {
-                                            Text("\(Int(kg))kg")
-                                                .font(.caption)
-                                        }
-                                    }
-                                }
-                            }
-                            .chartXAxis {
-                                AxisMarks { value in
-                                    AxisGridLine()
-                                    AxisValueLabel(format: .dateTime.month(.abbreviated))
-                                        .font(.caption)
-                                }
-                            }
-                            .frame(height: 200)
-                            .padding()
-                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
-                            .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
-                            .padding(.horizontal)
-                        }
-                    }
-
-                    // Volume progression chart
-                    if !volumeProgression.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Volume Trend")
-                                .font(.headline)
-                                .padding(.horizontal)
-
-                            Chart(volumeProgression, id: \.date) { point in
-                                BarMark(
-                                    x: .value("Date", point.date),
-                                    y: .value("Volume", point.volume)
-                                )
-                                .foregroundStyle(
-                                    LinearGradient(
-                                        colors: [.blue, .blue.opacity(0.6)],
-                                        startPoint: .top,
-                                        endPoint: .bottom
-                                    )
-                                )
-                                .cornerRadius(6)
-                            }
-                            .chartYAxis {
-                                AxisMarks(position: .leading) { value in
-                                    AxisGridLine()
-                                    AxisValueLabel {
-                                        if let kg = value.as(Double.self) {
-                                            Text(formatVolume(kg))
-                                                .font(.caption)
-                                        }
-                                    }
-                                }
-                            }
-                            .chartXAxis {
-                                AxisMarks { value in
-                                    AxisValueLabel(format: .dateTime.month(.abbreviated).day())
-                                        .font(.caption)
-                                }
-                            }
-                            .frame(height: 180)
-                            .padding()
-                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
-                            .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
-                            .padding(.horizontal)
-                        }
-                    }
-
                     // Average stats
                     HStack(spacing: 12) {
                         if let avgWeight = averageWeight {
@@ -287,14 +163,6 @@ struct ExerciseDetailView: View {
                 Text("Est. 1RM (Estimated One-Rep Max) is the maximum weight you could lift for one repetition.\n\nCalculated using the Brzycki formula:\nWeight ÷ (1.0278 - 0.0278 × Reps)\n\nThis helps compare different rep ranges and track pure strength gains.")
             }
         }
-    }
-
-    private func formatVolume(_ volume: Double) -> String {
-        let kg = Int(volume)
-        if kg >= 1000 {
-            return String(format: "%.1fk", Double(kg) / 1000.0)
-        }
-        return "\(kg)"
     }
 }
 
