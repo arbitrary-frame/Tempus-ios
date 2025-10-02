@@ -18,9 +18,10 @@ struct SettingsView: View {
     @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = true
 
-    @State private var showingExportSheet = false
-    @State private var exportData: Data?
+    @State private var exportItem: ExportItem?
     @State private var showingResetConfirmation = false
+    @State private var showingExportError = false
+    @State private var exportErrorMessage = ""
     @State private var showingSampleDataLoaded = false
     @State private var showingDataCleared = false
 
@@ -127,10 +128,14 @@ struct SettingsView: View {
             }
             .listStyle(.insetGrouped)
             .navigationTitle("Settings")
-            .sheet(isPresented: $showingExportSheet) {
-                if let data = exportData {
-                    ShareSheet(items: [data])
-                }
+            .sheet(item: $exportItem) { item in
+                ShareSheet(items: [item.url])
+                    .presentationDetents([.medium, .large])
+            }
+            .alert("Export Error", isPresented: $showingExportError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(exportErrorMessage)
             }
             .alert("Reset App to Default?", isPresented: $showingResetConfirmation) {
                 Button("Cancel", role: .cancel) { }
@@ -156,18 +161,52 @@ struct SettingsView: View {
     }
 
     private func exportAllData() {
+        // Calculate date range from workouts
+        let sortedWorkouts = workouts.sorted { $0.workoutDate < $1.workoutDate }
+        let dateRange: ExportDateRange? = {
+            guard let earliest = sortedWorkouts.first?.workoutDate,
+                  let latest = sortedWorkouts.last?.workoutDate else {
+                return nil
+            }
+            return ExportDateRange(earliest: earliest, latest: latest)
+        }()
+
+        // Create metadata
+        let metadata = ExportMetadata(
+            exportDate: Date(),
+            appVersion: "1.0.0",
+            totalWorkouts: workouts.count,
+            totalExercises: exercises.count,
+            totalRoutines: routines.count,
+            dateRange: dateRange
+        )
+
+        // Create user settings
+        let userSettings = ExportUserSettings(
+            userName: userName,
+            weeklyWorkoutGoal: weeklyWorkoutGoal
+        )
+
         let exportModel = ExportData(
-            version: "1.0.0",
+            version: "1.1.0",
+            userSettings: userSettings,
+            metadata: metadata,
             workouts: workouts.map { workout in
                 ExportWorkout(
                     id: workout.id.uuidString,
+                    routineID: workout.routine?.id.uuidString,
                     name: workout.workoutName,
                     date: workout.workoutDate,
                     notes: workout.notes,
-                    exercises: workout.exercisesData.map { exercise in
-                        ExportExercise(
-                            name: exercise.exerciseName,
-                            sets: exercise.sets.map { set in
+                    exercises: workout.exercisesData.map { exerciseData in
+                        // Look up muscle group from Exercise database using exerciseID
+                        let muscleGroup = exercises.first(where: { $0.id == exerciseData.exerciseID })?.muscleGroup
+
+                        return ExportExercise(
+                            exerciseID: exerciseData.exerciseID.uuidString,
+                            name: exerciseData.exerciseName,
+                            muscleGroup: muscleGroup,
+                            sets: exerciseData.sets.map { set in
                                 ExportSet(
                                     setNumber: set.setNumber,
                                     weightsAndReps: set.weightsAndReps.map { wr in
@@ -175,7 +214,7 @@ struct SettingsView: View {
                                     }
                                 )
                             },
-                            notes: exercise.notes
+                            notes: exerciseData.notes
                         )
                     }
                 )
@@ -189,17 +228,48 @@ struct SettingsView: View {
                     tags: exercise.tags
                 )
             },
+            routines: routines.map { routine in
+                ExportRoutine(
+                    id: routine.id.uuidString,
+                    name: routine.name,
+                    description: routine.routineDescription,
+                    emoji: routine.emoji,
+                    exerciseIDs: routine.exercises.map { $0.id.uuidString },
+                    createdAt: routine.createdAt,
+                    updatedAt: routine.updatedAt
+                )
+            },
             exportDate: Date()
         )
 
         do {
+            // Encode to JSON
             let encoder = JSONEncoder()
             encoder.dateEncodingStrategy = .iso8601
             encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-            exportData = try encoder.encode(exportModel)
-            showingExportSheet = true
+            let data = try encoder.encode(exportModel)
+
+            // Create filename with date
+            let dateFormatter = DateFormatter()
+            dateFormatter.locale = Locale(identifier: "en_GB")
+            dateFormatter.dateFormat = "yyyy-MM-dd"
+            let dateString = dateFormatter.string(from: Date())
+            let filename = "tempus-export-\(dateString).json"
+
+            // Write to temporary file
+            let tempURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent(filename)
+
+            try data.write(to: tempURL)
+
+            // Trigger success haptic and show share sheet
+            HapticManager.shared.trigger(.success)
+            exportItem = ExportItem(url: tempURL)
         } catch {
-            // Handle error silently for now
+            // Show error to user
+            exportErrorMessage = "Failed to export data: \(error.localizedDescription)"
+            showingExportError = true
+            HapticManager.shared.trigger(.error)
         }
     }
 
@@ -238,13 +308,36 @@ struct SettingsView: View {
 
 struct ExportData: Codable, Sendable {
     let version: String
+    let userSettings: ExportUserSettings
+    let metadata: ExportMetadata
     let workouts: [ExportWorkout]
     let exercises: [ExportExerciseDefinition]
+    let routines: [ExportRoutine]
     let exportDate: Date
+}
+
+struct ExportUserSettings: Codable, Sendable {
+    let userName: String
+    let weeklyWorkoutGoal: Int
+}
+
+struct ExportMetadata: Codable, Sendable {
+    let exportDate: Date
+    let appVersion: String
+    let totalWorkouts: Int
+    let totalExercises: Int
+    let totalRoutines: Int
+    let dateRange: ExportDateRange?
+}
+
+struct ExportDateRange: Codable, Sendable {
+    let earliest: Date
+    let latest: Date
 }
 
 struct ExportWorkout: Codable, Sendable {
     let id: String
+    let routineID: String?
     let name: String
     let date: Date
     let notes: String?
@@ -252,7 +345,9 @@ struct ExportWorkout: Codable, Sendable {
 }
 
 struct ExportExercise: Codable, Sendable {
+    let exerciseID: String
     let name: String
+    let muscleGroup: String?
     let sets: [ExportSet]
     let notes: String?
 }
@@ -275,17 +370,42 @@ struct ExportExerciseDefinition: Codable, Sendable {
     let tags: [String]
 }
 
+struct ExportRoutine: Codable, Sendable {
+    let id: String
+    let name: String
+    let description: String?
+    let emoji: String?
+    let exerciseIDs: [String]
+    let createdAt: Date
+    let updatedAt: Date
+}
+
 // MARK: - Share Sheet
 
 struct ShareSheet: UIViewControllerRepresentable {
     let items: [Any]
+    @Environment(\.colorScheme) var colorScheme
 
     func makeUIViewController(context: Context) -> UIActivityViewController {
         let controller = UIActivityViewController(activityItems: items, applicationActivities: nil)
+
+        // Sync SwiftUI colorScheme with UIKit interface style
+        controller.overrideUserInterfaceStyle = colorScheme == .dark ? .dark : .light
+
         return controller
     }
 
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {
+        // Update interface style when color scheme changes
+        uiViewController.overrideUserInterfaceStyle = colorScheme == .dark ? .dark : .light
+    }
+}
+
+// MARK: - Export Item
+
+struct ExportItem: Identifiable {
+    let id = UUID()
+    let url: URL
 }
 
 #Preview {

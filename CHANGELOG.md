@@ -4,6 +4,45 @@ All notable changes to Tempus iOS workout tracking app.
 
 ## [Unreleased]
 
+### [Analytics v1.1.0 - Phase 1] - Data Foundation - 2025-10-02
+
+**Added:**
+- **AnalyticsService** - Centralized calculation engine for all analytics
+  - Volume calculations (workout, exercise, trends)
+  - Max weight tracking and progression
+  - Personal records detection with 1RM estimation (Brzycki formula)
+  - Muscle group distribution analysis
+  - Frequency analysis and averages
+- **WorkoutEntry+Analytics Extensions** - Helper properties and methods
+  - `totalVolume`, `exerciseCount`, `totalSets`, `maxWeight` computed properties
+  - Array filtering and trend analysis extensions
+- **Enhanced Export Format (v1.1.0)**
+  - Added `exerciseID` in workout exercises for robust exercise tracking
+  - Added `routineID` in workouts to track routine adherence
+  - Added `userSettings` section with `userName` and `weeklyWorkoutGoal`
+  - Complete data portability with proper ID linkage
+
+**Fixed:**
+- **Export share sheet bug** - Blank screen in dark mode
+  - Root cause: SwiftUI `.sheet(isPresented:)` state wasn't triggering properly
+  - Root cause: UIKit/SwiftUI color scheme mismatch
+  - Solution: Changed to `.sheet(item:)` pattern for reliable presentation
+  - Solution: Synced SwiftUI `colorScheme` with UIKit `overrideUserInterfaceStyle`
+  - Now works perfectly in both dark and light modes
+
+**Improved:**
+- Eliminated duplicate volume calculation code across 3+ files
+- All analytics calculations now use single source of truth (AnalyticsService)
+- Export data is now fully analytics-ready with complete relationship tracking
+
+**Technical:**
+- Created `Services/AnalyticsService.swift` with actor-based thread safety
+- Created `Models/WorkoutEntry+Analytics.swift` for convenience methods
+- Export version bumped from 1.0.0 to 1.1.0
+- Refactored `WorkoutsListView` and `WorkoutStatsProvider` to use new extensions
+
+---
+
 ## [1.0.0] - 2025-10-01
 
 ### 🎉 Initial Release

@@ -77,19 +77,7 @@ struct WorkoutsListView: View {
         }
 
         let workoutsThisWeek = workouts.filter { $0.workoutDate >= weekStart }
-        var totalWeight: Double = 0
-
-        for workout in workoutsThisWeek {
-            for exercise in workout.exercisesData {
-                for set in exercise.sets {
-                    for weightRep in set.weightsAndReps {
-                        totalWeight += weightRep.weight * Double(weightRep.reps)
-                    }
-                }
-            }
-        }
-
-        return totalWeight
+        return workoutsThisWeek.reduce(0.0) { $0 + $1.totalVolume }
     }
 
     private var totalWeightLastWeek: Double {
@@ -101,19 +89,7 @@ struct WorkoutsListView: View {
         }
 
         let workoutsLastWeek = workouts.filter { $0.workoutDate >= lastWeekStart && $0.workoutDate < currentWeekStart }
-        var totalWeight: Double = 0
-
-        for workout in workoutsLastWeek {
-            for exercise in workout.exercisesData {
-                for set in exercise.sets {
-                    for weightRep in set.weightsAndReps {
-                        totalWeight += weightRep.weight * Double(weightRep.reps)
-                    }
-                }
-            }
-        }
-
-        return totalWeight
+        return workoutsLastWeek.reduce(0.0) { $0 + $1.totalVolume }
     }
 
     private var weightChangePercentage: Double? {

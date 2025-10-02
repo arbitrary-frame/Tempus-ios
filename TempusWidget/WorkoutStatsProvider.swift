@@ -115,13 +115,15 @@ struct WorkoutStatsProvider: TimelineProvider {
             let workouts = try context.fetch(descriptor)
             let workoutCount = workouts.count
 
-            // Calculate exercise count and total weight
+            // Calculate exercise count
             var exerciseCount = 0
-            var totalWeight = 0.0
-
             for workout in workouts {
                 exerciseCount += workout.exercisesData.count
+            }
 
+            // Calculate total volume
+            var totalWeight = 0.0
+            for workout in workouts {
                 for exercise in workout.exercisesData {
                     for set in exercise.sets {
                         for weightRep in set.weightsAndReps {
