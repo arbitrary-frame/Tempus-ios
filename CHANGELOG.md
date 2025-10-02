@@ -4,6 +4,45 @@ All notable changes to Tempus iOS workout tracking app.
 
 ## [Unreleased]
 
+### [Personal Records Feature] - 2025-10-02
+
+**Added:**
+- **PersonalRecordsCard** on Analytics dashboard
+  - Shows 3 most recent PRs with exercise name, weight×reps, relative date
+  - Displays count of exercises with PRs
+  - "View All PRs" button to drill down
+- **PersonalRecordsListView** - Full PR list
+  - All PRs grouped by muscle group with section headers
+  - Shows latest PR date, estimated 1RM, total PR count per exercise
+  - Chevron indicator showing rows are tappable
+  - Info button explaining 1RM calculation (Brzycki formula)
+  - Tap any exercise to view detailed stats
+- **ExerciseDetailView** - Exercise-specific analytics
+  - Exercise name with muscle group badge
+  - Quick stats: Frequency, Total Sets, PR Count
+  - Average weight & average reps
+  - PR timeline showing up to 10 recent PRs with dates and estimated 1RM
+  - Info button explaining 1RM calculation
+
+**Design:**
+- Liquid Glass aesthetic matching existing app UI
+- Progressive disclosure UX (Dashboard → List → Exercise)
+- Trophy emoji (🏆) for Personal Records
+- Checkmark emoji (✅) for Completed Weeks (previously also trophy)
+- Chevron affordance on tappable rows
+- Haptic feedback on all interactions
+
+**Technical:**
+- Uses existing AnalyticsService for PR detection
+- Clean info alerts explaining 1RM
+- Relative date formatting for accessibility
+- Stats-focused design (charts deferred to future)
+
+**Fixed:**
+- Added missing `Tempus.xcscheme` for Xcode scheme selection
+
+---
+
 ### [Analytics v1.1.0 - Phase 1] - Data Foundation - 2025-10-02
 
 **Added:**
