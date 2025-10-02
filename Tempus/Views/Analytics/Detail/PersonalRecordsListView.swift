@@ -14,6 +14,7 @@ struct PersonalRecordsListView: View {
 
     @State private var groupedPRs: [String: [ExercisePRGroup]] = [:]
     @State private var selectedExercise: String?
+    @State private var showingInfo = false
 
     private func loadPRs() {
         // Get all unique exercises from workouts
@@ -98,6 +99,17 @@ struct PersonalRecordsListView: View {
             .navigationTitle("Personal Records")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        HapticManager.shared.trigger(.light)
+                        showingInfo = true
+                    } label: {
+                        Image(systemName: "info.circle")
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         dismiss()
@@ -107,6 +119,11 @@ struct PersonalRecordsListView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
+            }
+            .alert("About 1RM", isPresented: $showingInfo) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("Est. 1RM (Estimated One-Rep Max) is the maximum weight you could lift for one repetition.\n\nCalculated using the Brzycki formula:\nWeight ÷ (1.0278 - 0.0278 × Reps)\n\nThis helps compare different rep ranges and track pure strength gains.")
             }
             .onAppear {
                 loadPRs()
