@@ -187,6 +187,10 @@ struct AnalyticsView: View {
                             }
                             .padding(.horizontal)
 
+                            // Volume Chart Card
+                            VolumeChartCard(workouts: workouts)
+                                .padding(.horizontal)
+
                             // Personal Records Card
                             PersonalRecordsCard(workouts: workouts, exercises: exercises)
                                 .padding(.horizontal)
