@@ -322,14 +322,14 @@ actor AnalyticsService {
 // MARK: - Supporting Models
 
 /// Represents a personal record achievement
-struct PersonalRecord: Identifiable, Codable {
+struct PersonalRecord: Identifiable, Codable, Sendable {
     let id: UUID
     let date: Date
     let weight: Double
     let reps: Int
     let estimatedOneRM: Double
 
-    init(date: Date, weight: Double, reps: Int, estimatedOneRM: Double) {
+    nonisolated init(date: Date, weight: Double, reps: Int, estimatedOneRM: Double) {
         self.id = UUID()
         self.date = date
         self.weight = weight
