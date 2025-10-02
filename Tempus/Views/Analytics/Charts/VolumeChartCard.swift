@@ -10,7 +10,7 @@ import Charts
 
 struct VolumeChartCard: View {
     let workouts: [WorkoutEntry]
-    @State private var selectedPeriod: TimePeriod = .thirtyDays
+    @State private var selectedPeriod: TimePeriod = .sevenDays
     @State private var showingDetailView = false
 
     enum TimePeriod: String, CaseIterable {
@@ -72,6 +72,15 @@ struct VolumeChartCard: View {
         }
     }
 
+    private func formatXAxisLabel(_ date: Date) -> String {
+        switch selectedPeriod {
+        case .sevenDays:
+            return date.formatted(.dateTime.weekday(.abbreviated))
+        case .thirtyDays, .ninetyDays, .all:
+            return date.formatted(.dateTime.month(.abbreviated).day())
+        }
+    }
+
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 20)
@@ -81,21 +90,9 @@ struct VolumeChartCard: View {
             VStack(alignment: .leading, spacing: 16) {
                 // Header
                 HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Total Weight Lifted")
-                            .font(.headline)
-                            .foregroundStyle(.primary)
-
-                        if let trend = trendPercentage {
-                            HStack(spacing: 4) {
-                                Image(systemName: trend >= 0 ? "arrow.up.right" : "arrow.down.right")
-                                    .font(.caption2)
-                                Text(String(format: "%.1f%% vs previous period", abs(trend)))
-                                    .font(.caption)
-                            }
-                            .foregroundStyle(trend >= 0 ? .green : .secondary)
-                        }
-                    }
+                    Text("Total Weight Lifted")
+                        .font(.headline)
+                        .foregroundStyle(.primary)
 
                     Spacer()
 
@@ -128,7 +125,7 @@ struct VolumeChartCard: View {
                             y: .value("Volume", point.volume)
                         )
                         .foregroundStyle(.orange)
-                        .interpolationMethod(.catmullRom)
+                        .interpolationMethod(.monotone)
 
                         AreaMark(
                             x: .value("Date", point.date),
@@ -141,10 +138,10 @@ struct VolumeChartCard: View {
                                 endPoint: .bottom
                             )
                         )
-                        .interpolationMethod(.catmullRom)
+                        .interpolationMethod(.monotone)
                     }
                     .chartYAxis {
-                        AxisMarks(position: .leading) { value in
+                        AxisMarks(position: .leading, values: .automatic(desiredCount: 4)) { value in
                             AxisValueLabel {
                                 if let kg = value.as(Double.self) {
                                     Text(formatVolume(kg))
@@ -154,16 +151,42 @@ struct VolumeChartCard: View {
                         }
                     }
                     .chartXAxis {
-                        AxisMarks(values: .stride(by: selectedPeriod == .sevenDays ? .day : .weekOfYear)) { value in
-                            if let date = value.as(Date.self) {
-                                AxisValueLabel {
-                                    if selectedPeriod == .sevenDays {
-                                        Text(date, format: .dateTime.weekday(.abbreviated))
-                                    } else {
-                                        Text(date, format: .dateTime.month(.abbreviated).day())
+                        switch selectedPeriod {
+                        case .sevenDays:
+                            AxisMarks(values: .stride(by: .day)) { value in
+                                if let date = value.as(Date.self) {
+                                    AxisValueLabel {
+                                        Text(formatXAxisLabel(date))
                                     }
+                                    .font(.caption2)
                                 }
-                                .font(.caption2)
+                            }
+                        case .thirtyDays:
+                            AxisMarks(values: .stride(by: .day, count: 5)) { value in
+                                if let date = value.as(Date.self) {
+                                    AxisValueLabel {
+                                        Text(formatXAxisLabel(date))
+                                    }
+                                    .font(.caption2)
+                                }
+                            }
+                        case .ninetyDays:
+                            AxisMarks(values: .stride(by: .weekOfYear, count: 2)) { value in
+                                if let date = value.as(Date.self) {
+                                    AxisValueLabel {
+                                        Text(formatXAxisLabel(date))
+                                    }
+                                    .font(.caption2)
+                                }
+                            }
+                        case .all:
+                            AxisMarks(values: .stride(by: .month)) { value in
+                                if let date = value.as(Date.self) {
+                                    AxisValueLabel {
+                                        Text(formatXAxisLabel(date))
+                                    }
+                                    .font(.caption2)
+                                }
                             }
                         }
                     }

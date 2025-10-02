@@ -67,6 +67,15 @@ struct VolumeDetailView: View {
         }
     }
 
+    private func formatXAxisLabel(_ date: Date) -> String {
+        switch selectedPeriod {
+        case .sevenDays:
+            return date.formatted(.dateTime.weekday(.abbreviated))
+        case .thirtyDays, .ninetyDays, .all:
+            return date.formatted(.dateTime.month(.abbreviated).day())
+        }
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -97,7 +106,7 @@ struct VolumeDetailView: View {
                                         y: .value("Volume", point.volume)
                                     )
                                     .foregroundStyle(.orange)
-                                    .interpolationMethod(.catmullRom)
+                                    .interpolationMethod(.monotone)
                                     .lineStyle(StrokeStyle(lineWidth: 3))
                                     .symbol(Circle().strokeBorder(lineWidth: 2))
                                     .symbolSize(30)
@@ -113,7 +122,7 @@ struct VolumeDetailView: View {
                                             endPoint: .bottom
                                         )
                                     )
-                                    .interpolationMethod(.catmullRom)
+                                    .interpolationMethod(.monotone)
                                 }
 
                                 // 7-day moving average
@@ -125,11 +134,12 @@ struct VolumeDetailView: View {
                                         )
                                         .foregroundStyle(.blue.opacity(0.6))
                                         .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 3]))
+                                        .interpolationMethod(.monotone)
                                     }
                                 }
                             }
                             .chartYAxis {
-                                AxisMarks(position: .leading) { value in
+                                AxisMarks(position: .leading, values: .automatic(desiredCount: 5)) { value in
                                     AxisGridLine()
                                     AxisValueLabel {
                                         if let kg = value.as(Double.self) {
@@ -140,17 +150,46 @@ struct VolumeDetailView: View {
                                 }
                             }
                             .chartXAxis {
-                                AxisMarks(values: .stride(by: selectedPeriod == .sevenDays ? .day : .weekOfYear)) { value in
-                                    if let date = value.as(Date.self) {
-                                        AxisGridLine()
-                                        AxisValueLabel {
-                                            if selectedPeriod == .sevenDays {
-                                                Text(date, format: .dateTime.weekday(.abbreviated))
-                                            } else {
-                                                Text(date, format: .dateTime.month(.abbreviated).day())
+                                switch selectedPeriod {
+                                case .sevenDays:
+                                    AxisMarks(values: .stride(by: .day)) { value in
+                                        if let date = value.as(Date.self) {
+                                            AxisGridLine()
+                                            AxisValueLabel {
+                                                Text(formatXAxisLabel(date))
                                             }
+                                            .font(.caption)
                                         }
-                                        .font(.caption)
+                                    }
+                                case .thirtyDays:
+                                    AxisMarks(values: .stride(by: .day, count: 5)) { value in
+                                        if let date = value.as(Date.self) {
+                                            AxisGridLine()
+                                            AxisValueLabel {
+                                                Text(formatXAxisLabel(date))
+                                            }
+                                            .font(.caption)
+                                        }
+                                    }
+                                case .ninetyDays:
+                                    AxisMarks(values: .stride(by: .weekOfYear, count: 2)) { value in
+                                        if let date = value.as(Date.self) {
+                                            AxisGridLine()
+                                            AxisValueLabel {
+                                                Text(formatXAxisLabel(date))
+                                            }
+                                            .font(.caption)
+                                        }
+                                    }
+                                case .all:
+                                    AxisMarks(values: .stride(by: .month)) { value in
+                                        if let date = value.as(Date.self) {
+                                            AxisGridLine()
+                                            AxisValueLabel {
+                                                Text(formatXAxisLabel(date))
+                                            }
+                                            .font(.caption)
+                                        }
                                     }
                                 }
                             }
