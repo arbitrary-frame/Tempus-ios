@@ -253,21 +253,34 @@ struct SettingsView: View {
             let dateString = dateFormatter.string(from: Date())
             let filename = "tempus-export-\(dateString).json"
 
-            // Write to temp file
-            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
-            try data.write(to: tempURL)
+            // Use Caches directory instead of tmp (more reliable for UIActivityViewController)
+            let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+            let fileURL = cachesURL.appendingPathComponent(filename)
+
+            // Remove old file if exists
+            try? FileManager.default.removeItem(at: fileURL)
+
+            // Write file with proper attributes
+            try data.write(to: fileURL, options: .atomic)
+
+            // Set file attributes to ensure it's readable
+            try FileManager.default.setAttributes(
+                [.posixPermissions: 0o644],
+                ofItemAtPath: fileURL.path
+            )
 
             // Trigger success haptic and show share sheet
             HapticManager.shared.trigger(.success)
-            exportFileURL = tempURL
+            exportFileURL = fileURL
 
-            // Small delay to ensure state is set
+            // Small delay to ensure file is ready
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 showingShareSheet = true
             }
 
             print("✅ Export ready: \(filename)")
             print("   File size: \(data.count) bytes")
+            print("   Location: \(fileURL.path)")
         } catch {
             // Show error to user
             exportErrorMessage = "Failed to export data: \(error.localizedDescription)"
