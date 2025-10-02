@@ -18,8 +18,7 @@ struct SettingsView: View {
     @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = true
 
-    @State private var exportFileURL: URL?
-    @State private var showingExportSheet = false
+    @State private var exportItem: ExportItem?
     @State private var showingResetConfirmation = false
     @State private var showingExportError = false
     @State private var exportErrorMessage = ""
@@ -129,12 +128,9 @@ struct SettingsView: View {
             }
             .listStyle(.insetGrouped)
             .navigationTitle("Settings")
-            .sheet(isPresented: $showingExportSheet) {
-                if let url = exportFileURL {
-                    ShareSheet(items: [url])
-                        .id(url) // Force recreation when URL changes
-                        .presentationDetents([.medium, .large]) // Give it explicit size
-                }
+            .sheet(item: $exportItem) { item in
+                ShareSheet(items: [item.url])
+                    .presentationDetents([.medium, .large])
             }
             .alert("Export Error", isPresented: $showingExportError) {
                 Button("OK", role: .cancel) { }
@@ -259,13 +255,9 @@ struct SettingsView: View {
 
             // Trigger success haptic
             HapticManager.shared.trigger(.success)
-            exportFileURL = tempURL
 
-            // Delay showing sheet to ensure file is ready and state is set
-            // This helps with UIKit/SwiftUI presentation timing
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                showingExportSheet = true
-            }
+            // Setting the item triggers the sheet (using .sheet(item:))
+            exportItem = ExportItem(url: tempURL)
 
             print("✅ Export successful: \(filename) (\(data.count) bytes)")
         } catch {
@@ -401,6 +393,13 @@ struct ShareSheet: UIViewControllerRepresentable {
         // Update interface style if color scheme changes
         uiViewController.overrideUserInterfaceStyle = colorScheme == .dark ? .dark : .light
     }
+}
+
+// MARK: - Export Item
+
+struct ExportItem: Identifiable {
+    let id = UUID()
+    let url: URL
 }
 
 #Preview {
