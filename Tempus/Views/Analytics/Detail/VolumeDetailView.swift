@@ -50,6 +50,23 @@ struct VolumeDetailView: View {
         volumeData.reduce(0.0) { $0 + $1.volume }
     }
 
+    private var chartXDomain: ClosedRange<Date> {
+        let calendar = Calendar.current
+        let now = Date()
+
+        if let days = selectedPeriod.days {
+            let startDate = calendar.date(byAdding: .day, value: -days, to: now) ?? now
+            return startDate...now
+        } else {
+            // For "All", use actual data range
+            if let firstDate = volumeData.first?.date,
+               let lastDate = volumeData.last?.date {
+                return firstDate...lastDate
+            }
+            return now...now
+        }
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -123,12 +140,21 @@ struct VolumeDetailView: View {
                                 }
                             }
                             .chartXAxis {
-                                AxisMarks { value in
-                                    AxisGridLine()
-                                    AxisValueLabel(format: .dateTime.month(.abbreviated).day())
+                                AxisMarks(values: .stride(by: selectedPeriod == .sevenDays ? .day : .weekOfYear)) { value in
+                                    if let date = value.as(Date.self) {
+                                        AxisGridLine()
+                                        AxisValueLabel {
+                                            if selectedPeriod == .sevenDays {
+                                                Text(date, format: .dateTime.weekday(.abbreviated))
+                                            } else {
+                                                Text(date, format: .dateTime.month(.abbreviated).day())
+                                            }
+                                        }
                                         .font(.caption)
+                                    }
                                 }
                             }
+                            .chartXScale(domain: chartXDomain)
                             .frame(height: 300)
                             .padding()
                             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
@@ -192,7 +218,7 @@ struct VolumeDetailView: View {
                 }
                 .padding(.top)
             }
-            .navigationTitle("Volume Over Time")
+            .navigationTitle("Total Weight Lifted")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

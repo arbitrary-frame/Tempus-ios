@@ -55,6 +55,23 @@ struct VolumeChartCard: View {
         return ((secondAvg - firstAvg) / firstAvg) * 100
     }
 
+    private var chartXDomain: ClosedRange<Date> {
+        let calendar = Calendar.current
+        let now = Date()
+
+        if let days = selectedPeriod.days {
+            let startDate = calendar.date(byAdding: .day, value: -days, to: now) ?? now
+            return startDate...now
+        } else {
+            // For "All", use actual data range
+            if let firstDate = volumeData.first?.date,
+               let lastDate = volumeData.last?.date {
+                return firstDate...lastDate
+            }
+            return now...now
+        }
+    }
+
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 20)
@@ -65,7 +82,7 @@ struct VolumeChartCard: View {
                 // Header
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Volume Trend")
+                        Text("Total Weight Lifted")
                             .font(.headline)
                             .foregroundStyle(.primary)
 
@@ -73,7 +90,7 @@ struct VolumeChartCard: View {
                             HStack(spacing: 4) {
                                 Image(systemName: trend >= 0 ? "arrow.up.right" : "arrow.down.right")
                                     .font(.caption2)
-                                Text(String(format: "%.1f%% vs first half", abs(trend)))
+                                Text(String(format: "%.1f%% vs previous period", abs(trend)))
                                     .font(.caption)
                             }
                             .foregroundStyle(trend >= 0 ? .green : .secondary)
@@ -137,11 +154,20 @@ struct VolumeChartCard: View {
                         }
                     }
                     .chartXAxis {
-                        AxisMarks { value in
-                            AxisValueLabel(format: .dateTime.month(.narrow).day())
+                        AxisMarks(values: .stride(by: selectedPeriod == .sevenDays ? .day : .weekOfYear)) { value in
+                            if let date = value.as(Date.self) {
+                                AxisValueLabel {
+                                    if selectedPeriod == .sevenDays {
+                                        Text(date, format: .dateTime.weekday(.abbreviated))
+                                    } else {
+                                        Text(date, format: .dateTime.month(.abbreviated).day())
+                                    }
+                                }
                                 .font(.caption2)
+                            }
                         }
                     }
+                    .chartXScale(domain: chartXDomain)
                     .frame(height: 120)
                 }
 
