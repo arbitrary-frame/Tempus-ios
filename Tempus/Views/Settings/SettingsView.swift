@@ -132,12 +132,11 @@ struct SettingsView: View {
             .navigationTitle("Settings")
             .background(
                 EmptyView()
-                    .sheet(isPresented: $showingShareSheet) {
+                    .fullScreenCover(isPresented: $showingShareSheet) {
                         if let data = exportData, let filename = exportFilename {
                             ActivityViewController(
                                 activityItems: [JSONActivityItemSource(data: data, filename: filename)]
                             )
-                            .ignoresSafeArea()
                         }
                     }
             )
@@ -385,11 +384,10 @@ struct ActivityViewController: UIViewControllerRepresentable {
     let applicationActivities: [UIActivity]? = nil
 
     func makeUIViewController(context: UIViewControllerRepresentableContext<ActivityViewController>) -> UIActivityViewController {
-        let controller = UIActivityViewController(
+        return UIActivityViewController(
             activityItems: activityItems,
             applicationActivities: applicationActivities
         )
-        return controller
     }
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: UIViewControllerRepresentableContext<ActivityViewController>) {}
