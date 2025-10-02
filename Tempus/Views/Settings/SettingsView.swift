@@ -253,15 +253,14 @@ struct SettingsView: View {
 
             try data.write(to: tempURL)
 
-            // Trigger success haptic
+            // Trigger success haptic and show share sheet
             HapticManager.shared.trigger(.success)
-
-            // Setting the item triggers the sheet (using .sheet(item:))
             exportItem = ExportItem(url: tempURL)
-
-            print("✅ Export successful: \(filename) (\(data.count) bytes)")
         } catch {
-            // Handle error silently for now
+            // Show error to user
+            exportErrorMessage = "Failed to export data: \(error.localizedDescription)"
+            showingExportError = true
+            HapticManager.shared.trigger(.error)
         }
     }
 
@@ -371,26 +370,16 @@ struct ShareSheet: UIViewControllerRepresentable {
     @Environment(\.colorScheme) var colorScheme
 
     func makeUIViewController(context: Context) -> UIActivityViewController {
-        print("📤 ShareSheet: Creating UIActivityViewController")
-        print("   ColorScheme: \(colorScheme)")
-        print("   Items count: \(items.count)")
-
         let controller = UIActivityViewController(activityItems: items, applicationActivities: nil)
 
-        // Apply SwiftUI color scheme to UIKit controller
-        // This fixes the blank dark mode issue by syncing the interface styles
+        // Sync SwiftUI colorScheme with UIKit interface style
         controller.overrideUserInterfaceStyle = colorScheme == .dark ? .dark : .light
-
-        print("   Interface style set to: \(controller.overrideUserInterfaceStyle.rawValue)")
 
         return controller
     }
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {
-        print("📤 ShareSheet: Updating UIActivityViewController")
-        print("   ColorScheme: \(colorScheme)")
-
-        // Update interface style if color scheme changes
+        // Update interface style when color scheme changes
         uiViewController.overrideUserInterfaceStyle = colorScheme == .dark ? .dark : .light
     }
 }
