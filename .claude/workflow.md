@@ -25,15 +25,17 @@
 ### Code Review Process
 1. Assistant builds the feature in Xcode to verify it compiles
 2. Assistant commits changes with descriptive messages
-3. **Assistant updates CHANGELOG.md with new changes**
-4. **Assistant commits CHANGELOG updates**
-5. **Assistant pushes the feature branch to GitHub: `git push -u origin branch-name`**
-6. **Assistant creates a Pull Request using `gh pr create`**
-7. Assistant notifies user that PR is ready for review on GitHub
-8. **⛔️ CRITICAL: Assistant NEVER merges to master directly**
-9. **User reviews the PR on GitHub**
-10. **User approves and merges via GitHub PR or `gh pr merge`**
-11. All merges go through GitHub Pull Requests for proper review workflow
+3. **Assistant pushes the feature branch to GitHub: `git push -u origin branch-name`**
+4. **Assistant asks user for initial review** (do NOT create PR yet)
+5. **User provides feedback and requests changes OR approves**
+6. Assistant makes any requested changes and pushes updates
+7. **Once user approves: Assistant updates CHANGELOG.md with final changes**
+8. **Assistant commits CHANGELOG updates**
+9. **Assistant pushes CHANGELOG commit**
+10. **Assistant creates a Pull Request using `gh pr create`**
+11. **⛔️ CRITICAL: Assistant NEVER merges to master directly**
+12. **User merges via GitHub PR or `gh pr merge`**
+13. All merges go through GitHub Pull Requests for proper review workflow
 
 ### Commit Messages
 - Clear, descriptive messages
@@ -129,7 +131,7 @@ Tempus/
 
 ## Summary Checklist
 
-Before requesting user review:
+Before requesting user initial review:
 - [ ] **⛔️ VERIFIED: Not on master branch (run `git branch` to confirm)**
 - [ ] **⛔️ VERIFIED: Still on feature branch (will NOT merge)**
 - [ ] Working on feature branch with descriptive name
@@ -137,11 +139,14 @@ Before requesting user review:
 - [ ] Xcode build succeeds
 - [ ] Debug print statements added where helpful
 - [ ] Committed with clear message
-- [ ] **✅ CHANGELOG.md updated with changes**
-- [ ] **✅ CHANGELOG updates committed**
 - [ ] **✅ Feature branch pushed to GitHub**
-- [ ] **✅ Pull Request created on GitHub**
-- [ ] Ready for user review on GitHub PR
+- [ ] Ready to ask user for feedback
+
+After user approves initial review:
+- [ ] **✅ CHANGELOG.md updated with final changes**
+- [ ] **✅ CHANGELOG updates committed and pushed**
+- [ ] **✅ Pull Request created on GitHub with `gh pr create`**
+- [ ] Ready for user to merge PR
 
 ## ⛔️ CRITICAL RULE - READ FIRST
 
