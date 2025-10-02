@@ -18,8 +18,8 @@ struct SettingsView: View {
     @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = true
 
-    @State private var showingExportSheet = false
     @State private var exportFileURL: URL?
+    @State private var showingShareSheet = false
     @State private var showingResetConfirmation = false
     @State private var showingExportError = false
     @State private var exportErrorMessage = ""
@@ -129,9 +129,9 @@ struct SettingsView: View {
             }
             .listStyle(.insetGrouped)
             .navigationTitle("Settings")
-            .sheet(isPresented: $showingExportSheet) {
+            .sheet(isPresented: $showingShareSheet) {
                 if let url = exportFileURL {
-                    ShareSheet(items: [url])
+                    ShareView(fileURL: url)
                 }
             }
             .alert("Export Error", isPresented: $showingExportError) {
@@ -249,18 +249,23 @@ struct SettingsView: View {
             let dateString = dateFormatter.string(from: Date())
             let filename = "tempus-export-\(dateString).json"
 
-            // Write to temporary file
-            let tempURL = FileManager.default.temporaryDirectory
-                .appendingPathComponent(filename)
+            // Write to temporary file in documents directory (more reliable for sharing)
+            let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let fileURL = documentsURL.appendingPathComponent(filename)
 
-            try data.write(to: tempURL)
+            // Remove old file if it exists
+            try? FileManager.default.removeItem(at: fileURL)
 
-            // Trigger success haptic and show share sheet
+            // Write new file
+            try data.write(to: fileURL, options: .atomic)
+
+            // Trigger success haptic and show share sheet immediately
             HapticManager.shared.trigger(.success)
-            exportFileURL = tempURL
-            showingExportSheet = true
+            exportFileURL = fileURL
+            showingShareSheet = true
 
-            print("✅ Export successful: \(filename) (\(data.count) bytes)")
+            print("✅ Export successful: \(filename) at \(fileURL.path)")
+            print("   File size: \(data.count) bytes)")
         } catch {
             // Show error to user
             exportErrorMessage = "Failed to export data: \(error.localizedDescription)"
@@ -369,17 +374,54 @@ struct ExportRoutine: Codable, Sendable {
     let updatedAt: Date
 }
 
-// MARK: - Share Sheet
+// MARK: - Share View
 
-struct ShareSheet: UIViewControllerRepresentable {
-    let items: [Any]
+struct ShareView: View {
+    let fileURL: URL
+    @Environment(\.dismiss) private var dismiss
 
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        let controller = UIActivityViewController(activityItems: items, applicationActivities: nil)
-        return controller
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                Image(systemName: "doc.text")
+                    .font(.system(size: 60))
+                    .foregroundStyle(.orange)
+
+                Text("Export Ready")
+                    .font(.title2.bold())
+
+                Text(fileURL.lastPathComponent)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal)
+
+                ShareLink(item: fileURL) {
+                    Label("Share Export", systemImage: "square.and.arrow.up")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.orange)
+                        .foregroundColor(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .padding(.horizontal)
+
+                Button("Done") {
+                    dismiss()
+                }
+                .padding()
+            }
+            .padding()
+            .navigationTitle("Export Complete")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") {
+                        dismiss()
+                    }
+                }
+            }
+        }
     }
-
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
 #Preview {
