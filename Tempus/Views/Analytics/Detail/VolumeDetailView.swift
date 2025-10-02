@@ -161,7 +161,6 @@ struct VolumeDetailView: View {
                                 }
                             }
                             .chartScrollableAxes(.horizontal)
-                            .chartXVisibleDomain(length: volumeData.count > 14 ? 14 : volumeData.count)
                             .chartXSelection(value: $selectedDate)
                             .frame(height: 300)
                             .padding()
@@ -231,8 +230,8 @@ struct VolumeDetailView: View {
                     }
 
                     // Instructions
-                    if !volumeData.isEmpty && volumeData.count > 14 {
-                        Text("Swipe left/right to scroll through your workout history")
+                    if !volumeData.isEmpty && volumeData.count > 7 {
+                        Text("Swipe left/right to scroll • Tap any point to see details")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
