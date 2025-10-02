@@ -18,7 +18,8 @@ struct SettingsView: View {
     @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = true
 
-    @State private var exportFileURL: URL?
+    @State private var exportData: Data?
+    @State private var exportFilename: String?
     @State private var showingShareSheet = false
     @State private var showingResetConfirmation = false
     @State private var showingExportError = false
@@ -132,9 +133,11 @@ struct SettingsView: View {
             .background(
                 EmptyView()
                     .sheet(isPresented: $showingShareSheet) {
-                        if let url = exportFileURL {
-                            ActivityViewController(activityItems: [url])
-                                .ignoresSafeArea()
+                        if let data = exportData, let filename = exportFilename {
+                            ActivityViewController(
+                                activityItems: [JSONActivityItemSource(data: data, filename: filename)]
+                            )
+                            .ignoresSafeArea()
                         }
                     }
             )
@@ -253,34 +256,20 @@ struct SettingsView: View {
             let dateString = dateFormatter.string(from: Date())
             let filename = "tempus-export-\(dateString).json"
 
-            // Use Caches directory instead of tmp (more reliable for UIActivityViewController)
-            let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-            let fileURL = cachesURL.appendingPathComponent(filename)
-
-            // Remove old file if exists
-            try? FileManager.default.removeItem(at: fileURL)
-
-            // Write file with proper attributes
-            try data.write(to: fileURL, options: .atomic)
-
-            // Set file attributes to ensure it's readable
-            try FileManager.default.setAttributes(
-                [.posixPermissions: 0o644],
-                ofItemAtPath: fileURL.path
-            )
+            // Store data and filename for sharing
+            exportData = data
+            exportFilename = filename
 
             // Trigger success haptic and show share sheet
             HapticManager.shared.trigger(.success)
-            exportFileURL = fileURL
 
-            // Small delay to ensure file is ready
+            // Small delay to ensure state is set
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 showingShareSheet = true
             }
 
             print("✅ Export ready: \(filename)")
             print("   File size: \(data.count) bytes")
-            print("   Location: \(fileURL.path)")
         } catch {
             // Show error to user
             exportErrorMessage = "Failed to export data: \(error.localizedDescription)"
@@ -404,6 +393,44 @@ struct ActivityViewController: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: UIViewControllerRepresentableContext<ActivityViewController>) {}
+}
+
+// MARK: - JSON Activity Item Source
+
+import UniformTypeIdentifiers
+import LinkPresentation
+
+class JSONActivityItemSource: NSObject, UIActivityItemSource {
+    private let data: Data
+    private let filename: String
+
+    init(data: Data, filename: String) {
+        self.data = data
+        self.filename = filename
+        super.init()
+    }
+
+    func activityViewControllerPlaceholderItem(_ activityViewController: UIActivityViewController) -> Any {
+        return data
+    }
+
+    func activityViewController(_ activityViewController: UIActivityViewController, itemForActivityType activityType: UIActivity.ActivityType?) -> Any? {
+        return data
+    }
+
+    func activityViewController(_ activityViewController: UIActivityViewController, dataTypeIdentifierForActivityType activityType: UIActivity.ActivityType?) -> String {
+        return UTType.json.identifier
+    }
+
+    func activityViewController(_ activityViewController: UIActivityViewController, subjectForActivityType activityType: UIActivity.ActivityType?) -> String {
+        return "Tempus Workout Data"
+    }
+
+    func activityViewControllerLinkMetadata(_ activityViewController: UIActivityViewController) -> LPLinkMetadata? {
+        let metadata = LPLinkMetadata()
+        metadata.title = filename
+        return metadata
+    }
 }
 
 #Preview {
