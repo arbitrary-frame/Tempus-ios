@@ -369,13 +369,22 @@ struct ExportRoutine: Codable, Sendable {
 
 struct ShareSheet: UIViewControllerRepresentable {
     let items: [Any]
+    @Environment(\.colorScheme) var colorScheme
 
     func makeUIViewController(context: Context) -> UIActivityViewController {
         let controller = UIActivityViewController(activityItems: items, applicationActivities: nil)
+
+        // Apply SwiftUI color scheme to UIKit controller
+        // This fixes the blank dark mode issue by syncing the interface styles
+        controller.overrideUserInterfaceStyle = colorScheme == .dark ? .dark : .light
+
         return controller
     }
 
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {
+        // Update interface style if color scheme changes
+        uiViewController.overrideUserInterfaceStyle = colorScheme == .dark ? .dark : .light
+    }
 }
 
 #Preview {
