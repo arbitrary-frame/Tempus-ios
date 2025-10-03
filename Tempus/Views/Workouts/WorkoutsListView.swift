@@ -21,11 +21,14 @@ struct WorkoutsListView: View {
     @AppStorage("userName") private var userName: String = ""
     @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
     @State private var currentGreeting: String = "Workouts"
-    @State private var selectedWeek: Date = Date() // Start of selected week
+    @State private var selectedWeek: Date = {
+        let calendar = Calendar.current
+        return calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())) ?? Date()
+    }()
 
     // Get the start of the selected week
     private var selectedWeekStart: Date {
-        Calendar.current.date(from: Calendar.current.dateComponents([.yearForWeekOfYear, .weekOfYear], from: selectedWeek)) ?? selectedWeek
+        selectedWeek
     }
 
     // Get the end of the selected week
@@ -357,10 +360,9 @@ struct WorkoutsListView: View {
     }
 
     private func changeWeek(by value: Int) {
-        if let newWeek = Calendar.current.date(byAdding: .weekOfYear, value: value, to: selectedWeek) {
-            withAnimation(.smooth(duration: 0.3)) {
-                selectedWeek = newWeek
-            }
+        let calendar = Calendar.current
+        if let newWeek = calendar.date(byAdding: .weekOfYear, value: value, to: selectedWeek) {
+            selectedWeek = newWeek
         }
     }
 
