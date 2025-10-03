@@ -20,10 +20,14 @@ struct WorkoutCalendarView: View {
     @State private var workoutsForSelectedDay: [WorkoutEntry] = []
     @State private var showingWorkoutPicker = false
     @State private var selectedDate: Date?  // Date user tapped to log workout
-    @State private var dateToLog: Date?  // Date confirmed for logging
-    @State private var showingLogWorkout = false
-    @State private var routineToStart: WorkoutRoutine?  // Routine to start from calendar
-    @State private var showingRoutinePicker = false  // Show routine selection
+    @State private var workoutToLog: WorkoutToLog?  // Workout logging details
+    @State private var showingDateMenu = false  // Show Quick Log / Routine menu
+
+    struct WorkoutToLog: Identifiable {
+        let id = UUID()
+        let date: Date
+        let routine: WorkoutRoutine?
+    }
 
     private let calendar = Calendar.current
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
@@ -162,7 +166,15 @@ struct WorkoutCalendarView: View {
                                         workouts: workoutsByDate[date] ?? [],
                                         isInCurrentMonth: calendar.isDate(date, equalTo: selectedMonth, toGranularity: .month),
                                         isToday: calendar.isDateInToday(date),
-                                        isInSelectedWeek: isDateInSelectedWeek(date)
+                                        isInSelectedWeek: isDateInSelectedWeek(date),
+                                        selectedDate: $selectedDate,
+                                        routines: routines,
+                                        onQuickLog: {
+                                            workoutToLog = WorkoutToLog(date: date, routine: nil)
+                                        },
+                                        onRoutineSelect: { routine in
+                                            workoutToLog = WorkoutToLog(date: date, routine: routine)
+                                        }
                                     )
                                     .onTapGesture {
                                         handleDayTap(date: date)
@@ -265,45 +277,12 @@ struct WorkoutCalendarView: View {
             .sheet(isPresented: $showingWorkoutPicker) {
                 WorkoutPickerSheet(workouts: workoutsForSelectedDay, selectedWorkout: $selectedWorkout)
             }
-            .sheet(isPresented: $showingRoutinePicker) {
-                RoutinePickerSheet(routines: routines, routineToStart: $routineToStart)
-            }
-            .confirmationDialog("", isPresented: Binding(
-                get: { selectedDate != nil },
-                set: { if !$0 { selectedDate = nil } }
-            ), titleVisibility: .hidden) {
-                Button("Quick Log") {
-                    dateToLog = selectedDate
-                    selectedDate = nil
-                    showingLogWorkout = true
-                }
-
-                if !routines.isEmpty {
-                    Button("Start from Routine") {
-                        // This will trigger showing the routine picker
-                        dateToLog = selectedDate
-                        selectedDate = nil
-                        showingRoutinePicker = true
-                    }
-                }
-
-                Button("Cancel", role: .cancel) {
-                    selectedDate = nil
-                }
-            }
-            .fullScreenCover(isPresented: $showingLogWorkout, onDismiss: {
-                dateToLog = nil
-            }) {
-                if let date = dateToLog {
-                    WorkoutLoggingView(date: date)
+            .fullScreenCover(item: $workoutToLog) { workout in
+                if let routine = workout.routine {
+                    WorkoutLoggingView(date: workout.date, routine: routine)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
-            }
-            .fullScreenCover(item: $routineToStart, onDismiss: {
-                dateToLog = nil
-            }) { routine in
-                if let date = dateToLog {
-                    WorkoutLoggingView(date: date, routine: routine)
+                } else {
+                    WorkoutLoggingView(date: workout.date)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
@@ -435,6 +414,12 @@ struct DayCell: View {
     let isInCurrentMonth: Bool
     let isToday: Bool
     let isInSelectedWeek: Bool
+    @Binding var selectedDate: Date?
+    let routines: [WorkoutRoutine]
+    let onQuickLog: () -> Void
+    let onRoutineSelect: (WorkoutRoutine) -> Void
+
+    @State private var showingRoutinePicker = false
 
     private let calendar = Calendar.current
 
@@ -498,6 +483,97 @@ struct DayCell: View {
                 }
             }
         )
+        .popover(isPresented: Binding(
+            get: { selectedDate == date },
+            set: { if !$0 { selectedDate = nil } }
+        ), arrowEdge: .bottom) {
+            VStack(spacing: 0) {
+                Button {
+                    selectedDate = nil
+                    onQuickLog()
+                } label: {
+                    Label("Quick Log", systemImage: "plus.circle")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .contentShape(Rectangle())
+                        .padding()
+                }
+                .buttonStyle(.plain)
+
+                if !routines.isEmpty {
+                    Divider()
+
+                    Button {
+                        selectedDate = nil
+                        showingRoutinePicker = true
+                    } label: {
+                        Label("Start from Routine", systemImage: "arrow.triangle.2.circlepath")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .contentShape(Rectangle())
+                            .padding()
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .frame(width: 220)
+            .presentationCompactAdaptation(.popover)
+        }
+        .sheet(isPresented: $showingRoutinePicker) {
+            RoutinePickerForDate(routines: routines, onSelect: { routine in
+                onRoutineSelect(routine)
+            })
+        }
+    }
+}
+
+struct RoutinePickerForDate: View {
+    @Environment(\.dismiss) private var dismiss
+    let routines: [WorkoutRoutine]
+    let onSelect: (WorkoutRoutine) -> Void
+
+    var body: some View {
+        NavigationStack {
+            List(routines) { routine in
+                Button {
+                    onSelect(routine)
+                    dismiss()
+                } label: {
+                    HStack(spacing: 12) {
+                        if let emoji = routine.emoji, !emoji.isEmpty {
+                            Text(emoji)
+                                .font(.title2)
+                        } else {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                                .font(.title3)
+                                .foregroundStyle(.accent)
+                        }
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(routine.name)
+                                .font(.headline)
+
+                            Text("\(routine.exercises.count) exercises")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+                    .padding(.vertical, 4)
+                }
+                .buttonStyle(.plain)
+            }
+            .navigationTitle("Start from Routine")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -540,57 +616,6 @@ struct WorkoutPickerSheet: View {
                 .buttonStyle(.plain)
             }
             .navigationTitle("Select Workout")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-}
-
-// Routine picker sheet for selecting routine to start
-struct RoutinePickerSheet: View {
-    @Environment(\.dismiss) private var dismiss
-    let routines: [WorkoutRoutine]
-    @Binding var routineToStart: WorkoutRoutine?
-
-    var body: some View {
-        NavigationStack {
-            List(routines) { routine in
-                Button {
-                    routineToStart = routine
-                    dismiss()
-                } label: {
-                    HStack(spacing: 12) {
-                        if let emoji = routine.emoji, !emoji.isEmpty {
-                            Text(emoji)
-                                .font(.title2)
-                        } else {
-                            Image(systemName: "arrow.triangle.2.circlepath")
-                                .font(.title3)
-                                .foregroundStyle(.accent)
-                        }
-
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(routine.name)
-                                .font(.headline)
-
-                            Text("\(routine.exercises.count) exercises")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-
-                        Spacer()
-                    }
-                    .padding(.vertical, 4)
-                }
-                .buttonStyle(.plain)
-            }
-            .navigationTitle("Start from Routine")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
