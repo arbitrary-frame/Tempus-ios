@@ -18,6 +18,8 @@ struct WorkoutCalendarView: View {
     @State private var selectedWorkout: WorkoutEntry?
     @State private var workoutsForSelectedDay: [WorkoutEntry] = []
     @State private var showingWorkoutPicker = false
+    @State private var selectedDate: Date?  // Date user tapped to log workout
+    @State private var showingLogWorkout = false
 
     private let calendar = Calendar.current
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
@@ -259,7 +261,32 @@ struct WorkoutCalendarView: View {
             .sheet(isPresented: $showingWorkoutPicker) {
                 WorkoutPickerSheet(workouts: workoutsForSelectedDay, selectedWorkout: $selectedWorkout)
             }
+            .confirmationDialog("Log Workout", isPresented: Binding(
+                get: { selectedDate != nil },
+                set: { if !$0 { selectedDate = nil } }
+            ), titleVisibility: .visible) {
+                Button("Log Workout on \(selectedDateString)") {
+                    showingLogWorkout = true
+                }
+                Button("Cancel", role: .cancel) {
+                    selectedDate = nil
+                }
+            }
+            .fullScreenCover(isPresented: $showingLogWorkout) {
+                if let date = selectedDate {
+                    WorkoutLoggingView(date: date)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
         }
+    }
+
+    private var selectedDateString: String {
+        guard let date = selectedDate else { return "" }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_GB")
+        formatter.dateStyle = .medium
+        return formatter.string(from: date)
     }
 
     private var monthYearString: String {
@@ -307,6 +334,9 @@ struct WorkoutCalendarView: View {
         if let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)) {
             selectedWeek = weekStart
         }
+
+        // Store selected date and show log workout prompt
+        selectedDate = date
     }
 
     private func isDateInSelectedWeek(_ date: Date) -> Bool {
