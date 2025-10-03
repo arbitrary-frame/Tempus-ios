@@ -22,6 +22,7 @@ struct WorkoutsListView: View {
     @AppStorage("userName") private var userName: String = ""
     @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
     @State private var currentGreeting: String = "Workouts"
+    @State private var cachedStreak: Int = 0  // Cache streak to force updates
 
     // Week navigation state - THIS IS THE KEY
     @State private var weekOffset: Int = 0  // 0 = current week, -1 = last week, +1 = next week
@@ -224,11 +225,17 @@ struct WorkoutsListView: View {
             .navigationTitle(currentGreeting)
             .onAppear {
                 updateGreeting()
+                cachedStreak = currentStreak
+            }
+            .onChange(of: weeklyWorkoutGoal) { oldValue, newValue in
+                cachedStreak = currentStreak
+            }
+            .onChange(of: workouts.count) { oldValue, newValue in
+                cachedStreak = currentStreak
             }
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
-                    StreakBadge(currentStreak: currentStreak, weeklyGoal: weeklyWorkoutGoal)
-                        .id(weeklyWorkoutGoal)  // Force rebuild when goal changes
+                    StreakBadge(currentStreak: cachedStreak, weeklyGoal: weeklyWorkoutGoal)
 
                     Button {
                         showingCalendar = true
