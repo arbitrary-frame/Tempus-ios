@@ -4,6 +4,28 @@ All notable changes to Tempus iOS workout tracking app.
 
 ## [Unreleased]
 
+### [PR UX Improvements] - 2025-10-03
+
+**Improved:**
+- **PersonalRecordsCard** - Enhanced interaction and clarity
+  - Card header is now tappable for navigation to full PR list
+  - Subtitle changed from "X exercises with PRs" to "3 most recent PRs" for clear context
+  - Button updated from "View All PRs" to "View All X PRs" showing total count
+  - Removed tap interaction from individual PR rows (cleaner UX)
+- **1RM Info Tooltips** - Relocated for better UX
+  - Moved from toolbar (top-left) to inline icon next to "Est. 1RM" labels
+  - Changed from modal `.alert()` to contextual `.popover()` tooltip
+  - Condensed tooltip text for clarity: "Max weight you could lift for 1 rep"
+  - Added `.fixedSize()` to ensure all text is visible
+  - Tooltip appears directly next to relevant metric (better discoverability)
+
+**Design:**
+- Progressive disclosure pattern: header tap → drill-down → exercise details
+- Non-disruptive tooltips keep user on same screen
+- Clear communication of what PRs are shown (most recent, not random)
+
+---
+
 ### [Personal Records Feature] - 2025-10-02
 
 **Added:**
