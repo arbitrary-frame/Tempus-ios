@@ -48,14 +48,14 @@ struct PersonalRecordsCard: View {
                 .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
 
             VStack(alignment: .leading, spacing: 16) {
-                // Header
+                // Header (tappable)
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Personal Records")
                             .font(.headline)
                             .foregroundStyle(.primary)
 
-                        Text("\(allPRs.count) exercises with PRs")
+                        Text(allPRs.isEmpty ? "No PRs yet" : "3 most recent PRs")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -64,6 +64,11 @@ struct PersonalRecordsCard: View {
 
                     Text("🏆")
                         .font(.system(size: 32))
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    HapticManager.shared.trigger(.light)
+                    showingAllPRs = true
                 }
 
                 if recentPRs.isEmpty {
@@ -82,7 +87,7 @@ struct PersonalRecordsCard: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical)
                 } else {
-                    // Recent PRs list
+                    // Recent PRs list (non-tappable, just display)
                     VStack(spacing: 12) {
                         ForEach(recentPRs, id: \.exerciseName) { prGroup in
                             PRRow(prGroup: prGroup)
@@ -95,7 +100,7 @@ struct PersonalRecordsCard: View {
                         showingAllPRs = true
                     } label: {
                         HStack {
-                            Text("View All PRs")
+                            Text("View All \(allPRs.count) PRs")
                                 .font(.subheadline.bold())
                             Image(systemName: "chevron.right")
                                 .font(.caption)

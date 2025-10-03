@@ -136,17 +136,6 @@ struct ExerciseDetailView: View {
             .navigationTitle("Exercise Details")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        HapticManager.shared.trigger(.light)
-                        showingInfo = true
-                    } label: {
-                        Image(systemName: "info.circle")
-                            .symbolRenderingMode(.hierarchical)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         dismiss()
@@ -156,11 +145,6 @@ struct ExerciseDetailView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
-            }
-            .alert("About 1RM", isPresented: $showingInfo) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text("Est. 1RM (Estimated One-Rep Max) is the maximum weight you could lift for one repetition.\n\nCalculated using the Brzycki formula:\nWeight ÷ (1.0278 - 0.0278 × Reps)\n\nThis helps compare different rep ranges and track pure strength gains.")
             }
         }
     }
@@ -230,6 +214,7 @@ struct AverageStatCard: View {
 
 struct PRTimelineRow: View {
     let pr: PersonalRecord
+    @State private var showingInfo = false
 
     private var formattedDate: String {
         let formatter = DateFormatter()
@@ -270,12 +255,45 @@ struct PRTimelineRow: View {
             Spacer()
 
             VStack(alignment: .trailing, spacing: 4) {
-                Text("Est. 1RM")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+                HStack(spacing: 4) {
+                    Text("Est. 1RM")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    Button {
+                        HapticManager.shared.trigger(.light)
+                        showingInfo = true
+                    } label: {
+                        Image(systemName: "info.circle")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
                 Text(String(format: "%.1fkg", pr.estimatedOneRM))
                     .font(.caption.bold())
                     .foregroundStyle(.blue)
+            }
+            .popover(isPresented: $showingInfo, arrowEdge: .top) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Estimated 1RM")
+                        .font(.headline)
+
+                    Text("Max weight you could lift for 1 rep, calculated using:")
+                        .font(.subheadline)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Text("Weight ÷ (1.0278 - 0.0278 × Reps)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .monospaced()
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Text("Brzycki formula")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
+                .padding()
+                .frame(width: 280)
+                .presentationCompactAdaptation(.popover)
             }
         }
         .padding(12)
