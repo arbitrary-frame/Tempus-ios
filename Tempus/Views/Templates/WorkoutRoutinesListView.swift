@@ -11,9 +11,15 @@ import SwiftData
 struct WorkoutRoutinesListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \WorkoutRoutine.name) private var routines: [WorkoutRoutine]
+    @Query(sort: \WorkoutEntry.workoutDate, order: .reverse) private var workouts: [WorkoutEntry]
+    @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
     @State private var showingCreateForm = false
     @State private var selectedRoutine: WorkoutRoutine?
     @State private var routineToStart: WorkoutRoutine?
+
+    private var currentStreak: Int {
+        AnalyticsHelper.calculateCurrentStreak(workouts: workouts, weeklyGoal: weeklyWorkoutGoal)
+    }
 
     var body: some View {
         NavigationStack {
@@ -59,7 +65,9 @@ struct WorkoutRoutinesListView: View {
             }
             .navigationTitle("Routines")
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    StreakBadge(currentStreak: currentStreak, weeklyGoal: weeklyWorkoutGoal)
+
                     Button {
                         showingCreateForm = true
                     } label: {

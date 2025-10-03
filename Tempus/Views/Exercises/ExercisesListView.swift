@@ -11,9 +11,15 @@ import SwiftData
 struct ExercisesListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Exercise.name) private var exercises: [Exercise]
+    @Query(sort: \WorkoutEntry.workoutDate, order: .reverse) private var workouts: [WorkoutEntry]
+    @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
     @State private var searchText = ""
     @State private var showingCreateForm = false
     @State private var selectedExercise: Exercise?
+
+    private var currentStreak: Int {
+        AnalyticsHelper.calculateCurrentStreak(workouts: workouts, weeklyGoal: weeklyWorkoutGoal)
+    }
 
     var filteredExercises: [Exercise] {
         if searchText.isEmpty {
@@ -68,7 +74,9 @@ struct ExercisesListView: View {
             .navigationTitle("Exercises")
             .searchable(text: $searchText, prompt: "Search exercises")
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    StreakBadge(currentStreak: currentStreak, weeklyGoal: weeklyWorkoutGoal)
+
                     Button {
                         showingCreateForm = true
                     } label: {

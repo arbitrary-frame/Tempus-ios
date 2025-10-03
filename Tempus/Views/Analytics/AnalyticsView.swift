@@ -112,80 +112,9 @@ struct AnalyticsView: View {
                 } else {
                     ScrollView {
                         LazyVStack(spacing: 16) {
-                            // Total Workouts Card
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 20)
-                                    .fill(.ultraThinMaterial)
-                                    .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
-
-                                VStack(spacing: 16) {
-                                    HStack {
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text("Total Workouts")
-                                                .font(.caption)
-                                                .foregroundStyle(Color.tempusTextSecondary)
-                                            Text("\(workouts.count)")
-                                                .font(.system(size: 48, weight: .bold))
-                                                .foregroundStyle(Color.tempusTextPrimary)
-                                        }
-
-                                        Spacer()
-
-                                        Text("💪")
-                                            .font(.system(size: 48))
-                                    }
-                                }
-                                .padding(24)
-                            }
-                            .padding(.horizontal)
-
-                            // Streak & Goals Met Cards
-                            HStack(spacing: 16) {
-                                // Current Streak Card
-                                ZStack {
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .fill(.ultraThinMaterial)
-                                        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
-
-                                    VStack(spacing: 12) {
-                                        Text("🔥")
-                                            .font(.system(size: 40))
-
-                                        Text("\(currentStreak)")
-                                            .font(.system(size: 36, weight: .bold))
-                                            .foregroundStyle(Color.tempusTextPrimary)
-
-                                        Text("Week Streak")
-                                            .font(.caption)
-                                            .foregroundStyle(Color.tempusTextSecondary)
-                                    }
-                                    .padding(24)
-                                }
-                                .frame(maxWidth: .infinity)
-
-                                // Goals Met Card
-                                ZStack {
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .fill(.ultraThinMaterial)
-                                        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
-
-                                    VStack(spacing: 12) {
-                                        Text("✅")
-                                            .font(.system(size: 40))
-
-                                        Text("\(totalGoalsMet)")
-                                            .font(.system(size: 36, weight: .bold))
-                                            .foregroundStyle(Color.tempusTextPrimary)
-
-                                        Text("Completed Weeks")
-                                            .font(.caption)
-                                            .foregroundStyle(Color.tempusTextSecondary)
-                                    }
-                                    .padding(24)
-                                }
-                                .frame(maxWidth: .infinity)
-                            }
-                            .padding(.horizontal)
+                            // Weekly Consistency Graph
+                            ConsistencyGraphCard(workouts: workouts, weeklyGoal: weeklyWorkoutGoal)
+                                .padding(.horizontal)
 
                             // Personal Records Card
                             PersonalRecordsCard(workouts: workouts, exercises: exercises)
@@ -196,7 +125,58 @@ struct AnalyticsView: View {
                 }
             }
             .navigationTitle("Analytics")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    StreakBadge(currentStreak: currentStreak, weeklyGoal: weeklyWorkoutGoal)
+                }
+            }
         }
+    }
+}
+
+// MARK: - Streak Badge Component
+struct StreakBadge: View {
+    let currentStreak: Int
+    let weeklyGoal: Int
+    @State private var showingInfo = false
+
+    var body: some View {
+        Button {
+            HapticManager.shared.trigger(.light)
+            showingInfo = true
+        } label: {
+            HStack(spacing: 4) {
+                Text("🔥")
+                    .font(.system(size: 18))
+                Text("\(currentStreak)")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundStyle(.primary)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+        }
+        .buttonStyle(NoHighlightButtonStyle())
+        .popover(isPresented: $showingInfo, arrowEdge: .top) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Week Streak")
+                    .font(.headline)
+
+                Text("Consecutive weeks meeting your goal of \(weeklyGoal) workout\(weeklyGoal == 1 ? "" : "s") per week.")
+                    .font(.subheadline)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding()
+            .frame(width: 240)
+            .presentationCompactAdaptation(.popover)
+        }
+    }
+}
+
+// MARK: - Custom Button Style
+struct NoHighlightButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(configuration.isPressed ? 0.9 : 1.0)
     }
 }
 
