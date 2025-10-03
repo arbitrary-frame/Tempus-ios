@@ -4,6 +4,53 @@ All notable changes to Tempus iOS workout tracking app.
 
 ## [Unreleased]
 
+### [Weekly Consistency Graph & Analytics UX] - 2025-10-03
+
+**Added:**
+- **ConsistencyGraphCard** on Analytics dashboard
+  - Line chart showing workouts per week over time
+  - Dashed gray reference line for weekly workout goal
+  - Orange line with circular markers for actual workout data
+  - Legend showing "Workouts" (orange) and "Goal" (dashed)
+  - Dynamic x-axis labels prevent overlap (stride adjusts based on data range)
+  - Date range picker (4W/12W/6M/All) - only visible when >12 weeks of data
+  - Smart default behavior: ≤12 weeks shows all data, >12 weeks shows last 12
+  - Smooth catmullRom interpolation for natural curves
+  - Empty state for <2 weeks of data
+- **Streak Badge** in navigation bar (all tabs)
+  - Compact 🔥 + number badge in top-right toolbar capsule
+  - Visible on Workouts, Routines, Exercises, and Analytics tabs
+  - Tappable to show tooltip explaining week streak calculation
+  - Popover shows goal context (e.g., "Consecutive weeks meeting your goal of 3 workouts per week")
+  - Haptic feedback on tap
+  - Centralized calculation logic via AnalyticsHelper utility
+
+**Improved:**
+- **Analytics page layout**
+  - Removed "Total Workouts" card (redundant metric)
+  - Removed "Completed Weeks" card (redundant with streak)
+  - Cleaner header with just streak badge
+  - More vertical space for graphs and visualizations
+
+**Design:**
+- Liquid Glass `.ultraThinMaterial` background matching app aesthetic
+- Compact legend in top-right corner of graph
+- Subtitle shows actual date range or week count dynamically
+- Auto-scaling to fit card width for all ranges
+- Minimal toolbar badge design
+
+**Known Issues:**
+- Minor animation glitch when switching between date ranges (e.g., 4W ↔ 12W)
+  - Chart briefly shows intermediate data points during transition
+  - Does not affect functionality, cosmetic only
+  - Will be addressed in future Swift Charts optimization
+- Streak badge shows brief orange glow after dismissing tooltip
+  - iOS default button highlight behavior persists ~1 second after popover dismissal
+  - Does not affect functionality, cosmetic only
+  - Known SwiftUI popover + toolbar button interaction issue
+
+---
+
 ### [PR UX Improvements] - 2025-10-03
 
 **Improved:**
