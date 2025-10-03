@@ -62,6 +62,61 @@ struct WorkoutsListView: View {
         }
     }
 
+    // Current streak calculation (uses all workouts, not just displayed week)
+    private var currentStreak: Int {
+        guard weeklyWorkoutGoal > 0 else { return 0 }
+
+        let calendar = Calendar.current
+        let now = Date()
+        var streak = 0
+        var currentWeekDate = now
+        var isCurrentWeek = true
+
+        // Group workouts by week
+        var workoutsByWeek: [Date: Int] = [:]
+        for workout in workouts {
+            guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: workout.workoutDate)) else {
+                continue
+            }
+            workoutsByWeek[weekStart, default: 0] += 1
+        }
+
+        // Get current week start for comparison
+        guard let currentWeekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
+            return 0
+        }
+
+        // Count backwards from current week
+        while true {
+            guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: currentWeekDate)) else {
+                break
+            }
+
+            let workoutsThisWeek = workoutsByWeek[weekStart] ?? 0
+
+            if workoutsThisWeek >= weeklyWorkoutGoal {
+                streak += 1
+                guard let previousWeek = calendar.date(byAdding: .weekOfYear, value: -1, to: currentWeekDate) else {
+                    break
+                }
+                currentWeekDate = previousWeek
+                isCurrentWeek = false
+            } else {
+                if isCurrentWeek && weekStart == currentWeekStart {
+                    guard let previousWeek = calendar.date(byAdding: .weekOfYear, value: -1, to: currentWeekDate) else {
+                        break
+                    }
+                    currentWeekDate = previousWeek
+                    isCurrentWeek = false
+                } else {
+                    break
+                }
+            }
+        }
+
+        return streak
+    }
+
     // Stats for displayed week
     private var workoutCount: Int {
         workoutsThisWeek.count
@@ -172,6 +227,8 @@ struct WorkoutsListView: View {
             }
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
+                    StreakBadge(currentStreak: currentStreak, weeklyGoal: weeklyWorkoutGoal)
+
                     Button {
                         showingCalendar = true
                     } label: {
