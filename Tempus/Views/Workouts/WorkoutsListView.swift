@@ -21,6 +21,32 @@ struct WorkoutsListView: View {
     @AppStorage("userName") private var userName: String = ""
     @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
     @State private var currentGreeting: String = "Workouts"
+    @State private var selectedWeek: Date = Date() // Start of selected week
+
+    // Get the start of the selected week
+    private var selectedWeekStart: Date {
+        Calendar.current.date(from: Calendar.current.dateComponents([.yearForWeekOfYear, .weekOfYear], from: selectedWeek)) ?? selectedWeek
+    }
+
+    // Get the end of the selected week
+    private var selectedWeekEnd: Date {
+        Calendar.current.date(byAdding: .day, value: 7, to: selectedWeekStart) ?? selectedWeek
+    }
+
+    // Check if selected week is current week
+    private var isCurrentWeek: Bool {
+        let calendar = Calendar.current
+        guard let currentWeekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())) else {
+            return false
+        }
+        return selectedWeekStart == currentWeekStart
+    }
+
+    // Workouts filtered to selected week
+    private var workoutsForSelectedWeek: [WorkoutEntry] {
+        workouts.filter { $0.workoutDate >= selectedWeekStart && $0.workoutDate < selectedWeekEnd }
+            .sorted { $0.workoutDate > $1.workoutDate }
+    }
 
     // Statistics computed properties
     private var currentStreak: Int {
@@ -79,12 +105,7 @@ struct WorkoutsListView: View {
 
     // Statistics computed properties
     private var workoutsThisWeek: Int {
-        let calendar = Calendar.current
-        let now = Date()
-        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
-            return 0
-        }
-        return workouts.filter { $0.workoutDate >= weekStart }.count
+        workoutsForSelectedWeek.count
     }
 
     private var totalExercisesCompleted: Int {
@@ -98,25 +119,16 @@ struct WorkoutsListView: View {
     }
 
     private var exercisesThisWeek: Int {
-        let calendar = Calendar.current
-        let now = Date()
-        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
-            return 0
-        }
-
-        let workoutsThisWeek = workouts.filter { $0.workoutDate >= weekStart }
-        return workoutsThisWeek.reduce(0) { $0 + $1.exercisesData.count }
+        workoutsForSelectedWeek.reduce(0) { $0 + $1.exercisesData.count }
     }
 
     private var exercisesLastWeek: Int {
         let calendar = Calendar.current
-        let now = Date()
-        guard let currentWeekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)),
-              let lastWeekStart = calendar.date(byAdding: .weekOfYear, value: -1, to: currentWeekStart) else {
+        guard let lastWeekStart = calendar.date(byAdding: .weekOfYear, value: -1, to: selectedWeekStart) else {
             return 0
         }
 
-        let workoutsLastWeek = workouts.filter { $0.workoutDate >= lastWeekStart && $0.workoutDate < currentWeekStart }
+        let workoutsLastWeek = workouts.filter { $0.workoutDate >= lastWeekStart && $0.workoutDate < selectedWeekStart }
         return workoutsLastWeek.reduce(0) { $0 + $1.exercisesData.count }
     }
 
@@ -126,25 +138,16 @@ struct WorkoutsListView: View {
     }
 
     private var totalWeightThisWeek: Double {
-        let calendar = Calendar.current
-        let now = Date()
-        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
-            return 0
-        }
-
-        let workoutsThisWeek = workouts.filter { $0.workoutDate >= weekStart }
-        return workoutsThisWeek.reduce(0.0) { $0 + $1.totalVolume }
+        workoutsForSelectedWeek.reduce(0.0) { $0 + $1.totalVolume }
     }
 
     private var totalWeightLastWeek: Double {
         let calendar = Calendar.current
-        let now = Date()
-        guard let currentWeekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)),
-              let lastWeekStart = calendar.date(byAdding: .weekOfYear, value: -1, to: currentWeekStart) else {
+        guard let lastWeekStart = calendar.date(byAdding: .weekOfYear, value: -1, to: selectedWeekStart) else {
             return 0
         }
 
-        let workoutsLastWeek = workouts.filter { $0.workoutDate >= lastWeekStart && $0.workoutDate < currentWeekStart }
+        let workoutsLastWeek = workouts.filter { $0.workoutDate >= lastWeekStart && $0.workoutDate < selectedWeekStart }
         return workoutsLastWeek.reduce(0.0) { $0 + $1.totalVolume }
     }
 
@@ -152,6 +155,25 @@ struct WorkoutsListView: View {
         guard totalWeightLastWeek > 0 else { return nil }
         let change = ((totalWeightThisWeek - totalWeightLastWeek) / totalWeightLastWeek) * 100
         return change
+    }
+
+    // Week range display string
+    private var weekRangeString: String {
+        if isCurrentWeek {
+            return "This Week"
+        }
+
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_GB")
+        formatter.dateFormat = "d MMM"
+
+        guard let weekEnd = Calendar.current.date(byAdding: .day, value: 6, to: selectedWeekStart) else {
+            return "This Week"
+        }
+
+        let startString = formatter.string(from: selectedWeekStart)
+        let endString = formatter.string(from: weekEnd)
+        return "\(startString) - \(endString)"
     }
 
     var body: some View {
@@ -165,6 +187,51 @@ struct WorkoutsListView: View {
                     }
                 } else {
                     List {
+                        // Week Navigation Header
+                        Section {
+                            HStack {
+                                Button {
+                                    HapticManager.shared.trigger(.light)
+                                    changeWeek(by: -1)
+                                } label: {
+                                    Image(systemName: "chevron.left.circle.fill")
+                                        .font(.title3)
+                                        .symbolRenderingMode(.hierarchical)
+                                        .foregroundStyle(.primary)
+                                }
+
+                                Spacer()
+
+                                VStack(spacing: 2) {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "chart.bar.fill")
+                                            .font(.caption2)
+                                            .foregroundStyle(.secondary)
+                                            .symbolRenderingMode(.hierarchical)
+                                        Text(weekRangeString)
+                                            .font(.caption.bold())
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+
+                                Spacer()
+
+                                Button {
+                                    HapticManager.shared.trigger(.light)
+                                    changeWeek(by: 1)
+                                } label: {
+                                    Image(systemName: "chevron.right.circle.fill")
+                                        .font(.title3)
+                                        .symbolRenderingMode(.hierarchical)
+                                        .foregroundStyle(.primary)
+                                }
+                            }
+                            .padding(.vertical, 8)
+                        }
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                        .listRowSeparator(.hidden)
+
                         // Statistics Summary - scrolls with content
                         Section {
                             WorkoutStatsCard(
@@ -179,7 +246,7 @@ struct WorkoutsListView: View {
                         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 12, trailing: 16))
                         .listRowSeparator(.hidden)
 
-                        ForEach(workouts) { workout in
+                        ForEach(workoutsForSelectedWeek) { workout in
                             WorkoutCardView(workout: workout)
                                 .onTapGesture {
                                     selectedWorkout = workout
@@ -287,6 +354,14 @@ struct WorkoutsListView: View {
         }
 
         currentGreeting = Self.generateGreeting(for: userName)
+    }
+
+    private func changeWeek(by value: Int) {
+        if let newWeek = Calendar.current.date(byAdding: .weekOfYear, value: value, to: selectedWeek) {
+            withAnimation(.smooth(duration: 0.3)) {
+                selectedWeek = newWeek
+            }
+        }
     }
 
     // Static method to generate greeting - can be precomputed or memoized
