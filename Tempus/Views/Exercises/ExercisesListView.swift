@@ -76,6 +76,7 @@ struct ExercisesListView: View {
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     StreakBadge(currentStreak: currentStreak, weeklyGoal: weeklyWorkoutGoal)
+                        .id(weeklyWorkoutGoal)  // Force rebuild when goal changes
 
                     Button {
                         showingCreateForm = true
