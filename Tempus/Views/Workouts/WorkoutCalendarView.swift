@@ -11,6 +11,7 @@ import SwiftData
 struct WorkoutCalendarView: View {
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \WorkoutEntry.workoutDate, order: .reverse) private var workouts: [WorkoutEntry]
+    @Query(sort: \WorkoutRoutine.name) private var routines: [WorkoutRoutine]
     @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
 
     @State private var selectedMonth: Date = Date()
@@ -21,6 +22,7 @@ struct WorkoutCalendarView: View {
     @State private var selectedDate: Date?  // Date user tapped to log workout
     @State private var dateToLog: Date?  // Date confirmed for logging
     @State private var showingLogWorkout = false
+    @State private var routineToStart: WorkoutRoutine?  // Routine to start from calendar
 
     private let calendar = Calendar.current
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
@@ -262,24 +264,43 @@ struct WorkoutCalendarView: View {
             .sheet(isPresented: $showingWorkoutPicker) {
                 WorkoutPickerSheet(workouts: workoutsForSelectedDay, selectedWorkout: $selectedWorkout)
             }
-            .confirmationDialog("Log Workout", isPresented: Binding(
+            .confirmationDialog("", isPresented: Binding(
                 get: { selectedDate != nil },
                 set: { if !$0 { selectedDate = nil } }
-            ), titleVisibility: .visible) {
-                Button("Log Workout on \(selectedDateString)") {
+            ), titleVisibility: .hidden) {
+                Button("Quick Log") {
                     dateToLog = selectedDate
-                    selectedDate = nil  // Dismiss dialog
+                    selectedDate = nil
                     showingLogWorkout = true
                 }
+
+                if !routines.isEmpty {
+                    ForEach(routines) { routine in
+                        Button(routine.name) {
+                            dateToLog = selectedDate
+                            selectedDate = nil
+                            routineToStart = routine
+                        }
+                    }
+                }
+
                 Button("Cancel", role: .cancel) {
                     selectedDate = nil
                 }
             }
             .fullScreenCover(isPresented: $showingLogWorkout, onDismiss: {
-                dateToLog = nil  // Clear after dismissing
+                dateToLog = nil
             }) {
                 if let date = dateToLog {
                     WorkoutLoggingView(date: date)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
+            .fullScreenCover(item: $routineToStart, onDismiss: {
+                dateToLog = nil
+            }) { routine in
+                if let date = dateToLog {
+                    WorkoutLoggingView(date: date, routine: routine)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
