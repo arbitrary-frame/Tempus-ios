@@ -16,7 +16,6 @@ struct WorkoutRoutinesListView: View {
     @State private var showingCreateForm = false
     @State private var selectedRoutine: WorkoutRoutine?
     @State private var routineToStart: WorkoutRoutine?
-    @State private var cachedStreak: Int = 0
 
     private var currentStreak: Int {
         AnalyticsHelper.calculateCurrentStreak(workouts: workouts, weeklyGoal: weeklyWorkoutGoal)
@@ -65,18 +64,9 @@ struct WorkoutRoutinesListView: View {
                 }
             }
             .navigationTitle("Routines")
-            .onAppear {
-                cachedStreak = currentStreak
-            }
-            .onChange(of: weeklyWorkoutGoal) { oldValue, newValue in
-                cachedStreak = currentStreak
-            }
-            .onChange(of: workouts.count) { oldValue, newValue in
-                cachedStreak = currentStreak
-            }
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
-                    StreakBadge(currentStreak: cachedStreak, weeklyGoal: weeklyWorkoutGoal)
+                    StreakBadge(currentStreak: currentStreak, weeklyGoal: weeklyWorkoutGoal)
 
                     Button {
                         showingCreateForm = true

@@ -45,6 +45,7 @@ struct AppGroupStorage<Value>: DynamicProperty {
     private class Storage<T>: ObservableObject {
         private let key: String
         private let defaultValue: T
+        private var cancellable: AnyCancellable?
 
         @Published var value: T {
             didSet {
@@ -59,6 +60,20 @@ struct AppGroupStorage<Value>: DynamicProperty {
             self.value = defaultValue
             // Now load the actual value
             self.value = Self.getValue(key: key, defaultValue: defaultValue)
+
+            // Listen for changes from other instances
+            cancellable = NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)
+                .sink { [weak self] _ in
+                    guard let self = self else { return }
+                    let newValue = Self.getValue(key: self.key, defaultValue: self.defaultValue)
+                    if self.value as? Int != newValue as? Int ||
+                       self.value as? String != newValue as? String ||
+                       self.value as? Bool != newValue as? Bool {
+                        DispatchQueue.main.async {
+                            self.value = newValue
+                        }
+                    }
+                }
         }
 
         private static func getValue(key: String, defaultValue: T) -> T {

@@ -16,7 +16,6 @@ struct ExercisesListView: View {
     @State private var searchText = ""
     @State private var showingCreateForm = false
     @State private var selectedExercise: Exercise?
-    @State private var cachedStreak: Int = 0
 
     private var currentStreak: Int {
         AnalyticsHelper.calculateCurrentStreak(workouts: workouts, weeklyGoal: weeklyWorkoutGoal)
@@ -74,18 +73,9 @@ struct ExercisesListView: View {
             }
             .navigationTitle("Exercises")
             .searchable(text: $searchText, prompt: "Search exercises")
-            .onAppear {
-                cachedStreak = currentStreak
-            }
-            .onChange(of: weeklyWorkoutGoal) { oldValue, newValue in
-                cachedStreak = currentStreak
-            }
-            .onChange(of: workouts.count) { oldValue, newValue in
-                cachedStreak = currentStreak
-            }
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
-                    StreakBadge(currentStreak: cachedStreak, weeklyGoal: weeklyWorkoutGoal)
+                    StreakBadge(currentStreak: currentStreak, weeklyGoal: weeklyWorkoutGoal)
 
                     Button {
                         showingCreateForm = true
