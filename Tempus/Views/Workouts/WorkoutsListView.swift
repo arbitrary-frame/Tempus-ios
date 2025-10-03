@@ -2,7 +2,7 @@
 //  WorkoutsListView.swift
 //  Tempus
 //
-//  Created by Ronak Pattani on 30/09/2025.
+//  REBUILT from scratch with working week navigation pattern
 //
 
 import SwiftUI
@@ -13,6 +13,7 @@ struct WorkoutsListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \WorkoutEntry.workoutDate, order: .reverse) private var workouts: [WorkoutEntry]
     @Query(sort: \WorkoutRoutine.name) private var routines: [WorkoutRoutine]
+
     @State private var showingWorkoutLogging = false
     @State private var selectedWorkout: WorkoutEntry?
     @State private var showingRoutinePicker = false
@@ -22,136 +23,56 @@ struct WorkoutsListView: View {
     @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
     @State private var currentGreeting: String = "Workouts"
 
-    // Statistics computed properties
-    private var currentStreak: Int {
-        guard weeklyWorkoutGoal > 0 else { return 0 }
+    // Week navigation state - THIS IS THE KEY
+    @State private var weekOffset: Int = 0  // 0 = current week, -1 = last week, +1 = next week
 
+    // Computed week boundaries
+    private var currentWeekStart: Date {
         let calendar = Calendar.current
         let now = Date()
-        var streak = 0
-        var currentWeekDate = now
-        var isCurrentWeek = true
-
-        // Group workouts by week
-        var workoutsByWeek: [Date: Int] = [:]
-        for workout in workouts {
-            guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: workout.workoutDate)) else {
-                continue
-            }
-            workoutsByWeek[weekStart, default: 0] += 1
+        guard let thisWeekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
+            return now
         }
-
-        // Get current week start for comparison
-        guard let currentWeekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
-            return 0
+        guard let offsetWeek = calendar.date(byAdding: .weekOfYear, value: weekOffset, to: thisWeekStart) else {
+            return thisWeekStart
         }
-
-        // Count backwards from current week
-        while true {
-            guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: currentWeekDate)) else {
-                break
-            }
-
-            let workoutsThisWeek = workoutsByWeek[weekStart] ?? 0
-
-            if workoutsThisWeek >= weeklyWorkoutGoal {
-                streak += 1
-                guard let previousWeek = calendar.date(byAdding: .weekOfYear, value: -1, to: currentWeekDate) else {
-                    break
-                }
-                currentWeekDate = previousWeek
-                isCurrentWeek = false
-            } else {
-                if isCurrentWeek && weekStart == currentWeekStart {
-                    guard let previousWeek = calendar.date(byAdding: .weekOfYear, value: -1, to: currentWeekDate) else {
-                        break
-                    }
-                    currentWeekDate = previousWeek
-                    isCurrentWeek = false
-                } else {
-                    break
-                }
-            }
-        }
-
-        return streak
+        return offsetWeek
     }
 
-    // Statistics computed properties
-    private var workoutsThisWeek: Int {
-        let calendar = Calendar.current
-        let now = Date()
-        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
-            return 0
-        }
-        return workouts.filter { $0.workoutDate >= weekStart }.count
+    private var currentWeekEnd: Date {
+        Calendar.current.date(byAdding: .day, value: 7, to: currentWeekStart)!
     }
 
-    private var totalExercisesCompleted: Int {
-        workouts.reduce(0) { $0 + $1.exercisesData.count }
+    // Filtered workouts for displayed week
+    private var workoutsThisWeek: [WorkoutEntry] {
+        workouts.filter { $0.workoutDate >= currentWeekStart && $0.workoutDate < currentWeekEnd }
     }
 
-    private var totalSetsCompleted: Int {
-        workouts.reduce(0) { total, workout in
-            total + workout.exercisesData.reduce(0) { $0 + $1.sets.count }
+    // Week label
+    private var weekLabel: String {
+        if weekOffset == 0 {
+            return "This Week"
+        } else if weekOffset == -1 {
+            return "Last Week"
+        } else {
+            let formatter = DateFormatter()
+            formatter.locale = Locale(identifier: "en_GB")
+            formatter.dateFormat = "d MMM"
+            return formatter.string(from: currentWeekStart)
         }
     }
 
-    private var exercisesThisWeek: Int {
-        let calendar = Calendar.current
-        let now = Date()
-        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
-            return 0
-        }
-
-        let workoutsThisWeek = workouts.filter { $0.workoutDate >= weekStart }
-        return workoutsThisWeek.reduce(0) { $0 + $1.exercisesData.count }
+    // Stats for displayed week
+    private var workoutCount: Int {
+        workoutsThisWeek.count
     }
 
-    private var exercisesLastWeek: Int {
-        let calendar = Calendar.current
-        let now = Date()
-        guard let currentWeekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)),
-              let lastWeekStart = calendar.date(byAdding: .weekOfYear, value: -1, to: currentWeekStart) else {
-            return 0
-        }
-
-        let workoutsLastWeek = workouts.filter { $0.workoutDate >= lastWeekStart && $0.workoutDate < currentWeekStart }
-        return workoutsLastWeek.reduce(0) { $0 + $1.exercisesData.count }
+    private var exerciseCount: Int {
+        workoutsThisWeek.reduce(0) { $0 + $1.exercisesData.count }
     }
 
-    private var exercisesAbsoluteChange: Int? {
-        guard exercisesLastWeek > 0 else { return nil }
-        return exercisesThisWeek - exercisesLastWeek
-    }
-
-    private var totalWeightThisWeek: Double {
-        let calendar = Calendar.current
-        let now = Date()
-        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
-            return 0
-        }
-
-        let workoutsThisWeek = workouts.filter { $0.workoutDate >= weekStart }
-        return workoutsThisWeek.reduce(0.0) { $0 + $1.totalVolume }
-    }
-
-    private var totalWeightLastWeek: Double {
-        let calendar = Calendar.current
-        let now = Date()
-        guard let currentWeekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)),
-              let lastWeekStart = calendar.date(byAdding: .weekOfYear, value: -1, to: currentWeekStart) else {
-            return 0
-        }
-
-        let workoutsLastWeek = workouts.filter { $0.workoutDate >= lastWeekStart && $0.workoutDate < currentWeekStart }
-        return workoutsLastWeek.reduce(0.0) { $0 + $1.totalVolume }
-    }
-
-    private var weightChangePercentage: Double? {
-        guard totalWeightLastWeek > 0 else { return nil }
-        let change = ((totalWeightThisWeek - totalWeightLastWeek) / totalWeightLastWeek) * 100
-        return change
+    private var totalWeight: Double {
+        workoutsThisWeek.reduce(0.0) { $0 + $1.totalVolume }
     }
 
     var body: some View {
@@ -164,22 +85,66 @@ struct WorkoutsListView: View {
                         Text("Tap + to log your first workout")
                     }
                 } else {
-                    List {
-                        // Statistics Summary - scrolls with content
+                    VStack(spacing: 0) {
+                        // Week Navigation - OUTSIDE the List!
+                        HStack {
+                            Button {
+                                HapticManager.shared.trigger(.light)
+                                weekOffset -= 1
+                            } label: {
+                                Image(systemName: "chevron.left.circle.fill")
+                                    .font(.title3)
+                                    .symbolRenderingMode(.hierarchical)
+                                    .foregroundStyle(.primary)
+                            }
+
+                            Spacer()
+
+                            // Tappable label to return to this week
+                            Button {
+                                if weekOffset != 0 {
+                                    HapticManager.shared.trigger(.light)
+                                    weekOffset = 0
+                                }
+                            } label: {
+                                Text(weekLabel)
+                                    .font(.subheadline.bold())
+                                    .foregroundStyle(.primary)
+                            }
+
+                            Spacer()
+
+                            Button {
+                                HapticManager.shared.trigger(.light)
+                                weekOffset += 1
+                            } label: {
+                                Image(systemName: "chevron.right.circle.fill")
+                                    .font(.title3)
+                                    .symbolRenderingMode(.hierarchical)
+                                    .foregroundStyle(.primary)
+                            }
+                            .disabled(weekOffset >= 0)  // Can't go to future weeks
+                            .opacity(weekOffset >= 0 ? 0.3 : 1.0)
+                        }
+                        .padding()
+                        .background(Color(uiColor: .systemGroupedBackground))
+
+                        List {
+                            // Statistics
                         Section {
-                            WorkoutStatsCard(
-                                workoutsThisWeek: workoutsThisWeek,
-                                totalExercises: exercisesThisWeek,
-                                totalWeight: totalWeightThisWeek,
-                                exercisesAbsoluteChange: exercisesAbsoluteChange,
-                                weightChangePercentage: weightChangePercentage
+                            SimpleStatsCard(
+                                workoutCount: workoutCount,
+                                exerciseCount: exerciseCount,
+                                totalWeight: totalWeight,
+                                weeklyGoal: weeklyWorkoutGoal
                             )
                         }
                         .listRowBackground(Color.clear)
                         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 12, trailing: 16))
                         .listRowSeparator(.hidden)
 
-                        ForEach(workouts) { workout in
+                        // Workouts for this week
+                        ForEach(workoutsThisWeek) { workout in
                             WorkoutCardView(workout: workout)
                                 .onTapGesture {
                                     selectedWorkout = workout
@@ -197,6 +162,8 @@ struct WorkoutsListView: View {
                     }
                     .listStyle(.plain)
                     .scrollContentBackground(.hidden)
+                    .id(weekOffset)  // Force rebuild when week changes
+                    }  // Close VStack
                 }
             }
             .navigationTitle(currentGreeting)
@@ -205,8 +172,6 @@ struct WorkoutsListView: View {
             }
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
-                    StreakBadge(currentStreak: currentStreak, weeklyGoal: weeklyWorkoutGoal)
-
                     Button {
                         showingCalendar = true
                     } label: {
@@ -264,20 +229,13 @@ struct WorkoutsListView: View {
             modelContext.delete(workout)
         }
 
-        // Save and refresh widgets after deletion
         do {
             try modelContext.save()
-            print("✅ Workout deleted from SwiftData")
         } catch {
             print("❌ Failed to save after deletion: \(error)")
         }
 
-        print("🔄 Requesting widget refresh after deletion...")
         WidgetCenter.shared.reloadAllTimelines()
-        WidgetCenter.shared.reloadTimelines(ofKind: "GoalProgressWidget")
-        WidgetCenter.shared.reloadTimelines(ofKind: "ExercisesWidget")
-        WidgetCenter.shared.reloadTimelines(ofKind: "WeightWidget")
-        WidgetCenter.shared.reloadTimelines(ofKind: "CombinedStatsWidget")
     }
 
     private func updateGreeting() {
@@ -286,49 +244,75 @@ struct WorkoutsListView: View {
             return
         }
 
-        currentGreeting = Self.generateGreeting(for: userName)
-    }
-
-    // Static method to generate greeting - can be precomputed or memoized
-    private static func generateGreeting(for userName: String) -> String {
         let hour = Calendar.current.component(.hour, from: Date())
-
         let messages: [String] = switch hour {
         case 5..<12:
-            [
-                "Morning \(userName)",
-                "Let's go \(userName)",
-                "Ready \(userName)?",
-                "Time to train \(userName)"
-            ]
+            ["Morning \(userName)", "Let's go \(userName)", "Ready \(userName)?", "Time to train \(userName)"]
         case 12..<17:
-            [
-                "Hey \(userName)",
-                "Let's work \(userName)",
-                "Ready \(userName)?",
-                "Time to move \(userName)"
-            ]
+            ["Hey \(userName)", "Let's work \(userName)", "Ready \(userName)?", "Time to move \(userName)"]
         case 17..<22:
-            [
-                "Evening \(userName)",
-                "Let's go \(userName)",
-                "Ready \(userName)?",
-                "Time to push \(userName)"
-            ]
+            ["Evening \(userName)", "Let's go \(userName)", "Ready \(userName)?", "Time to push \(userName)"]
         default:
-            [
-                "Hey \(userName)",
-                "Can't sleep \(userName)?",
-                "Night owl \(userName)?",
-                "Late session \(userName)?"
-            ]
+            ["Hey \(userName)", "Can't sleep \(userName)?", "Night owl \(userName)?", "Late session \(userName)?"]
         }
 
-        return messages.randomElement() ?? messages[0]
+        currentGreeting = messages.randomElement() ?? messages[0]
     }
 }
 
-// Enhanced Workout Card with Liquid Glass effects
+// Simplified stats card for rebuilt view
+struct SimpleStatsCard: View {
+    let workoutCount: Int
+    let exerciseCount: Int
+    let totalWeight: Double
+    let weeklyGoal: Int
+
+    private var formattedWeight: String {
+        let kg = Int(totalWeight)
+        if kg >= 1000 {
+            return String(format: "%.1fk", Double(kg) / 1000.0)
+        }
+        return "\(kg)"
+    }
+
+    var body: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 4) {
+                Image(systemName: "chart.bar.fill")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text("Week Summary")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer()
+            }
+
+            HStack(spacing: 8) {
+                StatBubble(
+                    value: "\(workoutCount)/\(weeklyGoal)",
+                    label: "Workouts",
+                    icon: "figure.strengthtraining.traditional"
+                )
+                .frame(maxWidth: .infinity)
+
+                StatBubble(
+                    value: "\(exerciseCount)",
+                    label: "Exercises",
+                    icon: "list.bullet.clipboard"
+                )
+                .frame(maxWidth: .infinity)
+
+                StatBubble(
+                    value: formattedWeight,
+                    label: "kg",
+                    icon: "dumbbell.fill",
+                    accentColor: .orange
+                )
+                .frame(maxWidth: .infinity)
+            }
+        }
+    }
+}
 struct WorkoutCardView: View {
     let workout: WorkoutEntry
     @State private var isPressed = false
