@@ -19,6 +19,7 @@ struct WorkoutCalendarView: View {
     @State private var workoutsForSelectedDay: [WorkoutEntry] = []
     @State private var showingWorkoutPicker = false
     @State private var selectedDate: Date?  // Date user tapped to log workout
+    @State private var dateToLog: Date?  // Date confirmed for logging
     @State private var showingLogWorkout = false
 
     private let calendar = Calendar.current
@@ -266,14 +267,18 @@ struct WorkoutCalendarView: View {
                 set: { if !$0 { selectedDate = nil } }
             ), titleVisibility: .visible) {
                 Button("Log Workout on \(selectedDateString)") {
+                    dateToLog = selectedDate
+                    selectedDate = nil  // Dismiss dialog
                     showingLogWorkout = true
                 }
                 Button("Cancel", role: .cancel) {
                     selectedDate = nil
                 }
             }
-            .fullScreenCover(isPresented: $showingLogWorkout) {
-                if let date = selectedDate {
+            .fullScreenCover(isPresented: $showingLogWorkout, onDismiss: {
+                dateToLog = nil  // Clear after dismissing
+            }) {
+                if let date = dateToLog {
                     WorkoutLoggingView(date: date)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
