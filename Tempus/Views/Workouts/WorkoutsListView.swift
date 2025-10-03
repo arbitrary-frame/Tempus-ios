@@ -140,88 +140,84 @@ struct WorkoutsListView: View {
                         Text("Tap + to log your first workout")
                     }
                 } else {
-                    VStack(spacing: 0) {
-                        // Week Navigation - OUTSIDE the List!
-                        HStack {
-                            Button {
-                                HapticManager.shared.trigger(.light)
-                                weekOffset -= 1
-                            } label: {
-                                Image(systemName: "chevron.left.circle.fill")
-                                    .font(.title3)
-                                    .symbolRenderingMode(.hierarchical)
-                                    .foregroundStyle(.primary)
-                            }
-
-                            Spacer()
-
-                            // Tappable label to return to this week
-                            Button {
-                                if weekOffset != 0 {
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            // Week Navigation - Scrolls with content
+                            HStack {
+                                Button {
                                     HapticManager.shared.trigger(.light)
-                                    weekOffset = 0
+                                    weekOffset -= 1
+                                } label: {
+                                    Image(systemName: "chevron.left.circle.fill")
+                                        .font(.title3)
+                                        .symbolRenderingMode(.hierarchical)
+                                        .foregroundStyle(.primary)
                                 }
-                            } label: {
-                                Text(weekLabel)
-                                    .font(.subheadline.bold())
-                                    .foregroundStyle(.primary)
+
+                                Spacer()
+
+                                // Tappable label to return to this week
+                                Button {
+                                    if weekOffset != 0 {
+                                        HapticManager.shared.trigger(.light)
+                                        weekOffset = 0
+                                    }
+                                } label: {
+                                    Text(weekLabel)
+                                        .font(.subheadline.bold())
+                                        .foregroundStyle(.primary)
+                                }
+
+                                Spacer()
+
+                                Button {
+                                    HapticManager.shared.trigger(.light)
+                                    weekOffset += 1
+                                } label: {
+                                    Image(systemName: "chevron.right.circle.fill")
+                                        .font(.title3)
+                                        .symbolRenderingMode(.hierarchical)
+                                        .foregroundStyle(.primary)
+                                }
+                                .disabled(weekOffset >= 0)  // Can't go to future weeks
+                                .opacity(weekOffset >= 0 ? 0.3 : 1.0)
                             }
+                            .padding()
 
-                            Spacer()
-
-                            Button {
-                                HapticManager.shared.trigger(.light)
-                                weekOffset += 1
-                            } label: {
-                                Image(systemName: "chevron.right.circle.fill")
-                                    .font(.title3)
-                                    .symbolRenderingMode(.hierarchical)
-                                    .foregroundStyle(.primary)
-                            }
-                            .disabled(weekOffset >= 0)  // Can't go to future weeks
-                            .opacity(weekOffset >= 0 ? 0.3 : 1.0)
-                        }
-                        .padding()
-                        .background(Color(uiColor: .systemGroupedBackground))
-
-                        List {
                             // Statistics
-                        Section {
                             SimpleStatsCard(
                                 workoutCount: workoutCount,
                                 exerciseCount: exerciseCount,
                                 totalWeight: totalWeight,
                                 weeklyGoal: weeklyWorkoutGoal
                             )
-                        }
-                        .listRowBackground(Color.clear)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 12, trailing: 16))
-                        .listRowSeparator(.hidden)
+                            .padding(.horizontal)
+                            .padding(.bottom, 12)
 
-                        // Workouts for this week
-                        ForEach(workoutsThisWeek) { workout in
-                            WorkoutCardView(workout: workout)
-                                .onTapGesture {
-                                    selectedWorkout = workout
+                            // Workouts for this week
+                            LazyVStack(spacing: 12) {
+                                ForEach(workoutsThisWeek) { workout in
+                                    WorkoutCardView(workout: workout)
+                                        .onTapGesture {
+                                            selectedWorkout = workout
+                                        }
+                                        .contextMenu {
+                                            Button(role: .destructive) {
+                                                deleteWorkout(workout)
+                                            } label: {
+                                                Label("Delete", systemImage: "trash")
+                                            }
+                                        }
                                 }
-                                .listRowBackground(Color.clear)
-                                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                    Button(role: .destructive) {
-                                        deleteWorkout(workout)
-                                    } label: {
-                                        Label("Delete", systemImage: "trash")
-                                    }
-                                }
+                            }
+                            .padding(.horizontal)
                         }
                     }
-                    .listStyle(.plain)
-                    .scrollContentBackground(.hidden)
                     .id(weekOffset)  // Force rebuild when week changes
-                    }  // Close VStack
                 }
             }
             .navigationTitle(currentGreeting)
+            .navigationBarTitleDisplayMode(.large)
             .onAppear {
                 updateGreeting()
             }
