@@ -23,7 +23,7 @@ struct WorkoutsListView: View {
     @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
     @State private var currentGreeting: String = "Workouts"
 
-    // Week navigation state - THIS IS THE KEY
+    // Week navigation state
     @State private var weekOffset: Int = 0  // 0 = current week, -1 = last week, +1 = next week
 
     // Computed week boundaries
@@ -117,19 +117,6 @@ struct WorkoutsListView: View {
         return streak
     }
 
-    // Stats for displayed week
-    private var workoutCount: Int {
-        workoutsThisWeek.count
-    }
-
-    private var exerciseCount: Int {
-        workoutsThisWeek.reduce(0) { $0 + $1.exercisesData.count }
-    }
-
-    private var totalWeight: Double {
-        workoutsThisWeek.reduce(0.0) { $0 + $1.totalVolume }
-    }
-
     var body: some View {
         NavigationStack {
             Group {
@@ -140,80 +127,19 @@ struct WorkoutsListView: View {
                         Text("Tap + to log your first workout")
                     }
                 } else {
-                    ScrollView {
-                        VStack(spacing: 0) {
-                            // Week Navigation - Scrolls with content
-                            HStack {
-                                Button {
-                                    HapticManager.shared.trigger(.light)
-                                    weekOffset -= 1
-                                } label: {
-                                    Image(systemName: "chevron.left.circle.fill")
-                                        .font(.title3)
-                                        .symbolRenderingMode(.hierarchical)
-                                        .foregroundStyle(.primary)
-                                }
-
-                                Spacer()
-
-                                // Tappable label to return to this week
-                                Button {
-                                    if weekOffset != 0 {
-                                        HapticManager.shared.trigger(.light)
-                                        weekOffset = 0
-                                    }
-                                } label: {
-                                    Text(weekLabel)
-                                        .font(.subheadline.bold())
-                                        .foregroundStyle(.primary)
-                                }
-
-                                Spacer()
-
-                                Button {
-                                    HapticManager.shared.trigger(.light)
-                                    weekOffset += 1
-                                } label: {
-                                    Image(systemName: "chevron.right.circle.fill")
-                                        .font(.title3)
-                                        .symbolRenderingMode(.hierarchical)
-                                        .foregroundStyle(.primary)
-                                }
-                                .disabled(weekOffset >= 0)  // Can't go to future weeks
-                                .opacity(weekOffset >= 0 ? 0.3 : 1.0)
-                            }
-                            .padding()
-
-                            // Statistics
-                            SimpleStatsCard(
-                                workoutCount: workoutCount,
-                                exerciseCount: exerciseCount,
-                                totalWeight: totalWeight,
-                                weeklyGoal: weeklyWorkoutGoal
-                            )
-                            .padding(.horizontal)
-                            .padding(.bottom, 12)
-
-                            // Workouts for this week
-                            LazyVStack(spacing: 12) {
-                                ForEach(workoutsThisWeek) { workout in
-                                    WorkoutCardView(workout: workout)
-                                        .onTapGesture {
-                                            selectedWorkout = workout
-                                        }
-                                        .contextMenu {
-                                            Button(role: .destructive) {
-                                                deleteWorkout(workout)
-                                            } label: {
-                                                Label("Delete", systemImage: "trash")
-                                            }
-                                        }
-                                }
-                            }
-                            .padding(.horizontal)
+                    WorkoutsListContent(
+                        allWorkouts: workouts,
+                        weekLabel: weekLabel,
+                        weekOffset: weekOffset,
+                        weeklyGoal: weeklyWorkoutGoal,
+                        onWeekOffsetChange: { newOffset in
+                            weekOffset = newOffset
+                        },
+                        onDeleteWorkout: deleteWorkout,
+                        onSelectWorkout: { workout in
+                            selectedWorkout = workout
                         }
-                    }
-                    .id(weekOffset)  // Force rebuild when week changes
+                    )
                 }
             }
             .navigationTitle(currentGreeting)
@@ -313,7 +239,208 @@ struct WorkoutsListView: View {
     }
 }
 
-// Simplified stats card for rebuilt view
+// MARK: - Content View (receives all workouts and filters internally)
+struct WorkoutsListContent: View {
+    let allWorkouts: [WorkoutEntry]
+    let weekLabel: String
+    let weekOffset: Int
+    let weeklyGoal: Int
+    let onWeekOffsetChange: (Int) -> Void
+    let onDeleteWorkout: (WorkoutEntry) -> Void
+    let onSelectWorkout: (WorkoutEntry) -> Void
+
+    private let calendar = Calendar.current
+
+    // Computed week boundaries based on weekOffset
+    private var currentWeekStart: Date {
+        let now = Date()
+        guard let thisWeekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
+            return now
+        }
+        guard let offsetWeek = calendar.date(byAdding: .weekOfYear, value: weekOffset, to: thisWeekStart) else {
+            return thisWeekStart
+        }
+        return offsetWeek
+    }
+
+    private var currentWeekEnd: Date {
+        calendar.date(byAdding: .day, value: 7, to: currentWeekStart)!
+    }
+
+    // Filter workouts for displayed week
+    private var workoutsThisWeek: [WorkoutEntry] {
+        allWorkouts.filter { $0.workoutDate >= currentWeekStart && $0.workoutDate < currentWeekEnd }
+    }
+
+    // Stats computed from filtered workouts
+    private var workoutCount: Int {
+        workoutsThisWeek.count
+    }
+
+    private var exerciseCount: Int {
+        workoutsThisWeek.reduce(0) { $0 + $1.exercisesData.count }
+    }
+
+    private var totalWeight: Double {
+        workoutsThisWeek.reduce(0.0) { $0 + $1.totalVolume }
+    }
+
+    var body: some View {
+        List {
+            // Week Navigation as header (scrolls with list, buttons use callbacks!)
+            Section {
+                HStack(spacing: 0) {
+                    Button {
+                        HapticManager.shared.trigger(.light)
+                        onWeekOffsetChange(weekOffset - 1)
+                    } label: {
+                        Image(systemName: "chevron.left.circle.fill")
+                            .font(.title3)
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundStyle(.orange)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+
+                    Spacer()
+
+                    // Tappable label to return to this week
+                    Button {
+                        if weekOffset != 0 {
+                            HapticManager.shared.trigger(.light)
+                            onWeekOffsetChange(0)
+                        }
+                    } label: {
+                        Text(weekLabel)
+                            .font(.subheadline.bold())
+                            .foregroundStyle(.orange)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+
+                    Spacer()
+
+                    Button {
+                        HapticManager.shared.trigger(.light)
+                        onWeekOffsetChange(weekOffset + 1)
+                    } label: {
+                        Image(systemName: "chevron.right.circle.fill")
+                            .font(.title3)
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundStyle(.orange)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(weekOffset >= 0)  // Can't go to future weeks
+                    .opacity(weekOffset >= 0 ? 0.3 : 1.0)
+                }
+                .padding(.vertical, 8)
+            } header: {
+                EmptyView()
+            }
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+            .listRowSeparator(.hidden)
+
+            // Statistics with weekly goal ring
+            Section {
+                WeeklyStatsWithRing(
+                    workoutCount: workoutCount,
+                    exerciseCount: exerciseCount,
+                    totalWeight: totalWeight,
+                    weeklyGoal: weeklyGoal
+                )
+            }
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 12, trailing: 16))
+            .listRowSeparator(.hidden)
+
+            // Workouts for this week
+            ForEach(workoutsThisWeek) { workout in
+                WorkoutCardView(workout: workout)
+                    .onTapGesture {
+                        onSelectWorkout(workout)
+                    }
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                        Button(role: .destructive) {
+                            onDeleteWorkout(workout)
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    }
+            }
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .id(weekOffset)  // Force rebuild when weekOffset changes
+    }
+}
+
+// Weekly stats card with goal ring and celebration
+struct WeeklyStatsWithRing: View {
+    let workoutCount: Int
+    let exerciseCount: Int
+    let totalWeight: Double
+    let weeklyGoal: Int
+
+    private var formattedWeight: String {
+        let kg = Int(totalWeight)
+        if kg >= 1000 {
+            return String(format: "%.1fk", Double(kg) / 1000.0)
+        }
+        return "\(kg)"
+    }
+
+    private var progress: Double {
+        guard weeklyGoal > 0 else { return 0 }
+        return min(Double(workoutCount) / Double(weeklyGoal), 1.0)
+    }
+
+    var body: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 4) {
+                Image(systemName: "chart.bar.fill")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text("Week Summary")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer()
+            }
+
+            HStack(spacing: 8) {
+                // Circular progress ring with celebration
+                WeeklyGoalRing(
+                    workoutsCompleted: workoutCount,
+                    weeklyGoal: weeklyGoal,
+                    progress: progress
+                )
+                .frame(maxWidth: .infinity)
+
+                StatBubble(
+                    value: "\(exerciseCount)",
+                    label: "Exercises",
+                    icon: "list.bullet.clipboard"
+                )
+                .frame(maxWidth: .infinity)
+
+                StatBubble(
+                    value: formattedWeight,
+                    label: "kg",
+                    icon: "dumbbell.fill",
+                    accentColor: .orange
+                )
+                .frame(maxWidth: .infinity)
+            }
+        }
+    }
+}
+
+// Simplified stats card for rebuilt view (kept for backward compatibility)
 struct SimpleStatsCard: View {
     let workoutCount: Int
     let exerciseCount: Int
@@ -709,6 +836,55 @@ struct StatBubble: View {
             }
         }
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+// Week navigation component extracted to avoid Section state issues
+struct WeekNavigationView: View {
+    let weekLabel: String
+    @Binding var weekOffset: Int
+
+    var body: some View {
+        HStack {
+            Button {
+                HapticManager.shared.trigger(.light)
+                weekOffset -= 1
+            } label: {
+                Image(systemName: "chevron.left.circle.fill")
+                    .font(.title3)
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundStyle(.primary)
+            }
+
+            Spacer()
+
+            // Tappable label to return to this week
+            Button {
+                if weekOffset != 0 {
+                    HapticManager.shared.trigger(.light)
+                    weekOffset = 0
+                }
+            } label: {
+                Text(weekLabel)
+                    .font(.subheadline.bold())
+                    .foregroundStyle(.primary)
+            }
+
+            Spacer()
+
+            Button {
+                HapticManager.shared.trigger(.light)
+                weekOffset += 1
+            } label: {
+                Image(systemName: "chevron.right.circle.fill")
+                    .font(.title3)
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundStyle(.primary)
+            }
+            .disabled(weekOffset >= 0)  // Can't go to future weeks
+            .opacity(weekOffset >= 0 ? 0.3 : 1.0)
+        }
+        .padding(.vertical, 8)
     }
 }
 
