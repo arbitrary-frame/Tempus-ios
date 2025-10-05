@@ -17,6 +17,7 @@ struct SettingsView: View {
     @AppStorage("userName") private var userName: String = ""
     @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = true
+    @AppStorage("isTestMode") private var isTestMode: Bool = false
 
     @State private var exportItem: ExportItem?
     @State private var showingResetConfirmation = false
@@ -24,6 +25,8 @@ struct SettingsView: View {
     @State private var exportErrorMessage = ""
     @State private var showingSampleDataLoaded = false
     @State private var showingDataCleared = false
+    @State private var showingTestModeConfirmation = false
+    @State private var pendingTestModeValue = false
 
     var body: some View {
         NavigationStack {
@@ -76,6 +79,76 @@ struct SettingsView: View {
                     }
                 }
 
+                // Developer Mode Section
+                Section {
+                    HStack {
+                        Text("Active Database")
+                        Spacer()
+                        Text(isTestMode ? "🧪 Test" : "✅ Production")
+                            .foregroundStyle(isTestMode ? .orange : .green)
+                            .fontWeight(.bold)
+                    }
+
+                    HStack {
+                        Text("Workouts in Current DB")
+                        Spacer()
+                        Text("\(workouts.count)")
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Toggle(isOn: Binding(
+                        get: { isTestMode },
+                        set: { newValue in
+                            pendingTestModeValue = newValue
+                            showingTestModeConfirmation = true
+                        }
+                    )) {
+                        HStack {
+                            Label("Test Mode", systemImage: "flask.fill")
+                            if isTestMode {
+                                Text("🧪")
+                                    .font(.title3)
+                            }
+                        }
+                    }
+                    .tint(.orange)
+
+                    if isTestMode {
+                        Button {
+                            SampleDataManager.loadSampleData(into: modelContext)
+                            HapticManager.shared.trigger(.success)
+                            showingSampleDataLoaded = true
+                        } label: {
+                            Label("Load Sample Data", systemImage: "tray.and.arrow.down.fill")
+                        }
+
+                        Button(role: .destructive) {
+                            SampleDataManager.clearAllData(from: modelContext)
+                            HapticManager.shared.trigger(.success)
+                            showingDataCleared = true
+                        } label: {
+                            Label("Clear Test Data", systemImage: "trash.fill")
+                        }
+                    } else {
+                        Button(role: .destructive) {
+                            SampleDataManager.clearAllData(from: modelContext)
+                            HapticManager.shared.trigger(.success)
+                            showingDataCleared = true
+                        } label: {
+                            Label("Clear Production Data", systemImage: "trash.fill")
+                        }
+                    }
+                } header: {
+                    Text("Developer Mode")
+                } footer: {
+                    if isTestMode {
+                        Text("🧪 TEST MODE ACTIVE: You're viewing test data. Your production data is safe. Switch back to access your real workouts.")
+                            .foregroundStyle(.orange)
+                    } else {
+                        Text("Enable Test Mode to experiment with the app without affecting your real data. Test and production data are completely isolated.")
+                    }
+                }
+
                 // Danger Zone Section
                 Section {
                     Button(role: .destructive) {
@@ -89,32 +162,6 @@ struct SettingsView: View {
                     Text("This will delete all workouts, exercises, routines, and reset all settings. This action cannot be undone.")
                         .foregroundStyle(.secondary)
                 }
-
-                #if DEBUG
-                // Developer Section (Debug only)
-                Section {
-                    Button {
-                        SampleDataManager.loadSampleData(into: modelContext)
-                        HapticManager.shared.trigger(.success)
-                        showingSampleDataLoaded = true
-                    } label: {
-                        Label("Load Sample Data", systemImage: "tray.and.arrow.down.fill")
-                    }
-
-                    Button(role: .destructive) {
-                        SampleDataManager.clearAllData(from: modelContext)
-                        HapticManager.shared.trigger(.success)
-                        showingDataCleared = true
-                    } label: {
-                        Label("Clear All Data", systemImage: "trash.fill")
-                    }
-                } header: {
-                    Text("Developer")
-                } footer: {
-                    Text("DEBUG BUILD ONLY: These options help with testing and will not appear in production builds.")
-                        .foregroundStyle(.orange)
-                }
-                #endif
 
                 // About Section
                 Section("About") {
@@ -145,7 +192,19 @@ struct SettingsView: View {
             } message: {
                 Text("This will permanently delete all your workouts, exercises, routines, and settings. You will need to go through onboarding again. This action cannot be undone.")
             }
-            #if DEBUG
+            .alert(pendingTestModeValue ? "Switch to Test Mode?" : "Switch to Production?", isPresented: $showingTestModeConfirmation) {
+                Button("Cancel", role: .cancel) { }
+                Button(pendingTestModeValue ? "Enable Test Mode" : "Back to Production") {
+                    isTestMode = pendingTestModeValue
+                    HapticManager.shared.trigger(.success)
+                }
+            } message: {
+                if pendingTestModeValue {
+                    Text("You'll switch to test mode with isolated data. Your production data will remain safe and untouched. You can switch back anytime.")
+                } else {
+                    Text("You'll switch back to production mode with your real workout data. Test data will be hidden but preserved.")
+                }
+            }
             .alert("Sample Data Loaded!", isPresented: $showingSampleDataLoaded) {
                 Button("OK", role: .cancel) { }
             } message: {
@@ -154,9 +213,8 @@ struct SettingsView: View {
             .alert("Data Cleared!", isPresented: $showingDataCleared) {
                 Button("OK", role: .cancel) { }
             } message: {
-                Text("All exercises, routines, and workouts have been deleted from the database.")
+                Text(isTestMode ? "All test data has been deleted from the test database." : "All data has been deleted from the production database.")
             }
-            #endif
         }
     }
 

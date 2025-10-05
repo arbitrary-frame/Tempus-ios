@@ -13,36 +13,41 @@ struct ContentView: View {
     @Binding var selectedTab: Int
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            WorkoutsListView()
-                .tabItem {
-                    Label("Workouts", systemImage: "figure.strengthtraining.traditional")
-                }
-                .tag(0)
+        VStack(spacing: 0) {
+            // Test mode banner at the top
+            TestModeBanner()
 
-            WorkoutRoutinesListView()
-                .tabItem {
-                    Label("Routines", systemImage: "arrow.triangle.2.circlepath")
-                }
-                .tag(1)
+            TabView(selection: $selectedTab) {
+                WorkoutsListView()
+                    .tabItem {
+                        Label("Workouts", systemImage: "figure.strengthtraining.traditional")
+                    }
+                    .tag(0)
 
-            ExercisesListView()
-                .tabItem {
-                    Label("Exercises", systemImage: "list.bullet.clipboard")
-                }
-                .tag(2)
+                WorkoutRoutinesListView()
+                    .tabItem {
+                        Label("Routines", systemImage: "arrow.triangle.2.circlepath")
+                    }
+                    .tag(1)
 
-            AnalyticsView()
-                .tabItem {
-                    Label("Analytics", systemImage: "chart.line.uptrend.xyaxis")
-                }
-                .tag(3)
+                ExercisesListView()
+                    .tabItem {
+                        Label("Exercises", systemImage: "list.bullet.clipboard")
+                    }
+                    .tag(2)
 
-            SettingsView()
-                .tabItem {
-                    Label("Settings", systemImage: "gearshape")
-                }
-                .tag(4)
+                AnalyticsView()
+                    .tabItem {
+                        Label("Analytics", systemImage: "chart.line.uptrend.xyaxis")
+                    }
+                    .tag(3)
+
+                SettingsView()
+                    .tabItem {
+                        Label("Settings", systemImage: "gearshape")
+                    }
+                    .tag(4)
+            }
         }
         .preferredColorScheme(themeManager.colorScheme)
     }

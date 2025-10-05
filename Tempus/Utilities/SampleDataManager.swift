@@ -5,8 +5,6 @@
 //  Created by Ronak Pattani on 30/09/2025.
 //
 
-#if DEBUG
-
 import Foundation
 import SwiftData
 
@@ -79,10 +77,13 @@ class SampleDataManager {
             ("Overhead Press", "Shoulders", ["Compound", "Barbell"]),
             ("Lateral Raise", "Shoulders", ["Isolation", "Dumbbell"]),
 
-            // Arms
-            ("Barbell Curl", "Arms", ["Isolation", "Barbell"]),
-            ("Tricep Pushdown", "Arms", ["Isolation", "Cable"]),
-            ("Hammer Curl", "Arms", ["Isolation", "Dumbbell"])
+            // Biceps
+            ("Barbell Curl", "Biceps", ["Isolation", "Barbell"]),
+            ("Hammer Curl", "Biceps", ["Isolation", "Dumbbell"]),
+
+            // Triceps
+            ("Tricep Pushdown", "Triceps", ["Isolation", "Cable"]),
+            ("Overhead Tricep Extension", "Triceps", ["Isolation", "Dumbbell"])
         ]
 
         var exercises: [Exercise] = []
@@ -220,5 +221,3 @@ class SampleDataManager {
         }
     }
 }
-
-#endif

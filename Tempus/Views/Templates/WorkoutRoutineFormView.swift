@@ -156,6 +156,7 @@ struct RoutineExercisePickerView: View {
     @Query(sort: \Exercise.name) private var allExercises: [Exercise]
     @Binding var selectedExercises: [Exercise]
     @State private var searchText = ""
+    @State private var showingExerciseForm = false
 
     var filteredExercises: [Exercise] {
         let available = allExercises.filter { !$0.isArchived }
@@ -204,11 +205,22 @@ struct RoutineExercisePickerView: View {
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $searchText, prompt: "Search exercises")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        showingExerciseForm = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
+
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") {
                         dismiss()
                     }
                 }
+            }
+            .sheet(isPresented: $showingExerciseForm) {
+                ExerciseFormView()
             }
         }
     }
