@@ -37,6 +37,8 @@ struct WorkoutRoutinesListView: View {
                                 selectedRoutine = routine
                             } label: {
                                 RoutineRowView(routine: routine)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
                             .listRowBackground(
