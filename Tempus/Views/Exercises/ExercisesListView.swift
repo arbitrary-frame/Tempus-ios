@@ -51,6 +51,8 @@ struct ExercisesListView: View {
                                         selectedExercise = exercise
                                     } label: {
                                         ExerciseRowView(exercise: exercise)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .contentShape(Rectangle())
                                     }
                                     .buttonStyle(.plain)
                                     .listRowBackground(

@@ -158,7 +158,7 @@ struct WorkoutCalendarView: View {
                     // Calendar grid and weekly content
                     ScrollView(showsIndicators: false) {
                         VStack(spacing: 20) {
-                            // Calendar grid
+                            // Calendar grid with swipe gesture
                             LazyVGrid(columns: columns, spacing: 6) {
                                 ForEach(daysInMonth, id: \.self) { date in
                                     DayCell(
@@ -182,6 +182,26 @@ struct WorkoutCalendarView: View {
                                 }
                             }
                             .padding(.horizontal, 20)
+                            .gesture(
+                                DragGesture(minimumDistance: 30)
+                                    .onEnded { value in
+                                        let horizontalMovement = value.translation.width
+                                        let verticalMovement = value.translation.height
+
+                                        // Only trigger if horizontal swipe is dominant
+                                        if abs(horizontalMovement) > abs(verticalMovement) {
+                                            if horizontalMovement < 0 {
+                                                // Swipe left - next month
+                                                HapticManager.shared.trigger(.light)
+                                                changeMonth(by: 1)
+                                            } else if horizontalMovement > 0 {
+                                                // Swipe right - previous month
+                                                HapticManager.shared.trigger(.light)
+                                                changeMonth(by: -1)
+                                            }
+                                        }
+                                    }
+                            )
 
                             // Weekly statistics summary with navigation
                             VStack(spacing: 0) {
