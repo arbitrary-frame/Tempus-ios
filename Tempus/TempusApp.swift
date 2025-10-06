@@ -31,6 +31,10 @@ struct TempusApp: App {
         #endif
 
         let appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+
+        // Ensure Application Support directory exists before creating database
+        try? FileManager.default.createDirectory(at: appSupportURL, withIntermediateDirectories: true)
+
         let databaseURL = appSupportURL.appendingPathComponent(databaseName)
 
         let modelConfiguration = ModelConfiguration(
