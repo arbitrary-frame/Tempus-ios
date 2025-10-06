@@ -90,8 +90,8 @@ struct SettingsView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                #if DEBUG
-                // Developer Section (Debug only)
+                #if DEVELOPMENT
+                // Developer Section (Development scheme only)
                 Section {
                     Button {
                         SampleDataManager.loadSampleData(into: modelContext)
@@ -106,12 +106,12 @@ struct SettingsView: View {
                         HapticManager.shared.trigger(.success)
                         showingDataCleared = true
                     } label: {
-                        Label("Clear All Data", systemImage: "trash.fill")
+                        Label("Clear Dev Data", systemImage: "trash.fill")
                     }
                 } header: {
                     Text("Developer")
                 } footer: {
-                    Text("DEBUG BUILD ONLY: These options help with testing and will not appear in production builds.")
+                    Text("🧪 DEVELOPMENT BUILD: These options are only available in the Tempus Dev scheme and won't appear in production builds.")
                         .foregroundStyle(.orange)
                 }
                 #endif
@@ -145,16 +145,16 @@ struct SettingsView: View {
             } message: {
                 Text("This will permanently delete all your workouts, exercises, routines, and settings. You will need to go through onboarding again. This action cannot be undone.")
             }
-            #if DEBUG
+            #if DEVELOPMENT
             .alert("Sample Data Loaded!", isPresented: $showingSampleDataLoaded) {
                 Button("OK", role: .cancel) { }
             } message: {
-                Text("Successfully loaded 16 exercises, 3 routines, and 7 workouts. Check the Workouts and Exercises tabs to see them!")
+                Text("Successfully loaded 17 exercises, 3 routines, and 7 workouts. Check the Workouts and Exercises tabs to see them!")
             }
             .alert("Data Cleared!", isPresented: $showingDataCleared) {
                 Button("OK", role: .cancel) { }
             } message: {
-                Text("All exercises, routines, and workouts have been deleted from the database.")
+                Text("All exercises, routines, and workouts have been deleted from the development database.")
             }
             #endif
         }
