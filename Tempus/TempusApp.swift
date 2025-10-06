@@ -21,14 +21,26 @@ struct TempusApp: App {
             WorkoutEntry.self
         ])
 
-        // Use default configuration (widgets will use fallback)
+        // Conditional database path based on build configuration
+        #if DEVELOPMENT
+        let databaseName = "dev-database.store"
+        print("🧪 [DEVELOPMENT] Using dev database: \(databaseName)")
+        #else
+        let databaseName = "production-database.store"
+        print("✅ [PRODUCTION] Using production database: \(databaseName)")
+        #endif
+
+        let appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        let databaseURL = appSupportURL.appendingPathComponent(databaseName)
+
         let modelConfiguration = ModelConfiguration(
-            schema: schema,
-            isStoredInMemoryOnly: false
+            url: databaseURL
         )
 
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
+            print("📦 Database location: \(databaseURL.path)")
+            return container
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }

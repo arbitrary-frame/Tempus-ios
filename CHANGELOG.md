@@ -4,6 +4,44 @@ All notable changes to Tempus iOS workout tracking app.
 
 ## [Unreleased]
 
+### [Development/Production Database Separation] - 2025-10-06
+
+**Added:**
+- **Separate Database Files** for development and production builds
+  - Development builds use: `dev-database.store`
+  - Production builds use: `production-database.store`
+  - Console logging on startup shows which database is active
+  - Prevents accidental loss of production workout data during testing
+- **"Tempus Dev" Xcode Scheme** for development work
+  - New build configuration: "Development"
+  - Activates DEVELOPMENT compiler flag for conditional code
+  - Separate bundle identifier for dev builds: `tempus-ios.Tempus.dev`
+  - Widget bundle identifier: `tempus-ios.Tempus.dev.TempusWidget`
+- **Developer Section** in Settings (Development builds only)
+  - "Load Sample Data" button only visible in Tempus Dev scheme
+  - "Clear Dev Data" button isolates test data deletion
+  - Orange footer clearly indicates development build
+  - Changed from `#if DEBUG` to `#if DEVELOPMENT` for better control
+
+**Technical:**
+- Build configuration added to all three targets (app, widget, project)
+- Conditional compilation using `#if DEVELOPMENT` throughout codebase
+- `OTHER_SWIFT_FLAGS[arch=*] = "-D DEVELOPMENT"` in build settings
+- Database path determined at runtime based on compiler flag
+
+**Benefits:**
+- ✅ Safe development environment with isolated test database
+- ✅ No risk of losing real workout data during testing
+- ✅ Clean separation between development and production
+- ✅ Easy switching via Xcode scheme selector
+
+**Usage:**
+- Select "Tempus" scheme for production builds (default)
+- Select "Tempus Dev" scheme for development/testing
+- Sample data and developer tools only available in Dev scheme
+
+---
+
 ### [Weekly Consistency Graph & Analytics UX] - 2025-10-03
 
 **Added:**
