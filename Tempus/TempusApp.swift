@@ -15,6 +15,9 @@ struct TempusApp: App {
     @State private var selectedTab: Int = 0
 
     var sharedModelContainer: ModelContainer = {
+        // CRITICAL: Migrate database from old location to App Group FIRST
+        DatabaseMigration.migrateToAppGroupIfNeeded()
+
         let schema = Schema([
             Exercise.self,
             WorkoutRoutine.self,
