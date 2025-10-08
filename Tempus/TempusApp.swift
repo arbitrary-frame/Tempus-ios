@@ -16,8 +16,7 @@ struct TempusApp: App {
 
     var sharedModelContainer: ModelContainer = {
         // CRITICAL: Migrate database from old location to App Group FIRST
-        // forceOverwrite disabled now that data is recovered
-        DatabaseMigration.migrateToAppGroupIfNeeded(forceOverwrite: false)
+        DatabaseMigration.migrateToAppGroupIfNeeded()
 
         let schema = Schema([
             Exercise.self,
