@@ -25,18 +25,22 @@ struct TempusApp: App {
             WorkoutEntry.self
         ])
 
-        // Conditional database path based on build configuration
+        // Conditional database path AND App Group based on build configuration
         #if DEVELOPMENT
         let databaseName = "dev-database.store"
+        let appGroupIdentifier = "group.tempus-ios.Tempus.dev"
         print("🧪 [DEVELOPMENT] Using dev database: \(databaseName)")
+        print("🧪 [DEVELOPMENT] Using dev App Group: \(appGroupIdentifier)")
         #else
         let databaseName = "production-database.store"
+        let appGroupIdentifier = "group.tempus-ios.Tempus"
         print("✅ [PRODUCTION] Using production database: \(databaseName)")
+        print("✅ [PRODUCTION] Using production App Group: \(appGroupIdentifier)")
         #endif
 
         // CRITICAL: Use App Group container so widgets can access the same database
-        guard let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.tempus-ios.Tempus") else {
-            fatalError("App Group container not found. Check entitlements configuration.")
+        guard let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier) else {
+            fatalError("App Group container '\(appGroupIdentifier)' not found. Check entitlements configuration.")
         }
 
         // Ensure App Group directory exists

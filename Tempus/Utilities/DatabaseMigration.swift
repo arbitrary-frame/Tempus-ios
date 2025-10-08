@@ -16,9 +16,11 @@ enum DatabaseMigration {
     static func migrateToAppGroupIfNeeded(forceOverwrite: Bool = false) {
         #if DEVELOPMENT
         let databaseName = "dev-database.store"
+        let appGroupIdentifier = "group.tempus-ios.Tempus.dev"
         print("🔄 Checking for dev database migration...")
         #else
         let databaseName = "production-database.store"
+        let appGroupIdentifier = "group.tempus-ios.Tempus"
         print("🔄 Checking for production database migration...")
         #endif
 
@@ -30,8 +32,8 @@ enum DatabaseMigration {
         let oldDatabaseURL = oldAppSupportURL.appendingPathComponent(databaseName)
 
         // New location (App Group container)
-        guard let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.tempus-ios.Tempus") else {
-            print("❌ App Group container not found!")
+        guard let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier) else {
+            print("❌ App Group container '\(appGroupIdentifier)' not found!")
             return
         }
         let newDatabaseURL = appGroupURL.appendingPathComponent(databaseName)
