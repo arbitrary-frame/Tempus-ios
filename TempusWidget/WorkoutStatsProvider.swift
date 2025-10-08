@@ -44,6 +44,9 @@ struct WorkoutStatsProvider: TimelineProvider {
 
         let databaseURL = appGroupURL.appendingPathComponent(databaseName)
 
+        print("📦 Widget App Group URL: \(appGroupURL.path)")
+        print("📦 Widget database path: \(databaseURL.path)")
+
         let modelConfiguration = ModelConfiguration(
             url: databaseURL
         )
