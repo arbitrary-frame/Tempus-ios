@@ -20,15 +20,30 @@ struct WorkoutStatsProvider: TimelineProvider {
             WorkoutEntry.self
         ])
 
-        // Use default location (same as main app)
+        // Conditional database path based on build configuration (MUST match main app)
+        #if DEVELOPMENT
+        let databaseName = "dev-database.store"
+        print("🧪 [WIDGET DEVELOPMENT] Using dev database: \(databaseName)")
+        #else
+        let databaseName = "production-database.store"
+        print("✅ [WIDGET PRODUCTION] Using production database: \(databaseName)")
+        #endif
+
+        let appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+
+        // Ensure Application Support directory exists
+        try? FileManager.default.createDirectory(at: appSupportURL, withIntermediateDirectories: true)
+
+        let databaseURL = appSupportURL.appendingPathComponent(databaseName)
+
         let modelConfiguration = ModelConfiguration(
-            schema: schema,
-            isStoredInMemoryOnly: false
+            url: databaseURL
         )
 
         do {
             let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
             print("✅ Widget: ModelContainer created successfully")
+            print("📦 Widget database location: \(databaseURL.path)")
             return container
         } catch {
             print("❌ Widget: Failed to create ModelContainer: \(error)")

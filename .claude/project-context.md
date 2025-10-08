@@ -32,6 +32,7 @@
 - **UI Framework:** SwiftUI with Liquid Glass design system
 - **Minimum Deployment:** iOS 26.0+
 - **IDE:** Xcode 26+
+- **Simulator:** ⛔️ **ALWAYS use iPhone 17** (iOS 26 does NOT have iPhone 15/16)
 - **Architecture:** MVVM with SwiftUI property wrappers
 - **Data Persistence:** Swift Data (modern replacement for Core Data)
 - **Charts:** Swift Charts with 3D support in iOS 26
