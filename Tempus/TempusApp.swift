@@ -16,7 +16,8 @@ struct TempusApp: App {
 
     var sharedModelContainer: ModelContainer = {
         // CRITICAL: Migrate database from old location to App Group FIRST
-        DatabaseMigration.migrateToAppGroupIfNeeded()
+        // Set forceOverwrite to true to replace empty App Group database with old data
+        DatabaseMigration.migrateToAppGroupIfNeeded(forceOverwrite: true)
 
         let schema = Schema([
             Exercise.self,
