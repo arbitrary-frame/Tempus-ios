@@ -29,12 +29,16 @@ struct WorkoutStatsProvider: TimelineProvider {
         print("✅ [WIDGET PRODUCTION] Using production database: \(databaseName)")
         #endif
 
-        let appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        // CRITICAL: Use App Group container so app and widget share the same database
+        guard let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.tempus-ios.Tempus") else {
+            print("❌ Widget: App Group container not found!")
+            return nil
+        }
 
-        // Ensure Application Support directory exists
-        try? FileManager.default.createDirectory(at: appSupportURL, withIntermediateDirectories: true)
+        // Ensure App Group directory exists
+        try? FileManager.default.createDirectory(at: appGroupURL, withIntermediateDirectories: true)
 
-        let databaseURL = appSupportURL.appendingPathComponent(databaseName)
+        let databaseURL = appGroupURL.appendingPathComponent(databaseName)
 
         let modelConfiguration = ModelConfiguration(
             url: databaseURL

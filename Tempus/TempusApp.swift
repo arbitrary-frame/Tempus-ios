@@ -30,12 +30,15 @@ struct TempusApp: App {
         print("✅ [PRODUCTION] Using production database: \(databaseName)")
         #endif
 
-        let appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        // CRITICAL: Use App Group container so widgets can access the same database
+        guard let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.tempus-ios.Tempus") else {
+            fatalError("App Group container not found. Check entitlements configuration.")
+        }
 
-        // Ensure Application Support directory exists before creating database
-        try? FileManager.default.createDirectory(at: appSupportURL, withIntermediateDirectories: true)
+        // Ensure App Group directory exists
+        try? FileManager.default.createDirectory(at: appGroupURL, withIntermediateDirectories: true)
 
-        let databaseURL = appSupportURL.appendingPathComponent(databaseName)
+        let databaseURL = appGroupURL.appendingPathComponent(databaseName)
 
         let modelConfiguration = ModelConfiguration(
             url: databaseURL
