@@ -20,15 +20,41 @@ struct WorkoutStatsProvider: TimelineProvider {
             WorkoutEntry.self
         ])
 
-        // Use default location (same as main app)
+        // Conditional database path AND App Group based on build configuration (MUST match main app)
+        #if DEVELOPMENT
+        let databaseName = "dev-database.store"
+        let appGroupIdentifier = "group.tempus-ios.Tempus.dev"
+        print("🧪 [WIDGET DEVELOPMENT] Using dev database: \(databaseName)")
+        print("🧪 [WIDGET DEVELOPMENT] Using dev App Group: \(appGroupIdentifier)")
+        #else
+        let databaseName = "production-database.store"
+        let appGroupIdentifier = "group.tempus-ios.Tempus"
+        print("✅ [WIDGET PRODUCTION] Using production database: \(databaseName)")
+        print("✅ [WIDGET PRODUCTION] Using production App Group: \(appGroupIdentifier)")
+        #endif
+
+        // CRITICAL: Use App Group container so app and widget share the same database
+        guard let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier) else {
+            print("❌ Widget: App Group container '\(appGroupIdentifier)' not found!")
+            return nil
+        }
+
+        // Ensure App Group directory exists
+        try? FileManager.default.createDirectory(at: appGroupURL, withIntermediateDirectories: true)
+
+        let databaseURL = appGroupURL.appendingPathComponent(databaseName)
+
+        print("📦 Widget App Group URL: \(appGroupURL.path)")
+        print("📦 Widget database path: \(databaseURL.path)")
+
         let modelConfiguration = ModelConfiguration(
-            schema: schema,
-            isStoredInMemoryOnly: false
+            url: databaseURL
         )
 
         do {
             let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
             print("✅ Widget: ModelContainer created successfully")
+            print("📦 Widget database location: \(databaseURL.path)")
             return container
         } catch {
             print("❌ Widget: Failed to create ModelContainer: \(error)")

@@ -9,8 +9,20 @@ import SwiftUI
 import Combine
 
 /// Shared UserDefaults for App Group to share data between app and widgets
+/// Uses conditional App Group based on build configuration
 extension UserDefaults {
-    static let shared = UserDefaults(suiteName: "group.tempus-ios.Tempus")!
+    static let shared: UserDefaults = {
+        #if DEVELOPMENT
+        let appGroupIdentifier = "group.tempus-ios.Tempus.dev"
+        #else
+        let appGroupIdentifier = "group.tempus-ios.Tempus"
+        #endif
+
+        guard let userDefaults = UserDefaults(suiteName: appGroupIdentifier) else {
+            fatalError("Failed to create UserDefaults for App Group: \(appGroupIdentifier)")
+        }
+        return userDefaults
+    }()
 }
 
 /// Custom property wrapper for App Group UserDefaults

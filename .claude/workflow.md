@@ -1,5 +1,13 @@
 # Tempus Development Workflow
 
+## ⛔️ CRITICAL REMINDERS - READ FIRST EVERY TIME
+
+1. **NEVER work on `master` branch** - Always create feature branch first
+2. **ALWAYS use `iPhone 17` simulator** - iOS 26 does NOT have iPhone 15/16
+3. **NEVER update CHANGELOG.md** until user approves changes before PR merge
+
+---
+
 ## Git Workflow
 
 ### Branch Strategy
@@ -23,17 +31,18 @@
 5. **Push feature branch to GitHub when ready for review**
 
 ### Code Review Process
-1. Assistant builds the feature in Xcode to verify it compiles
+1. Assistant builds the feature in Xcode to verify it compiles (iPhone 17 simulator)
 2. Assistant commits changes with descriptive messages
-3. **Assistant updates CHANGELOG.md with new changes**
-4. **Assistant commits CHANGELOG updates**
-5. **Assistant pushes the feature branch to GitHub: `git push -u origin branch-name`**
-6. **Assistant creates a Pull Request using `gh pr create`**
-7. Assistant notifies user that PR is ready for review on GitHub
-8. **⛔️ CRITICAL: Assistant NEVER merges to master directly**
-9. **User reviews the PR on GitHub**
-10. **User approves and merges via GitHub PR or `gh pr merge`**
-11. All merges go through GitHub Pull Requests for proper review workflow
+3. **⛔️ DO NOT update CHANGELOG.md yet** - Only update after user approval before PR merge
+4. **Assistant pushes the feature branch to GitHub: `git push -u origin branch-name`**
+5. **Assistant creates a Pull Request using `gh pr create`**
+6. Assistant notifies user that PR is ready for review on GitHub
+7. **⛔️ CRITICAL: Assistant NEVER merges to master directly**
+8. **User reviews the PR on GitHub**
+9. **User requests CHANGELOG update if changes approved**
+10. **Assistant updates CHANGELOG.md only when user approves**
+11. **User approves and merges via GitHub PR or `gh pr merge`**
+12. All merges go through GitHub Pull Requests for proper review workflow
 
 ### Commit Messages
 - Clear, descriptive messages
@@ -42,8 +51,15 @@
 
 ## Xcode Build Verification
 
+### ⛔️ CRITICAL: ALWAYS USE iPhone 17 Simulator
+- **NEVER use iPhone 15 or iPhone 16** - iOS 26 does not have these devices
+- **ALWAYS use `iPhone 17`** for simulator builds
+- This project runs on **iOS 26** which has iPhone 16e, 17, 17 Pro, 17 Pro Max, etc.
+- Build command: `xcodebuild -project Tempus.xcodeproj -scheme "Tempus Dev" -destination 'platform=iOS Simulator,name=iPhone 17' build`
+- Production build: `xcodebuild -project Tempus.xcodeproj -scheme "Tempus" -destination 'platform=iOS Simulator,name=iPhone 17' build`
+
 ### Before Every Code Review
-- Run full build in Xcode: `xcodebuild -project Tempus.xcodeproj -scheme Tempus -destination 'platform=iOS Simulator,name=iPhone 15' build`
+- **MANDATORY: Build with iPhone 17 simulator**
 - Fix all build errors before proceeding
 - No warnings should be introduced if possible
 - **Build MUST succeed before user review**
@@ -134,14 +150,17 @@ Before requesting user review:
 - [ ] **⛔️ VERIFIED: Still on feature branch (will NOT merge)**
 - [ ] Working on feature branch with descriptive name
 - [ ] Code follows requirements-ios.md
-- [ ] Xcode build succeeds
+- [ ] **⛔️ Xcode build succeeds with iPhone 17 simulator**
 - [ ] Debug print statements added where helpful
 - [ ] Committed with clear message
-- [ ] **✅ CHANGELOG.md updated with changes**
-- [ ] **✅ CHANGELOG updates committed**
 - [ ] **✅ Feature branch pushed to GitHub**
 - [ ] **✅ Pull Request created on GitHub**
 - [ ] Ready for user review on GitHub PR
+
+After user approves PR (before merge):
+- [ ] **✅ CHANGELOG.md updated with changes** (only when user approves)
+- [ ] **✅ CHANGELOG updates committed**
+- [ ] User merges PR via GitHub
 
 ## ⛔️ CRITICAL RULE - READ FIRST
 

@@ -15,27 +15,37 @@ struct TempusApp: App {
     @State private var selectedTab: Int = 0
 
     var sharedModelContainer: ModelContainer = {
+        // CRITICAL: Migrate database from old location to App Group FIRST
+        DatabaseMigration.migrateToAppGroupIfNeeded()
+
         let schema = Schema([
             Exercise.self,
             WorkoutRoutine.self,
             WorkoutEntry.self
         ])
 
-        // Conditional database path based on build configuration
+        // Conditional database path AND App Group based on build configuration
         #if DEVELOPMENT
         let databaseName = "dev-database.store"
+        let appGroupIdentifier = "group.tempus-ios.Tempus.dev"
         print("🧪 [DEVELOPMENT] Using dev database: \(databaseName)")
+        print("🧪 [DEVELOPMENT] Using dev App Group: \(appGroupIdentifier)")
         #else
         let databaseName = "production-database.store"
+        let appGroupIdentifier = "group.tempus-ios.Tempus"
         print("✅ [PRODUCTION] Using production database: \(databaseName)")
+        print("✅ [PRODUCTION] Using production App Group: \(appGroupIdentifier)")
         #endif
 
-        let appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        // CRITICAL: Use App Group container so widgets can access the same database
+        guard let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier) else {
+            fatalError("App Group container '\(appGroupIdentifier)' not found. Check entitlements configuration.")
+        }
 
-        // Ensure Application Support directory exists before creating database
-        try? FileManager.default.createDirectory(at: appSupportURL, withIntermediateDirectories: true)
+        // Ensure App Group directory exists
+        try? FileManager.default.createDirectory(at: appGroupURL, withIntermediateDirectories: true)
 
-        let databaseURL = appSupportURL.appendingPathComponent(databaseName)
+        let databaseURL = appGroupURL.appendingPathComponent(databaseName)
 
         let modelConfiguration = ModelConfiguration(
             url: databaseURL
