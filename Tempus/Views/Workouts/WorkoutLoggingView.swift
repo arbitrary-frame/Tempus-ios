@@ -19,6 +19,7 @@ struct WorkoutLoggingView: View {
     @State private var workoutDate: Date
     @State private var workoutExercises: [WorkoutExerciseEntry] = []
     @State private var showingExercisePicker = false
+    @State private var showingReorderSheet = false
     @State private var workoutNotes: String = ""
 
     // Track if name was from routine to auto-update it
@@ -148,6 +149,19 @@ struct WorkoutLoggingView: View {
                         dismiss()
                     }
                 }
+
+                ToolbarItem(placement: .principal) {
+                    HStack(spacing: 12) {
+                        Button {
+                            showingReorderSheet = true
+                        } label: {
+                            Label("Reorder", systemImage: "line.3.horizontal")
+                                .labelStyle(.iconOnly)
+                        }
+                        .disabled(workoutExercises.count < 2)
+                    }
+                }
+
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         saveWorkout()
@@ -157,6 +171,9 @@ struct WorkoutLoggingView: View {
             }
             .sheet(isPresented: $showingExercisePicker) {
                 ExercisePickerView(selectedExercises: $workoutExercises)
+            }
+            .sheet(isPresented: $showingReorderSheet) {
+                WorkoutExerciseReorderView(exercises: $workoutExercises)
             }
         }
     }
@@ -568,6 +585,44 @@ struct ExercisePickerView: View {
             )
             selectedExercises.append(entry)
         }
+    }
+}
+
+// Reorder modal for workout exercises
+struct WorkoutExerciseReorderView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var exercises: [WorkoutExerciseEntry]
+
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(exercises) { exercise in
+                    HStack {
+                        Image(systemName: "line.3.horizontal")
+                            .foregroundStyle(.secondary)
+                            .font(.caption)
+                        Text(exercise.exerciseName)
+                        Spacer()
+                    }
+                }
+                .onMove(perform: moveExercise)
+            }
+            .environment(\.editMode, .constant(.active))
+            .navigationTitle("Reorder Exercises")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+
+    private func moveExercise(from source: IndexSet, to destination: Int) {
+        exercises.move(fromOffsets: source, toOffset: destination)
+        HapticManager.shared.trigger(.light)
     }
 }
 
