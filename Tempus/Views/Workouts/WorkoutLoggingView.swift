@@ -150,7 +150,7 @@ struct WorkoutLoggingView: View {
                     }
                 }
 
-                ToolbarItem(placement: .primaryAction) {
+                ToolbarItem(placement: .destructiveAction) {
                     Button {
                         showingReorderSheet = true
                     } label: {
