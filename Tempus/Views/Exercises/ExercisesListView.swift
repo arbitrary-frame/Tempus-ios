@@ -16,6 +16,8 @@ struct ExercisesListView: View {
     @State private var searchText = ""
     @State private var showingCreateForm = false
     @State private var selectedExercise: Exercise?
+    @State private var showingDeleteAlert = false
+    @State private var exerciseToDelete: Exercise?
 
     private var currentStreak: Int {
         AnalyticsHelper.calculateCurrentStreak(workouts: workouts, weeklyGoal: weeklyWorkoutGoal)
@@ -31,6 +33,24 @@ struct ExercisesListView: View {
 
     var groupedExercises: [String: [Exercise]] {
         Dictionary(grouping: filteredExercises) { $0.muscleGroup }
+    }
+
+    // Check if exercise has been used in any workouts
+    private func isExerciseUsed(_ exercise: Exercise) -> Bool {
+        return workouts.contains { workout in
+            workout.exercisesData.contains { $0.exerciseID == exercise.id }
+        }
+    }
+
+    private func deleteExercise(_ exercise: Exercise) {
+        if isExerciseUsed(exercise) {
+            exerciseToDelete = exercise
+            showingDeleteAlert = true
+        } else {
+            // Safe to delete - not used in any workouts
+            modelContext.delete(exercise)
+            try? modelContext.save()
+        }
     }
 
     var body: some View {
@@ -60,6 +80,13 @@ struct ExercisesListView: View {
                                             .fill(.ultraThinMaterial)
                                             .padding(.vertical, 2)
                                     )
+                                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                        Button(role: .destructive) {
+                                            deleteExercise(exercise)
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                    }
                                 }
                             } header: {
                                 if let group = MuscleGroup(rawValue: muscleGroup) {
@@ -91,6 +118,13 @@ struct ExercisesListView: View {
             }
             .sheet(item: $selectedExercise) { exercise in
                 ExerciseFormView(exercise: exercise)
+            }
+            .alert("Cannot Delete Exercise", isPresented: $showingDeleteAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                if let exercise = exerciseToDelete {
+                    Text("'\(exercise.name)' has been used in past workouts and cannot be deleted. Historical workout data will be preserved.")
+                }
             }
         }
     }
