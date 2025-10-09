@@ -55,6 +55,7 @@ struct WorkoutEditView: View {
             WorkoutExerciseEntry(
                 exerciseID: data.exerciseID,
                 exerciseName: data.exerciseName,
+                isUnilateral: data.isUnilateral,
                 sets: data.sets,
                 notes: data.notes
             )
@@ -191,6 +192,7 @@ struct WorkoutEditView: View {
             WorkoutExerciseData(
                 exerciseID: entry.exerciseID,
                 exerciseName: entry.exerciseName,
+                isUnilateral: entry.isUnilateral,
                 sets: entry.sets,
                 notes: entry.notes
             )

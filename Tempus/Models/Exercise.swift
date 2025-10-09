@@ -17,6 +17,7 @@ final class Exercise {
     var tags: [String]
     var imageURL: String?
     var isArchived: Bool
+    var isUnilateral: Bool // For unilateral exercises - doubles weight in calculations
     var createdAt: Date
     var updatedAt: Date
 
@@ -24,7 +25,7 @@ final class Exercise {
     @Relationship(deleteRule: .nullify, inverse: \WorkoutRoutine.exercises)
     var routines: [WorkoutRoutine]?
 
-    init(name: String, muscleGroup: String, tags: [String] = [], exerciseDescription: String? = nil, imageURL: String? = nil) {
+    init(name: String, muscleGroup: String, tags: [String] = [], exerciseDescription: String? = nil, imageURL: String? = nil, isUnilateral: Bool = false) {
         self.id = UUID()
         self.name = name
         self.muscleGroup = muscleGroup
@@ -32,6 +33,7 @@ final class Exercise {
         self.exerciseDescription = exerciseDescription
         self.imageURL = imageURL
         self.isArchived = false
+        self.isUnilateral = isUnilateral
         self.createdAt = Date()
         self.updatedAt = Date()
     }

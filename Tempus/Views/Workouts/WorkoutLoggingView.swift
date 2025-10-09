@@ -61,7 +61,8 @@ struct WorkoutLoggingView: View {
             let entries = routine.exercises.map { exercise in
                 return WorkoutExerciseEntry(
                     exerciseID: exercise.id,
-                    exerciseName: exercise.name
+                    exerciseName: exercise.name,
+                    isUnilateral: exercise.isUnilateral
                 )
             }
             _workoutExercises = State(initialValue: entries)
@@ -194,6 +195,7 @@ struct WorkoutLoggingView: View {
             WorkoutExerciseData(
                 exerciseID: entry.exerciseID,
                 exerciseName: entry.exerciseName,
+                isUnilateral: entry.isUnilateral,
                 sets: entry.sets,
                 notes: entry.notes
             )
@@ -236,22 +238,25 @@ struct WorkoutExerciseEntry: Identifiable {
     let id = UUID()
     let exerciseID: UUID
     let exerciseName: String
+    let isUnilateral: Bool
     var sets: [WorkoutSet]
     var notes: String?
 
     // Init for new exercise (empty set)
-    init(exerciseID: UUID, exerciseName: String) {
+    init(exerciseID: UUID, exerciseName: String, isUnilateral: Bool = false) {
         self.exerciseID = exerciseID
         self.exerciseName = exerciseName
+        self.isUnilateral = isUnilateral
         // Initialize with one empty set (no default weight/reps)
         self.sets = [WorkoutSet(setNumber: 1, weightsAndReps: [WeightRep(weight: 0, reps: 0)])]
         self.notes = nil
     }
 
     // Init for editing existing exercise
-    init(exerciseID: UUID, exerciseName: String, sets: [WorkoutSet], notes: String?) {
+    init(exerciseID: UUID, exerciseName: String, isUnilateral: Bool = false, sets: [WorkoutSet], notes: String?) {
         self.exerciseID = exerciseID
         self.exerciseName = exerciseName
+        self.isUnilateral = isUnilateral
         self.sets = sets
         self.notes = notes
     }
@@ -578,7 +583,8 @@ struct ExercisePickerView: View {
             // Add new exercise
             let entry = WorkoutExerciseEntry(
                 exerciseID: exercise.id,
-                exerciseName: exercise.name
+                exerciseName: exercise.name,
+                isUnilateral: exercise.isUnilateral
             )
             selectedExercises.append(entry)
         }

@@ -18,6 +18,8 @@ struct ExerciseFormView: View {
     @State private var muscleGroup: MuscleGroup = .chest
     @State private var tagInput: String = ""
     @State private var tags: [String] = []
+    @State private var isUnilateral: Bool = false
+    @State private var showingUnilateralInfo = false
     @State private var showingValidationError = false
     @State private var validationMessage = ""
 
@@ -33,6 +35,7 @@ struct ExerciseFormView: View {
             _exerciseDescription = State(initialValue: exercise.exerciseDescription ?? "")
             _muscleGroup = State(initialValue: MuscleGroup(rawValue: exercise.muscleGroup) ?? .chest)
             _tags = State(initialValue: exercise.tags)
+            _isUnilateral = State(initialValue: exercise.isUnilateral)
         }
     }
 
@@ -117,6 +120,25 @@ struct ExerciseFormView: View {
                     }
                 }
 
+                Section {
+                    HStack {
+                        Toggle("Unilateral Exercise", isOn: $isUnilateral)
+
+                        Button {
+                            showingUnilateralInfo = true
+                        } label: {
+                            Image(systemName: "info.circle")
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                } footer: {
+                    if isUnilateral {
+                        Text("Weight will be counted twice (once per limb) in total volume calculations")
+                            .font(.caption)
+                    }
+                }
+
                 if showingValidationError {
                     Section {
                         Text(validationMessage)
@@ -139,6 +161,11 @@ struct ExerciseFormView: View {
                     }
                     .disabled(!isValid)
                 }
+            }
+            .alert("Unilateral Exercise", isPresented: $showingUnilateralInfo) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Enable this for unilateral exercises performed one limb at a time, like dumbbell curls, single-arm rows, or Bulgarian split squats. When enabled, the weight you lift is counted twice in total volume calculations (once per limb), giving you a more accurate representation of your total work.")
             }
         }
     }
@@ -181,6 +208,7 @@ struct ExerciseFormView: View {
             exercise.exerciseDescription = exerciseDescription.isEmpty ? nil : exerciseDescription
             exercise.muscleGroup = muscleGroup.rawValue
             exercise.tags = tags
+            exercise.isUnilateral = isUnilateral
             exercise.updatedAt = Date()
         } else {
             // Create new exercise
@@ -188,7 +216,8 @@ struct ExerciseFormView: View {
                 name: trimmedName,
                 muscleGroup: muscleGroup.rawValue,
                 tags: tags,
-                exerciseDescription: exerciseDescription.isEmpty ? nil : exerciseDescription
+                exerciseDescription: exerciseDescription.isEmpty ? nil : exerciseDescription,
+                isUnilateral: isUnilateral
             )
             modelContext.insert(newExercise)
         }
