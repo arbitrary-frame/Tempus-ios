@@ -69,11 +69,6 @@ struct WorkoutRoutineFormView: View {
                     } else {
                         ForEach(selectedExercises) { exercise in
                             HStack {
-                                // Drag handle icon
-                                Image(systemName: "line.3.horizontal")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-
                                 if let group = MuscleGroup(rawValue: exercise.muscleGroup) {
                                     Image(systemName: group.icon)
                                         .font(.caption)
@@ -81,16 +76,10 @@ struct WorkoutRoutineFormView: View {
                                 }
                                 Text(exercise.name)
                                 Spacer()
-                                Button(role: .destructive) {
-                                    removeExercise(exercise)
-                                } label: {
-                                    Image(systemName: "minus.circle.fill")
-                                        .foregroundStyle(.red)
-                                }
-                                .buttonStyle(.borderless)
                             }
                         }
                         .onMove(perform: moveExercise)
+                        .onDelete(perform: deleteExercise)
                     }
 
                     Button {
@@ -108,6 +97,7 @@ struct WorkoutRoutineFormView: View {
                 }
             }
             .listStyle(.insetGrouped)
+            .environment(\.editMode, .constant(.active))
             .navigationTitle(isEditing ? "Edit Routine" : "New Routine")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -129,9 +119,9 @@ struct WorkoutRoutineFormView: View {
         }
     }
 
-    private func removeExercise(_ exercise: Exercise) {
+    private func deleteExercise(at offsets: IndexSet) {
         HapticManager.shared.trigger(.light)
-        selectedExercises.removeAll { $0.id == exercise.id }
+        selectedExercises.remove(atOffsets: offsets)
     }
 
     private func moveExercise(from source: IndexSet, to destination: Int) {
