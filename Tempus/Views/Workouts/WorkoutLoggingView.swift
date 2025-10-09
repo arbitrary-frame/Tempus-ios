@@ -150,7 +150,7 @@ struct WorkoutLoggingView: View {
                     }
                 }
 
-                ToolbarItemGroup(placement: .confirmationAction) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
                     Button {
                         showingReorderSheet = true
                     } label: {
