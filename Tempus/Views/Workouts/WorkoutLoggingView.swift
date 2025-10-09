@@ -150,7 +150,7 @@ struct WorkoutLoggingView: View {
                     }
                 }
 
-                ToolbarItem(placement: .primaryAction) {
+                ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showingReorderSheet = true
                     } label: {
@@ -159,7 +159,7 @@ struct WorkoutLoggingView: View {
                     .disabled(workoutExercises.count < 2)
                 }
 
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItem(placement: .topBarTrailing) {
                     Button("Save") {
                         saveWorkout()
                     }
