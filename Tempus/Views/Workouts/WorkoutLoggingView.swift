@@ -592,13 +592,7 @@ struct WorkoutExerciseReorderView: View {
         NavigationStack {
             List {
                 ForEach(exercises) { exercise in
-                    HStack {
-                        Image(systemName: "line.3.horizontal")
-                            .foregroundStyle(.secondary)
-                            .font(.caption)
-                        Text(exercise.exerciseName)
-                        Spacer()
-                    }
+                    Text(exercise.exerciseName)
                 }
                 .onMove(perform: moveExercise)
             }
@@ -606,6 +600,11 @@ struct WorkoutExerciseReorderView: View {
             .navigationTitle("Reorder Exercises")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") {
                         dismiss()
