@@ -24,6 +24,7 @@ struct WorkoutEditView: View {
     @State private var showingExercisePicker = false
     @State private var showingDeleteConfirmation = false
     @State private var showingSaveAsRoutine = false
+    @State private var showingReorderSheet = false
 
     // Cached previous workout data lookup - prevents N+1 query pattern
     private var previousWorkoutDataCache: [UUID: WorkoutExerciseData] {
@@ -118,7 +119,7 @@ struct WorkoutEditView: View {
                 }
             }
             .listStyle(.insetGrouped)
-            .navigationTitle("Edit Workout")
+            .navigationTitle("Edit")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -135,6 +136,13 @@ struct WorkoutEditView: View {
                 }
                 ToolbarItem(placement: .primaryAction) {
                     Menu {
+                        Button {
+                            showingReorderSheet = true
+                        } label: {
+                            Label("Reorder Exercises", systemImage: "line.3.horizontal")
+                        }
+                        .disabled(workoutExercises.count < 2)
+
                         Button {
                             showingSaveAsRoutine = true
                         } label: {
@@ -156,6 +164,9 @@ struct WorkoutEditView: View {
             }
             .sheet(isPresented: $showingSaveAsRoutine) {
                 SaveWorkoutAsTemplateView(workoutExercises: workoutExercises, defaultName: workoutName)
+            }
+            .sheet(isPresented: $showingReorderSheet) {
+                WorkoutExerciseReorderView(exercises: $workoutExercises)
             }
             .confirmationDialog("Delete this workout?", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
                 Button("Delete Workout", role: .destructive) {

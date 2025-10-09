@@ -19,6 +19,7 @@ struct WorkoutLoggingView: View {
     @State private var workoutDate: Date
     @State private var workoutExercises: [WorkoutExerciseEntry] = []
     @State private var showingExercisePicker = false
+    @State private var showingReorderSheet = false
     @State private var workoutNotes: String = ""
 
     // Track if name was from routine to auto-update it
@@ -140,7 +141,7 @@ struct WorkoutLoggingView: View {
                 }
             }
             .listStyle(.insetGrouped)
-            .navigationTitle("Log Workout")
+            .navigationTitle("Log")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -148,6 +149,16 @@ struct WorkoutLoggingView: View {
                         dismiss()
                     }
                 }
+
+                ToolbarItem(placement: .destructiveAction) {
+                    Button {
+                        showingReorderSheet = true
+                    } label: {
+                        Image(systemName: "line.3.horizontal")
+                    }
+                    .disabled(workoutExercises.count < 2)
+                }
+
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         saveWorkout()
@@ -157,6 +168,9 @@ struct WorkoutLoggingView: View {
             }
             .sheet(isPresented: $showingExercisePicker) {
                 ExercisePickerView(selectedExercises: $workoutExercises)
+            }
+            .sheet(isPresented: $showingReorderSheet) {
+                WorkoutExerciseReorderView(exercises: $workoutExercises)
             }
         }
     }
@@ -568,6 +582,52 @@ struct ExercisePickerView: View {
             )
             selectedExercises.append(entry)
         }
+    }
+}
+
+// Reorder modal for workout exercises
+struct WorkoutExerciseReorderView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var exercises: [WorkoutExerciseEntry]
+    @State private var workingCopy: [WorkoutExerciseEntry]
+
+    init(exercises: Binding<[WorkoutExerciseEntry]>) {
+        self._exercises = exercises
+        self._workingCopy = State(initialValue: exercises.wrappedValue)
+    }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(workingCopy) { exercise in
+                    Text(exercise.exerciseName)
+                }
+                .onMove(perform: moveExercise)
+            }
+            .environment(\.editMode, .constant(.active))
+            .navigationTitle("Reorder Exercises")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        // Discard changes - don't update the binding
+                        dismiss()
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        // Save changes - update the binding
+                        exercises = workingCopy
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+
+    private func moveExercise(from source: IndexSet, to destination: Int) {
+        workingCopy.move(fromOffsets: source, toOffset: destination)
+        HapticManager.shared.trigger(.light)
     }
 }
 
