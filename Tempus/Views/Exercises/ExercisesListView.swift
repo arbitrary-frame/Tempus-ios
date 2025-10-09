@@ -125,8 +125,8 @@ struct ExercisesListView: View {
             .sheet(item: $selectedExercise) { exercise in
                 ExerciseFormView(exercise: exercise)
             }
-            .confirmationDialog("Delete this exercise?", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
-                Button("Delete Exercise", role: .destructive) {
+            .alert("Delete this exercise?", isPresented: $showingDeleteConfirmation) {
+                Button("Delete", role: .destructive) {
                     confirmDelete()
                 }
                 Button("Cancel", role: .cancel) {}
