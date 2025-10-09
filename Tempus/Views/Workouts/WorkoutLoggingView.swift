@@ -142,7 +142,7 @@ struct WorkoutLoggingView: View {
             }
             .listStyle(.insetGrouped)
             .navigationTitle("Log Workout")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
