@@ -150,14 +150,16 @@ struct WorkoutLoggingView: View {
                     }
                 }
 
-                ToolbarItemGroup(placement: .topBarTrailing) {
+                ToolbarItem(placement: .primaryAction) {
                     Button {
                         showingReorderSheet = true
                     } label: {
                         Image(systemName: "line.3.horizontal")
                     }
                     .disabled(workoutExercises.count < 2)
+                }
 
+                ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         saveWorkout()
                     }
