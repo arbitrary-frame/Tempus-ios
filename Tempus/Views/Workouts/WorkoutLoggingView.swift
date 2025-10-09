@@ -143,7 +143,6 @@ struct WorkoutLoggingView: View {
             .listStyle(.insetGrouped)
             .navigationTitle("Log")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarRole(.editor)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
