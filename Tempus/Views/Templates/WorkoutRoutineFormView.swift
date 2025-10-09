@@ -69,6 +69,11 @@ struct WorkoutRoutineFormView: View {
                     } else {
                         ForEach(selectedExercises) { exercise in
                             HStack {
+                                // Drag handle icon
+                                Image(systemName: "line.3.horizontal")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+
                                 if let group = MuscleGroup(rawValue: exercise.muscleGroup) {
                                     Image(systemName: group.icon)
                                         .font(.caption)
@@ -85,6 +90,7 @@ struct WorkoutRoutineFormView: View {
                                 .buttonStyle(.borderless)
                             }
                         }
+                        .onMove(perform: moveExercise)
                     }
 
                     Button {
@@ -94,6 +100,11 @@ struct WorkoutRoutineFormView: View {
                     }
                 } header: {
                     Text("Exercises")
+                } footer: {
+                    if !selectedExercises.isEmpty {
+                        Text("Drag to reorder • This determines exercise order when starting a workout")
+                            .font(.caption)
+                    }
                 }
             }
             .listStyle(.insetGrouped)
@@ -121,6 +132,11 @@ struct WorkoutRoutineFormView: View {
     private func removeExercise(_ exercise: Exercise) {
         HapticManager.shared.trigger(.light)
         selectedExercises.removeAll { $0.id == exercise.id }
+    }
+
+    private func moveExercise(from source: IndexSet, to destination: Int) {
+        selectedExercises.move(fromOffsets: source, toOffset: destination)
+        HapticManager.shared.trigger(.light)
     }
 
     private func saveRoutine() {
