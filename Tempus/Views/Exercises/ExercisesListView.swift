@@ -16,7 +16,8 @@ struct ExercisesListView: View {
     @State private var searchText = ""
     @State private var showingCreateForm = false
     @State private var selectedExercise: Exercise?
-    @State private var showingDeleteAlert = false
+    @State private var showingDeleteConfirmation = false
+    @State private var showingCannotDeleteAlert = false
     @State private var exerciseToDelete: Exercise?
 
     private var currentStreak: Int {
@@ -42,15 +43,20 @@ struct ExercisesListView: View {
         }
     }
 
-    private func deleteExercise(_ exercise: Exercise) {
+    private func requestDelete(_ exercise: Exercise) {
+        exerciseToDelete = exercise
         if isExerciseUsed(exercise) {
-            exerciseToDelete = exercise
-            showingDeleteAlert = true
+            showingCannotDeleteAlert = true
         } else {
-            // Safe to delete - not used in any workouts
-            modelContext.delete(exercise)
-            try? modelContext.save()
+            showingDeleteConfirmation = true
         }
+    }
+
+    private func confirmDelete() {
+        guard let exercise = exerciseToDelete else { return }
+        modelContext.delete(exercise)
+        try? modelContext.save()
+        exerciseToDelete = nil
     }
 
     var body: some View {
@@ -82,7 +88,7 @@ struct ExercisesListView: View {
                                     )
                                     .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                         Button(role: .destructive) {
-                                            deleteExercise(exercise)
+                                            requestDelete(exercise)
                                         } label: {
                                             Label("Delete", systemImage: "trash")
                                         }
@@ -119,7 +125,15 @@ struct ExercisesListView: View {
             .sheet(item: $selectedExercise) { exercise in
                 ExerciseFormView(exercise: exercise)
             }
-            .alert("Cannot Delete Exercise", isPresented: $showingDeleteAlert) {
+            .confirmationDialog("Delete this exercise?", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
+                Button("Delete Exercise", role: .destructive) {
+                    confirmDelete()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This action cannot be undone.")
+            }
+            .alert("Cannot Delete Exercise", isPresented: $showingCannotDeleteAlert) {
                 Button("OK", role: .cancel) { }
             } message: {
                 if let exercise = exerciseToDelete {
