@@ -150,8 +150,8 @@ struct WorkoutLoggingView: View {
                     }
                 }
 
-                ToolbarItem(placement: .principal) {
-                    HStack(spacing: 12) {
+                ToolbarItem(placement: .confirmationAction) {
+                    HStack(spacing: 0) {
                         Button {
                             showingReorderSheet = true
                         } label: {
@@ -159,14 +159,20 @@ struct WorkoutLoggingView: View {
                                 .labelStyle(.iconOnly)
                         }
                         .disabled(workoutExercises.count < 2)
-                    }
-                }
 
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        saveWorkout()
+                        Divider()
+                            .frame(height: 20)
+                            .padding(.horizontal, 8)
+
+                        Button("Save") {
+                            saveWorkout()
+                        }
+                        .disabled(workoutExercises.isEmpty || workoutName.isEmpty)
                     }
-                    .disabled(workoutExercises.isEmpty || workoutName.isEmpty)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(.regularMaterial)
+                    .clipShape(Capsule())
                 }
             }
             .sheet(isPresented: $showingExercisePicker) {
