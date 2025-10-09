@@ -587,11 +587,17 @@ struct ExercisePickerView: View {
 struct WorkoutExerciseReorderView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var exercises: [WorkoutExerciseEntry]
+    @State private var workingCopy: [WorkoutExerciseEntry]
+
+    init(exercises: Binding<[WorkoutExerciseEntry]>) {
+        self._exercises = exercises
+        self._workingCopy = State(initialValue: exercises.wrappedValue)
+    }
 
     var body: some View {
         NavigationStack {
             List {
-                ForEach(exercises) { exercise in
+                ForEach(workingCopy) { exercise in
                     Text(exercise.exerciseName)
                 }
                 .onMove(perform: moveExercise)
@@ -602,11 +608,14 @@ struct WorkoutExerciseReorderView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
+                        // Discard changes - don't update the binding
                         dismiss()
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") {
+                        // Save changes - update the binding
+                        exercises = workingCopy
                         dismiss()
                     }
                 }
@@ -615,7 +624,7 @@ struct WorkoutExerciseReorderView: View {
     }
 
     private func moveExercise(from source: IndexSet, to destination: Int) {
-        exercises.move(fromOffsets: source, toOffset: destination)
+        workingCopy.move(fromOffsets: source, toOffset: destination)
         HapticManager.shared.trigger(.light)
     }
 }
