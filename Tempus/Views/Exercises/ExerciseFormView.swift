@@ -121,6 +121,14 @@ struct ExerciseFormView: View {
                                         .buttonStyle(.bordered)
                                     }
                                 }
+
+                                // Helpful tip for unilateral exercises
+                                if availableSuggestions.contains("unilateral") {
+                                    Text("💡 Tip: Mark single-limb exercises (like dumbbell curls, single-leg presses) as unilateral for accurate volume tracking")
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                        .padding(.top, 2)
+                                }
                             }
                         }
 
