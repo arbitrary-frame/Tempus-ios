@@ -106,7 +106,7 @@ struct ExerciseFormView: View {
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
 
-                                HStack(spacing: 8) {
+                                FlowLayout(spacing: 8) {
                                     ForEach(availableSuggestions, id: \.self) { tag in
                                         Button {
                                             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
