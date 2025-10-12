@@ -98,9 +98,43 @@ struct ExerciseFormView: View {
                             }
                         }
 
+                        // Suggested tags
+                        let availableSuggestions = ExerciseTag.suggestedTags.filter { !tags.contains($0) }
+                        if !availableSuggestions.isEmpty {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Suggested:")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+
+                                FlowLayout(spacing: 8) {
+                                    ForEach(availableSuggestions, id: \.self) { tag in
+                                        Button {
+                                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                                addSuggestedTag(tag)
+                                            }
+                                        } label: {
+                                            Text(tag)
+                                                .font(.caption)
+                                                .padding(.horizontal, 10)
+                                                .padding(.vertical, 6)
+                                        }
+                                        .buttonStyle(.bordered)
+                                    }
+                                }
+
+                                // Helpful tip for unilateral exercises
+                                if availableSuggestions.contains("unilateral") {
+                                    Text("💡 **Unilateral:** Single-limb exercises (dumbbell curls, single-leg presses) for accurate volume tracking")
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                        .padding(.top, 2)
+                                }
+                            }
+                        }
+
                         // Tag input
                         HStack {
-                            TextField("Add tag", text: $tagInput)
+                            TextField("Add custom tag", text: $tagInput)
                                 .textInputAutocapitalization(.never)
                                 .autocorrectionDisabled()
                                 .onSubmit {
@@ -152,6 +186,12 @@ struct ExerciseFormView: View {
         HapticManager.shared.trigger(.light)
         tags.append(trimmedTag)
         tagInput = ""
+    }
+
+    private func addSuggestedTag(_ tag: String) {
+        guard !tags.contains(tag) else { return }
+        HapticManager.shared.trigger(.light)
+        tags.append(tag)
     }
 
     private func removeTag(_ tag: String) {
