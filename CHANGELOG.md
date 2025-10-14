@@ -4,6 +4,54 @@ All notable changes to Tempus iOS workout tracking app.
 
 ## [Unreleased]
 
+### [Preset Exercises & Routines Library] - 2025-10-14
+
+**Added:**
+- **Preset Exercise Library** - 32 curated exercises across 8 muscle groups
+  - Chest (5), Back (5), Shoulders (4), Biceps (3), Triceps (3), Legs (5), Core (4), Full Body (3)
+  - Each with name, description, proper tags (including "unilateral" where applicable)
+  - Preset browser with multi-select checkboxes
+  - "Import X Exercises" button creates Exercise models in SwiftData
+
+- **Preset Routine Library** - 7 curated workout routines
+  - Push Day 💪, Pull Day 🏃, Leg Day 🦵, Upper Body 🏋️, Full Body 🔥, Arm Day 💪, Core & Conditioning 🧠
+  - Each includes emoji, description, and exercise list
+  - Preset browser with multi-select checkboxes
+  - "Import X Routines" button with smart deduplication
+
+- **Smart Exercise Deduplication**
+  - When importing routines, checks if exercises already exist (case-insensitive name match)
+  - Only creates exercises that don't exist yet
+  - Links routines to existing/newly created exercises
+  - No duplicate exercises ever created
+
+- **Consistent UX Pattern** across Exercises and Routines tabs
+  - + button opens Menu with:
+    1. "Create Exercise/Routine" (primary action)
+    2. Divider
+    3. "Add from Presets" (secondary option)
+  - Enhanced empty state with two buttons:
+    - "Browse Preset Exercises/Routines" (primary, orange)
+    - "Create Exercise/Routine" (secondary, material)
+  - Buttons centered vertically (not at bottom)
+
+**Benefits:**
+- ✅ Faster onboarding for beta testers (start in seconds vs minutes)
+- ✅ Demonstrates proper exercise/routine structure
+- ✅ Shows examples of tags, descriptions, and organisation
+- ✅ Optional (not forced) - users can still create custom
+- ✅ No duplicate data created
+- ✅ Consistent user journey across tabs
+
+**Technical:**
+- PresetExercises.swift - Static library of 32 exercises
+- PresetRoutines.swift - Static library of 7 routines
+- PresetExercisesBrowserView.swift - Selection UI for exercises
+- PresetRoutinesBrowserView.swift - Selection UI with smart import logic
+- Updated ExercisesListView.swift and WorkoutRoutinesListView.swift
+- Case-insensitive name matching for deduplication
+- British English throughout
+
 ### [Remove Cardio Muscle Group] - 2025-10-14
 
 **Removed:**

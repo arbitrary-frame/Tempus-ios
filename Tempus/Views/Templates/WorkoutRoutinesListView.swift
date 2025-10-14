@@ -14,6 +14,7 @@ struct WorkoutRoutinesListView: View {
     @Query(sort: \WorkoutEntry.workoutDate, order: .reverse) private var workouts: [WorkoutEntry]
     @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
     @State private var showingCreateForm = false
+    @State private var showingPresetBrowser = false
     @State private var selectedRoutine: WorkoutRoutine?
     @State private var routineToStart: WorkoutRoutine?
 
@@ -25,10 +26,53 @@ struct WorkoutRoutinesListView: View {
         NavigationStack {
             Group {
                 if routines.isEmpty {
-                    ContentUnavailableView {
-                        Label("No Routines Yet", systemImage: "arrow.triangle.2.circlepath")
-                    } description: {
-                        Text("Create routines from your workouts to quickly start familiar training sessions")
+                    VStack(spacing: 0) {
+                        Spacer()
+
+                        VStack(spacing: 24) {
+                            ContentUnavailableView {
+                                Label("No Routines Yet", systemImage: "arrow.triangle.2.circlepath")
+                            } description: {
+                                Text("Get started with preset routines or create your own")
+                            }
+
+                            VStack(spacing: 12) {
+                            Button {
+                                showingPresetBrowser = true
+                            } label: {
+                                HStack {
+                                    Image(systemName: "square.grid.3x3.fill")
+                                        .symbolRenderingMode(.hierarchical)
+                                    Text("Browse Preset Routines")
+                                }
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.accentColor)
+                                .foregroundStyle(.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                            }
+
+                            Button {
+                                showingCreateForm = true
+                            } label: {
+                                HStack {
+                                    Image(systemName: "plus.circle")
+                                        .symbolRenderingMode(.hierarchical)
+                                    Text("Create Routine")
+                                }
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(.regularMaterial)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        }
+
+                        Spacer()
+                        Spacer()
                     }
                 } else {
                     List {
@@ -70,8 +114,20 @@ struct WorkoutRoutinesListView: View {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     StreakBadge(currentStreak: currentStreak, weeklyGoal: weeklyWorkoutGoal)
 
-                    Button {
-                        showingCreateForm = true
+                    Menu {
+                        Button {
+                            showingCreateForm = true
+                        } label: {
+                            Label("Create Routine", systemImage: "plus.circle")
+                        }
+
+                        Divider()
+
+                        Button {
+                            showingPresetBrowser = true
+                        } label: {
+                            Label("Add from Presets", systemImage: "square.grid.3x3.fill")
+                        }
                     } label: {
                         Image(systemName: "plus")
                     }
@@ -79,6 +135,9 @@ struct WorkoutRoutinesListView: View {
             }
             .sheet(isPresented: $showingCreateForm) {
                 WorkoutRoutineFormView()
+            }
+            .sheet(isPresented: $showingPresetBrowser) {
+                PresetRoutinesBrowserView()
             }
             .sheet(item: $selectedRoutine) { routine in
                 WorkoutRoutineFormView(routine: routine)
