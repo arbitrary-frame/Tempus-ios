@@ -212,12 +212,10 @@ struct VolumeProgressionCard: View {
         if let selectedDate,
            let index = weeklyData.firstIndex(where: { $0.weekStart == selectedDate }) {
             let dataPoint = weeklyData[index]
-            let formattedVolume = formatVolume(dataPoint.totalVolume)
-            let volumeText = formattedVolume.contains("k") ? "\(formattedVolume)g" : "\(formattedVolume)kg"
             VStack(spacing: 4) {
                 Text(selectedDate, format: .dateTime.month(.abbreviated).day())
                     .font(.caption2.bold())
-                Text("\(volumeText) lifted")
+                Text("\(formatVolume(dataPoint.totalVolume)) kg lifted")
                     .font(.caption)
                 // Show week-on-week change if not first week
                 if index > 0 {
