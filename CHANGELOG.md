@@ -4,6 +4,36 @@ All notable changes to Tempus iOS workout tracking app.
 
 ## [Unreleased]
 
+### [Decimal Weight Display & Tap-to-Populate] - 2025-10-14
+
+**Fixed:**
+- **Decimal weights now display correctly** in "Last Session" previews
+  - Previously: 7.5kg displayed as "7kg × 10"
+  - Now: 7.5kg displays as "7.5kg × 10"
+  - Smart formatting: whole numbers show as "10kg", decimals as "7.5kg"
+  - Uses `truncatingRemainder(dividingBy: 1)` to detect decimals
+  - Formats with `String(format:)` for clean output
+
+**Added:**
+- **Tap-to-populate functionality** for Last Session capsules
+  - Tap any previous set capsule to create new set with those values
+  - Example: Tap "20kg × 10" → instant new set with 20kg × 10
+  - Automatically handles drop sets (preserves all weight/rep pairs)
+  - Selection haptic feedback for tactile confirmation
+  - Maintains clean capsule appearance with `.plain` button style
+
+**Benefits:**
+- ✅ Accurate weight history display (no data loss on decimals)
+- ✅ Faster workout logging (one tap vs manual entry)
+- ✅ Reduced errors when repeating previous sets
+- ✅ Seamless support for complex drop set patterns
+
+**Technical:**
+- Updated `formatSet()` in WorkoutLoggingView.swift
+- Added `addSetFromPrevious()` method for set population
+- Preserves decimal precision (1 decimal place) throughout UI
+- Drop set support via `weightsAndReps` array copying
+
 ### [Volume Progression Graph & Interactive Charts] - 2025-10-14
 
 **Added:**
