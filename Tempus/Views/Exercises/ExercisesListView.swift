@@ -94,7 +94,7 @@ struct ExercisesListView: View {
                                 HStack {
                                     Image(systemName: "plus.circle")
                                         .symbolRenderingMode(.hierarchical)
-                                    Text("Create Custom Exercise")
+                                    Text("Create Exercise")
                                 }
                                 .font(.headline)
                                 .frame(maxWidth: .infinity)
@@ -151,15 +151,17 @@ struct ExercisesListView: View {
 
                     Menu {
                         Button {
+                            showingCreateForm = true
+                        } label: {
+                            Label("Create Exercise", systemImage: "plus.circle")
+                        }
+
+                        Divider()
+
+                        Button {
                             showingPresetBrowser = true
                         } label: {
                             Label("Add from Presets", systemImage: "square.grid.3x3.fill")
-                        }
-
-                        Button {
-                            showingCreateForm = true
-                        } label: {
-                            Label("Create Custom Exercise", systemImage: "plus.circle")
                         }
                     } label: {
                         Image(systemName: "plus")
