@@ -12,6 +12,7 @@ struct ExerciseFormView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query private var allExercises: [Exercise]
+    @Query(sort: \WorkoutEntry.workoutDate, order: .reverse) private var allWorkouts: [WorkoutEntry]
 
     @State private var name: String = ""
     @State private var exerciseDescription: String = ""
@@ -20,6 +21,7 @@ struct ExerciseFormView: View {
     @State private var tags: [String] = []
     @State private var showingValidationError = false
     @State private var validationMessage = ""
+    @State private var showingUnilateralLockAlert = false
 
     let isEditing: Bool
     let exerciseToEdit: Exercise?
@@ -38,6 +40,18 @@ struct ExerciseFormView: View {
 
     var isValid: Bool {
         !name.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    private var isExerciseUsedInWorkouts: Bool {
+        guard let exercise = exerciseToEdit else { return false }
+        return allWorkouts.contains { workout in
+            workout.exercisesData.contains { $0.exerciseID == exercise.id }
+        }
+    }
+
+    private var canChangeUnilateralTag: Bool {
+        // Can change if not editing, or if editing but not used in workouts
+        return !isEditing || !isExerciseUsedInWorkouts
     }
 
     var body: some View {
@@ -174,6 +188,11 @@ struct ExerciseFormView: View {
                     .disabled(!isValid)
                 }
             }
+            .alert("Cannot Change Unilateral Status", isPresented: $showingUnilateralLockAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("This exercise has been logged in past workouts. Changing the unilateral status would make your historical volume data inaccurate. Create a new exercise if you need different tracking.")
+            }
         }
     }
 
@@ -190,11 +209,24 @@ struct ExerciseFormView: View {
 
     private func addSuggestedTag(_ tag: String) {
         guard !tags.contains(tag) else { return }
+
+        // Check if trying to add unilateral to a used exercise
+        if tag == "unilateral" && !canChangeUnilateralTag {
+            showingUnilateralLockAlert = true
+            return
+        }
+
         HapticManager.shared.trigger(.light)
         tags.append(tag)
     }
 
     private func removeTag(_ tag: String) {
+        // Check if trying to remove unilateral from a used exercise
+        if tag == "unilateral" && !canChangeUnilateralTag {
+            showingUnilateralLockAlert = true
+            return
+        }
+
         HapticManager.shared.trigger(.light)
         tags.removeAll { $0 == tag }
     }

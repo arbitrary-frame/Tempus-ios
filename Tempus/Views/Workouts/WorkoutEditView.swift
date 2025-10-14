@@ -52,12 +52,7 @@ struct WorkoutEditView: View {
 
         // Convert WorkoutExerciseData to WorkoutExerciseEntry for editing
         let entries = workout.exercisesData.map { data in
-            WorkoutExerciseEntry(
-                exerciseID: data.exerciseID,
-                exerciseName: data.exerciseName,
-                sets: data.sets,
-                notes: data.notes
-            )
+            WorkoutExerciseEntry(from: data)
         }
         _workoutExercises = State(initialValue: entries)
     }
@@ -187,10 +182,16 @@ struct WorkoutEditView: View {
 
     private func saveWorkout() {
         // Convert WorkoutExerciseEntry back to WorkoutExerciseData
+        // Look up current exercise to get latest isUnilateral status from tags
         let exercisesData = workoutExercises.map { entry in
-            WorkoutExerciseData(
+            // Try to find the exercise in the current library
+            let exercise = allExercises.first { $0.id == entry.exerciseID }
+            let isUnilateral = exercise?.tags.contains("unilateral") ?? entry.isUnilateral
+
+            return WorkoutExerciseData(
                 exerciseID: entry.exerciseID,
                 exerciseName: entry.exerciseName,
+                isUnilateral: isUnilateral,
                 sets: entry.sets,
                 notes: entry.notes
             )

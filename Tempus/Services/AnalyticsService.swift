@@ -15,13 +15,14 @@ actor AnalyticsService {
 
     /// Calculate total volume for a workout (sum of weight × reps for all sets)
     /// - Parameter workout: The workout entry to calculate volume for
-    /// - Returns: Total volume in kg (weight × reps)
+    /// - Returns: Total volume in kg (weight × reps, doubled for unilateral exercises)
     static func calculateWorkoutVolume(_ workout: WorkoutEntry) -> Double {
         var total = 0.0
         for exercise in workout.exercisesData {
+            let multiplier = exercise.isUnilateral ? 2.0 : 1.0
             for set in exercise.sets {
                 for weightRep in set.weightsAndReps {
-                    total += weightRep.weight * Double(weightRep.reps)
+                    total += weightRep.weight * Double(weightRep.reps) * multiplier
                 }
             }
         }
@@ -32,7 +33,7 @@ actor AnalyticsService {
     /// - Parameters:
     ///   - exerciseName: Name of the exercise to track
     ///   - workouts: Array of workouts to search
-    /// - Returns: Array of tuples with date and volume for that exercise
+    /// - Returns: Array of tuples with date and volume for that exercise (doubled for unilateral)
     static func calculateExerciseVolume(
         exerciseName: String,
         in workouts: [WorkoutEntry]
@@ -46,10 +47,11 @@ actor AnalyticsService {
             }
 
             // Calculate volume for this exercise in this workout
+            let multiplier = exercise.isUnilateral ? 2.0 : 1.0
             var exerciseVolume = 0.0
             for set in exercise.sets {
                 for weightRep in set.weightsAndReps {
-                    exerciseVolume += weightRep.weight * Double(weightRep.reps)
+                    exerciseVolume += weightRep.weight * Double(weightRep.reps) * multiplier
                 }
             }
 
@@ -197,7 +199,7 @@ actor AnalyticsService {
     /// - Parameters:
     ///   - workouts: Array of workouts
     ///   - exerciseMuscleGroupMap: Dictionary mapping exercise names to muscle groups
-    /// - Returns: Dictionary of muscle group to total volume
+    /// - Returns: Dictionary of muscle group to total volume (doubled for unilateral exercises)
     static func calculateMuscleGroupDistribution(
         in workouts: [WorkoutEntry],
         exerciseMuscleGroupMap: [String: String]
@@ -212,10 +214,11 @@ actor AnalyticsService {
                 }
 
                 // Calculate volume for this exercise
+                let multiplier = exercise.isUnilateral ? 2.0 : 1.0
                 var exerciseVolume = 0.0
                 for set in exercise.sets {
                     for weightRep in set.weightsAndReps {
-                        exerciseVolume += weightRep.weight * Double(weightRep.reps)
+                        exerciseVolume += weightRep.weight * Double(weightRep.reps) * multiplier
                     }
                 }
 
