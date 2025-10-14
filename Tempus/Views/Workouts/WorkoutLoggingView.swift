@@ -21,6 +21,7 @@ struct WorkoutLoggingView: View {
     @State private var showingExercisePicker = false
     @State private var showingReorderSheet = false
     @State private var workoutNotes: String = ""
+    @State private var selectedExerciseForInfo: Exercise?
 
     // Track if name was from routine to auto-update it
     private let routineName: String?
@@ -102,10 +103,34 @@ struct WorkoutLoggingView: View {
                                 previousData: previousWorkoutDataCache[exerciseEntry.exerciseID]
                             )
                         } header: {
-                            HStack {
+                            HStack(spacing: 8) {
                                 Text(exerciseEntry.exerciseName)
                                     .font(.headline)
+
+                                // Info button
+                                if let exercise = allExercises.first(where: { $0.id == exerciseEntry.exerciseID }) {
+                                    Button {
+                                        selectedExerciseForInfo = exercise
+                                    } label: {
+                                        Image(systemName: "info.circle")
+                                            .font(.caption)
+                                            .symbolRenderingMode(.hierarchical)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    .buttonStyle(.borderless)
+                                }
+
+                                // Unilateral badge (if applicable)
+                                if exerciseEntry.isUnilateral {
+                                    Text("Unilateral")
+                                        .font(.caption)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 6)
+                                        .background(.regularMaterial, in: Capsule())
+                                }
+
                                 Spacer()
+
                                 Button(role: .destructive) {
                                     withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                                         removeExercise(exerciseEntry)
@@ -172,6 +197,9 @@ struct WorkoutLoggingView: View {
             }
             .sheet(isPresented: $showingReorderSheet) {
                 WorkoutExerciseReorderView(exercises: $workoutExercises)
+            }
+            .sheet(item: $selectedExerciseForInfo) { exercise in
+                ExerciseInfoSheet(exercise: exercise)
             }
         }
     }
@@ -596,6 +624,72 @@ struct ExercisePickerView: View {
                 isUnilateral: exercise.tags.contains("unilateral")
             )
             selectedExercises.append(entry)
+        }
+    }
+}
+
+// Exercise info sheet
+struct ExerciseInfoSheet: View {
+    let exercise: Exercise
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List {
+                // Description
+                if let description = exercise.exerciseDescription, !description.isEmpty {
+                    Section {
+                        Text(description)
+                            .font(.body)
+                    } header: {
+                        Label("Description", systemImage: "text.alignleft")
+                            .symbolRenderingMode(.hierarchical)
+                    }
+                }
+
+                // Muscle Group
+                Section {
+                    HStack {
+                        if let group = MuscleGroup(rawValue: exercise.muscleGroup) {
+                            Label(exercise.muscleGroup, systemImage: group.icon)
+                        } else {
+                            Text(exercise.muscleGroup)
+                        }
+                    }
+                } header: {
+                    Label("Muscle Group", systemImage: "figure.strengthtraining.traditional")
+                        .symbolRenderingMode(.hierarchical)
+                }
+
+                // Tags
+                if !exercise.tags.isEmpty {
+                    Section {
+                        FlowLayout(spacing: 8) {
+                            ForEach(exercise.tags, id: \.self) { tag in
+                                Text(tag)
+                                    .font(.caption)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 6)
+                                    .background(.regularMaterial, in: Capsule())
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    } header: {
+                        Label("Tags", systemImage: "tag")
+                            .symbolRenderingMode(.hierarchical)
+                    }
+                }
+            }
+            .listStyle(.insetGrouped)
+            .navigationTitle(exercise.name)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
         }
     }
 }

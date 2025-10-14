@@ -120,21 +120,50 @@ gh pr create --title "Title" --body "Description"
 
 ## Repository Etiquette
 
-### Branching Strategy
-1. **⛔️ NEVER commit to master** - Protected branch, all changes via PRs
-2. Check current branch: `git branch`
-3. Create feature branch: `git checkout -b feature/descriptive-name`
-4. Branch naming: `feature/`, `fix/`, `refactor/`
+### Branching Strategy (CRITICAL: Start Here for Every New Task)
 
-### Pull Request Workflow
-1. Build with iPhone 17 simulator MUST succeed
-2. Commit changes with clear messages
-3. Push feature branch: `git push -u origin branch-name`
-4. Create PR: `gh pr create`
-5. **DO NOT update CHANGELOG.md yet**
-6. User reviews PR on GitHub
-7. **Only when user approves:** Update CHANGELOG.md
-8. User merges PR via GitHub
+**⛔️ BEFORE starting ANY new work, ALWAYS run these commands:**
+
+```bash
+# 1. Fetch latest from remote
+git fetch origin
+
+# 2. Switch to master (NEVER create branches from feature branches!)
+git checkout master
+
+# 3. Pull latest master
+git pull origin master
+
+# 4. NOW create your feature branch
+git checkout -b feature/descriptive-name
+```
+
+**Key Rules:**
+- **⛔️ NEVER commit to master** - Protected branch, all changes via PRs
+- **⛔️ NEVER create feature branches from other feature branches** - Always branch from master
+- **⛔️ ALWAYS verify you're on master first:** `git branch --show-current` should show "master"
+- Branch naming: `feature/`, `fix/`, `refactor/`
+
+### Pull Request Workflow (IMPORTANT: Follow These Steps)
+
+**When you complete a task, ALWAYS create a PR immediately:**
+
+1. **Build verification:** `xcodebuild -project Tempus.xcodeproj -scheme "Tempus Dev" -destination 'platform=iOS Simulator,name=iPhone 17' build`
+2. **Create feature branch** (if not already on one): `git checkout -b feature/descriptive-name`
+3. **Commit changes:** `git add . && git commit -m "message"` (include Claude Code co-authoring footer)
+4. **Push branch:** `git push -u origin feature/branch-name`
+5. **Create PR immediately:** `gh pr create --title "..." --body "..."`
+6. **DO NOT update CHANGELOG.md yet** - Only after user approval
+7. **Provide PR URL to user** so they can review and test
+8. User reviews PR on GitHub
+9. **After user approves:** Update CHANGELOG.md with changes
+10. User merges PR via GitHub
+
+**Key Points:**
+- ⛔️ ALWAYS create PR when work is complete (don't wait for user to ask)
+- ⛔️ NEVER update CHANGELOG.md before user approves PR
+- ✅ Include comprehensive test plan in PR description
+- ✅ Provide PR URL to user immediately after creation
 
 ### Commit Message Format
 - `Add [feature]` - New functionality
@@ -307,16 +336,21 @@ let predicate = #Predicate<WorkoutEntry> { workout in
 
 ---
 
-## Quick Checklist Before PR
+## Quick Checklist When Completing Work
+
+**When you finish implementing a task, follow this checklist:**
 
 - [ ] **⛔️ NOT on master branch** (`git branch` shows feature branch)
 - [ ] **⛔️ Builds successfully with iPhone 17 simulator**
 - [ ] Code follows requirements-ios.md
-- [ ] Debug prints added where helpful
-- [ ] Committed with clear message
-- [ ] Feature branch pushed to GitHub
-- [ ] PR created via `gh pr create`
-- [ ] CHANGELOG.md NOT updated yet (wait for approval)
+- [ ] Debug prints added where helpful (marked with `// DEBUG:`)
+- [ ] Changes committed with clear message + Claude Code footer
+- [ ] Feature branch pushed to GitHub: `git push -u origin branch-name`
+- [ ] **⛔️ PR CREATED IMMEDIATELY** via `gh pr create` (don't wait for user to ask!)
+- [ ] **PR URL provided to user** in your response
+- [ ] CHANGELOG.md NOT updated yet (only after user approval)
+
+**Remember:** Always create the PR as soon as work is complete. The user expects a PR to review and test.
 
 ---
 
