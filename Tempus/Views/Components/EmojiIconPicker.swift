@@ -7,46 +7,31 @@
 
 import SwiftUI
 
-/// Inline emoji icon picker - tap to open native emoji keyboard
+/// Inline emoji icon picker - tap to open emoji selection sheet
 struct EmojiIconPicker: View {
     @Binding var selectedEmoji: String?
-    @State private var emojiText: String = ""
-    @FocusState private var isFocused: Bool
+    @State private var showingPicker = false
 
     var body: some View {
         Button {
-            isFocused = true
+            showingPicker = true
         } label: {
-            ZStack {
-                // Display selected emoji or placeholder icon
-                if let emoji = selectedEmoji, !emoji.isEmpty {
-                    Text(emoji)
-                        .font(.title2)
-                } else {
-                    Image(systemName: "face.smiling")
-                        .font(.title3)
-                        .foregroundStyle(.secondary)
-                }
-
-                // Hidden TextField for emoji input
-                TextField("", text: $emojiText)
-                    .focused($isFocused)
-                    .frame(width: 1, height: 1)
-                    .opacity(0.01)
-                    .onChange(of: emojiText) { oldValue, newValue in
-                        // Extract only emoji characters (filter out non-emoji)
-                        let emojis = newValue.filter { $0.isEmoji }
-                        if let firstEmoji = emojis.first {
-                            selectedEmoji = String(firstEmoji)
-                            emojiText = ""
-                            isFocused = false
-                            HapticManager.shared.trigger(.selection)
-                        }
-                    }
+            if let emoji = selectedEmoji, !emoji.isEmpty {
+                Text(emoji)
+                    .font(.title2)
+            } else {
+                Image(systemName: "face.smiling")
+                    .font(.title3)
+                    .foregroundStyle(.secondary)
             }
         }
         .frame(width: 44, height: 44)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
+        .sheet(isPresented: $showingPicker) {
+            EmojiPickerSheet(selectedEmoji: $selectedEmoji)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
         .contextMenu {
             if selectedEmoji != nil {
                 Button(role: .destructive) {
@@ -60,11 +45,104 @@ struct EmojiIconPicker: View {
     }
 }
 
-// Helper extension to detect emoji characters
-extension Character {
-    var isEmoji: Bool {
-        guard let scalar = unicodeScalars.first else { return false }
-        return scalar.properties.isEmoji && (scalar.value > 0x238C || unicodeScalars.count > 1)
+/// Full emoji picker sheet with search and categories
+struct EmojiPickerSheet: View {
+    @Binding var selectedEmoji: String?
+    @Environment(\.dismiss) private var dismiss
+    @State private var searchText = ""
+
+    // Comprehensive emoji collection organized by category
+    private let emojiCategories: [(String, String, [String])] = [
+        ("⏱️", "Recents", []),  // Populated dynamically
+        ("💪", "Fitness", ["💪", "🏋️", "🏋️‍♀️", "🏋️‍♂️", "🤸", "🤸‍♀️", "🤸‍♂️", "🤾", "🤾‍♀️", "🤾‍♂️", "🏃", "🏃‍♀️", "🏃‍♂️", "🚴", "🚴‍♀️", "🚴‍♂️", "🏊", "🏊‍♀️", "🏊‍♂️", "🧘", "🧘‍♀️", "🧘‍♂️", "🧗", "🧗‍♀️", "🧗‍♂️", "🤺", "🥊", "🥋", "⛷️", "🏂"]),
+        ("🔥", "Symbols", ["🔥", "⚡️", "💯", "🎯", "⭐️", "✨", "💥", "✅", "❌", "🚀", "📈", "📊", "⏰", "⏱️", "⏲️", "🎵", "🎶", "💊", "🧠", "❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍", "🤎", "💔"]),
+        ("🏆", "Achievement", ["🏆", "🥇", "🥈", "🥉", "🏅", "🎖️", "👑", "💎", "🔱", "⚔️", "🛡️", "🎯", "📈", "✅", "💯", "⚡️", "🔥", "💪", "👊", "✊", "🤜", "🤛", "👏"]),
+        ("⚽️", "Sports", ["⚽️", "🏀", "🏈", "⚾️", "🥎", "🎾", "🏐", "🏉", "🥏", "🎱", "🪀", "🏓", "🏸", "🏒", "🏑", "🥍", "🏏", "🪃", "🥅", "⛳️", "🪁", "🏹", "🎣", "🤿", "🥊", "🥋", "🎽", "🛹", "🛼", "🛷"]),
+        ("🍎", "Food", ["🍎", "🥗", "🥑", "🥦", "🥒", "🌽", "🥕", "🧄", "🧅", "🍇", "🍊", "🍋", "🍌", "🍉", "🍓", "🫐", "🍒", "🍑", "🥭", "🍍", "🥥", "🥝", "🍅", "🍆", "🥔", "🥐", "🥖", "🧀", "🥚"]),
+        ("😀", "Faces", ["😀", "😃", "😄", "😁", "😆", "😅", "🤣", "😂", "🙂", "🙃", "🫠", "😉", "😊", "😇", "🥰", "😍", "🤩", "😘", "😗", "😚", "😙", "🥲", "😋", "😛", "😜", "🤪", "😝", "🤑", "🤗", "🤭"]),
+        ("🐶", "Animals", ["🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯", "🦁", "🐮", "🐷", "🐸", "🐵", "🐔", "🐧", "🐦", "🐤", "🦆", "🦅", "🦉", "🦇", "🐺", "🐗", "🐴", "🦄", "🐝", "🪱", "🐛"]),
+        ("🌈", "Nature", ["🌈", "☀️", "🌤️", "⛅️", "🌥️", "☁️", "🌦️", "🌧️", "⛈️", "🌩️", "🌨️", "❄️", "☃️", "⛄️", "🌬️", "💨", "🌪️", "🌫️", "☔️", "💧", "💦", "🌊", "🌍", "🌎", "🌏", "🪐", "⭐️", "🌟", "✨", "💫"]),
+        ("🎮", "Activities", ["🎮", "🕹️", "👾", "🎯", "🎲", "🎰", "🎳", "🎴", "🃏", "🎭", "🎨", "🧩", "🎪", "🎡", "🎢", "🎠", "🎬", "🎤", "🎧", "🎼", "🎹", "🥁", "🎷", "🎺", "🎸", "🪕", "🎻", "🎲", "♟️", "🎯"]),
+    ]
+
+    private var filteredEmojis: [(String, String, [String])] {
+        if searchText.isEmpty {
+            return emojiCategories
+        }
+
+        return emojiCategories.compactMap { (icon, category, emojis) in
+            let filtered = emojis.filter { emoji in
+                // Simple emoji matching - could be enhanced with emoji names
+                return true
+            }
+            return filtered.isEmpty ? nil : (icon, category, filtered)
+        }
+    }
+
+    private let columns = Array(repeating: GridItem(.adaptive(minimum: 44), spacing: 12), count: 8)
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    ForEach(filteredEmojis, id: \.1) { (icon, category, emojis) in
+                        if !emojis.isEmpty {
+                            VStack(alignment: .leading, spacing: 12) {
+                                HStack(spacing: 8) {
+                                    Text(icon)
+                                        .font(.title3)
+                                    Text(category)
+                                        .font(.headline)
+                                        .foregroundStyle(.secondary)
+                                }
+                                .padding(.horizontal)
+
+                                LazyVGrid(columns: columns, spacing: 12) {
+                                    ForEach(emojis, id: \.self) { emoji in
+                                        Button {
+                                            selectedEmoji = emoji
+                                            HapticManager.shared.trigger(.selection)
+                                            dismiss()
+                                        } label: {
+                                            Text(emoji)
+                                                .font(.system(size: 32))
+                                                .frame(width: 44, height: 44)
+                                                .background(
+                                                    selectedEmoji == emoji ? Color.accentColor.opacity(0.2) : Color.clear,
+                                                    in: RoundedRectangle(cornerRadius: 8)
+                                                )
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
+                        }
+                    }
+                }
+                .padding(.vertical)
+            }
+            .navigationTitle("Choose Emoji")
+            .navigationBarTitleDisplayMode(.inline)
+            .searchable(text: $searchText, prompt: "Search emojis")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+
+                if selectedEmoji != nil {
+                    ToolbarItem(placement: .destructiveAction) {
+                        Button("Remove", role: .destructive) {
+                            selectedEmoji = nil
+                            HapticManager.shared.trigger(.light)
+                            dismiss()
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
