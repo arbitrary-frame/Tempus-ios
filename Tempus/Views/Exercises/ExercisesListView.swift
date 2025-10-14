@@ -64,14 +64,17 @@ struct ExercisesListView: View {
         NavigationStack {
             Group {
                 if filteredExercises.isEmpty {
-                    VStack(spacing: 24) {
-                        ContentUnavailableView {
-                            Label("No Exercises Yet", systemImage: "list.bullet.clipboard")
-                        } description: {
-                            Text("Get started with preset exercises or create your own")
-                        }
+                    VStack(spacing: 0) {
+                        Spacer()
 
-                        VStack(spacing: 12) {
+                        VStack(spacing: 24) {
+                            ContentUnavailableView {
+                                Label("No Exercises Yet", systemImage: "list.bullet.clipboard")
+                            } description: {
+                                Text("Get started with preset exercises or create your own")
+                            }
+
+                            VStack(spacing: 12) {
                             Button {
                                 showingPresetBrowser = true
                             } label: {
@@ -104,6 +107,10 @@ struct ExercisesListView: View {
                             }
                         }
                         .padding(.horizontal, 40)
+                        }
+
+                        Spacer()
+                        Spacer()
                     }
                 } else {
                     List {

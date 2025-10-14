@@ -26,14 +26,17 @@ struct WorkoutRoutinesListView: View {
         NavigationStack {
             Group {
                 if routines.isEmpty {
-                    VStack(spacing: 24) {
-                        ContentUnavailableView {
-                            Label("No Routines Yet", systemImage: "arrow.triangle.2.circlepath")
-                        } description: {
-                            Text("Get started with preset routines or create your own")
-                        }
+                    VStack(spacing: 0) {
+                        Spacer()
 
-                        VStack(spacing: 12) {
+                        VStack(spacing: 24) {
+                            ContentUnavailableView {
+                                Label("No Routines Yet", systemImage: "arrow.triangle.2.circlepath")
+                            } description: {
+                                Text("Get started with preset routines or create your own")
+                            }
+
+                            VStack(spacing: 12) {
                             Button {
                                 showingPresetBrowser = true
                             } label: {
@@ -66,6 +69,10 @@ struct WorkoutRoutinesListView: View {
                             }
                         }
                         .padding(.horizontal, 40)
+                        }
+
+                        Spacer()
+                        Spacer()
                     }
                 } else {
                     List {
