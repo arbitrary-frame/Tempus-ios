@@ -149,8 +149,18 @@ struct ExercisesListView: View {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     StreakBadge(currentStreak: currentStreak, weeklyGoal: weeklyWorkoutGoal)
 
-                    Button {
-                        showingCreateForm = true
+                    Menu {
+                        Button {
+                            showingPresetBrowser = true
+                        } label: {
+                            Label("Add from Presets", systemImage: "square.grid.3x3.fill")
+                        }
+
+                        Button {
+                            showingCreateForm = true
+                        } label: {
+                            Label("Create Custom Exercise", systemImage: "plus.circle")
+                        }
                     } label: {
                         Image(systemName: "plus")
                     }
