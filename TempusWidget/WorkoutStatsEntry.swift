@@ -44,12 +44,12 @@ struct WorkoutStatsEntry: TimelineEntry {
         }
 
         let absKg = abs(kg)
-        let prefix = kg > 0 ? "+" : ""
+        let prefix = kg > 0 ? "+" : "-"
 
         if absKg >= 1000 {
-            return String(format: "%@%.1fk", prefix, Double(kg) / 1000.0)
+            return String(format: "%@%.1fk", prefix, Double(absKg) / 1000.0)
         }
 
-        return "\(prefix)\(kg)"
+        return "\(prefix)\(absKg)"
     }
 }
