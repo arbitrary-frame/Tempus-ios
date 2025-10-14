@@ -15,6 +15,7 @@ struct ExercisesListView: View {
     @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
     @State private var searchText = ""
     @State private var showingCreateForm = false
+    @State private var showingPresetBrowser = false
     @State private var selectedExercise: Exercise?
     @State private var showingDeleteConfirmation = false
     @State private var showingCannotDeleteAlert = false
@@ -63,10 +64,46 @@ struct ExercisesListView: View {
         NavigationStack {
             Group {
                 if filteredExercises.isEmpty {
-                    ContentUnavailableView {
-                        Label("No Exercises Yet", systemImage: "list.bullet.clipboard")
-                    } description: {
-                        Text("Tap + to create your first exercise")
+                    VStack(spacing: 24) {
+                        ContentUnavailableView {
+                            Label("No Exercises Yet", systemImage: "list.bullet.clipboard")
+                        } description: {
+                            Text("Get started with preset exercises or create your own")
+                        }
+
+                        VStack(spacing: 12) {
+                            Button {
+                                showingPresetBrowser = true
+                            } label: {
+                                HStack {
+                                    Image(systemName: "square.grid.3x3.fill")
+                                        .symbolRenderingMode(.hierarchical)
+                                    Text("Browse Preset Exercises")
+                                }
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.accentColor)
+                                .foregroundStyle(.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                            }
+
+                            Button {
+                                showingCreateForm = true
+                            } label: {
+                                HStack {
+                                    Image(systemName: "plus.circle")
+                                        .symbolRenderingMode(.hierarchical)
+                                    Text("Create Custom Exercise")
+                                }
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(.regularMaterial)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                            }
+                        }
+                        .padding(.horizontal, 40)
                     }
                 } else {
                     List {
@@ -121,6 +158,9 @@ struct ExercisesListView: View {
             }
             .sheet(isPresented: $showingCreateForm) {
                 ExerciseFormView()
+            }
+            .sheet(isPresented: $showingPresetBrowser) {
+                PresetExercisesBrowserView()
             }
             .sheet(item: $selectedExercise) { exercise in
                 ExerciseFormView(exercise: exercise)
