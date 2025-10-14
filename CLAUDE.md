@@ -153,17 +153,25 @@ git checkout -b feature/descriptive-name
 3. **Commit changes:** `git add . && git commit -m "message"` (include Claude Code co-authoring footer)
 4. **Push branch:** `git push -u origin feature/branch-name`
 5. **Create PR immediately:** `gh pr create --title "..." --body "..."`
-6. **DO NOT update CHANGELOG.md yet** - Only after user approval
+6. **⛔️ DO NOT update CHANGELOG.md yet** - Wait for user approval first
 7. **Provide PR URL to user** so they can review and test
-8. User reviews PR on GitHub
-9. **After user approves:** Update CHANGELOG.md with changes
-10. User merges PR via GitHub
+8. **User reviews and approves PR** (comments "approved", "lgtm", or similar on PR)
+9. **After approval, immediately add CHANGELOG.md to the SAME PR:**
+   ```bash
+   # Edit CHANGELOG.md with changes
+   git add CHANGELOG.md
+   git commit -m "Update CHANGELOG.md for [feature name]"
+   git push
+   ```
+10. **User merges the single PR** (contains both feature + changelog)
 
 **Key Points:**
 - ⛔️ ALWAYS create PR when work is complete (don't wait for user to ask)
-- ⛔️ NEVER update CHANGELOG.md before user approves PR
+- ⛔️ NEVER update CHANGELOG.md before user approves the feature
+- ✅ One PR contains everything (feature changes + changelog entry)
 - ✅ Include comprehensive test plan in PR description
 - ✅ Provide PR URL to user immediately after creation
+- ✅ Watch for user's approval comment, then add CHANGELOG.md commit to same PR
 
 ### Commit Message Format
 - `Add [feature]` - New functionality
@@ -338,8 +346,9 @@ let predicate = #Predicate<WorkoutEntry> { workout in
 
 ## Quick Checklist When Completing Work
 
-**When you finish implementing a task, follow this checklist:**
+**Phase 1: Initial PR Creation**
 
+- [ ] **⛔️ Started from master** (`git fetch && git checkout master && git pull`)
 - [ ] **⛔️ NOT on master branch** (`git branch` shows feature branch)
 - [ ] **⛔️ Builds successfully with iPhone 17 simulator**
 - [ ] Code follows requirements-ios.md
@@ -348,9 +357,22 @@ let predicate = #Predicate<WorkoutEntry> { workout in
 - [ ] Feature branch pushed to GitHub: `git push -u origin branch-name`
 - [ ] **⛔️ PR CREATED IMMEDIATELY** via `gh pr create` (don't wait for user to ask!)
 - [ ] **PR URL provided to user** in your response
-- [ ] CHANGELOG.md NOT updated yet (only after user approval)
+- [ ] **⛔️ CHANGELOG.md NOT updated yet** (only after user approval)
 
-**Remember:** Always create the PR as soon as work is complete. The user expects a PR to review and test.
+**Phase 2: After User Approves PR**
+
+- [ ] User comments "approved" or "lgtm" on PR
+- [ ] Checkout feature branch: `git checkout feature/branch-name`
+- [ ] Update CHANGELOG.md with comprehensive entry
+- [ ] Commit: `git add CHANGELOG.md && git commit -m "Update CHANGELOG.md for [feature]"`
+- [ ] Push: `git push` (adds to same PR)
+- [ ] Notify user that CHANGELOG is updated
+- [ ] User merges the single PR containing feature + changelog
+
+**Remember:**
+- Always create PR immediately when work is complete
+- Wait for user's approval comment before updating CHANGELOG
+- One PR contains both feature and changelog
 
 ---
 
