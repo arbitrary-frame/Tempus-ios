@@ -580,7 +580,7 @@ struct WorkoutCardView: View {
 
                     // Exercise count badge
                     HStack(spacing: 4) {
-                        Image(systemName: "figure.mixed.cardio")
+                        Image(systemName: "list.bullet.clipboard")
                             .font(.caption)
                         Text("\(workout.exercisesData.count)")
                             .font(.caption.bold())
