@@ -4,6 +4,43 @@ All notable changes to Tempus iOS workout tracking app.
 
 ## [Unreleased]
 
+### [Exercise Info Button & Unilateral Badge] - 2025-10-14
+
+**Added:**
+- **Exercise Info Button (ℹ︎)** next to exercise names in workout logging/editing
+  - Tap to view ExerciseInfoSheet modal with full exercise details
+  - Shows exercise description (if available)
+  - Displays muscle group with icon
+  - Shows all tags in capsule format using FlowLayout
+  - Clean modal presentation with "Done" button
+- **"Unilateral" Badge** always visible for unilateral exercises
+  - Appears automatically next to exercise name during workout logging/editing
+  - Styled with `.regularMaterial` capsule (consistent with tag styling throughout app)
+  - Reminds users to log weights per hand/leg for accurate volume tracking
+  - Layout: `[Exercise Name] [ℹ︎] [Unilateral (if applicable)] [🗑️]`
+
+**Improved:**
+- **CLAUDE.md Workflow Documentation**
+  - Added explicit branching workflow to prevent feature branch conflicts
+  - Clarified PR creation timing (immediately after work completion)
+  - Added comprehensive checklist for completing work
+  - Critical warning: always branch from master, never from feature branches
+
+**Benefits:**
+- ✅ Users always see unilateral indicator without needing to tap
+- ✅ Full exercise context (description, tags, muscle group) accessible on demand
+- ✅ Prevents confusion about weight logging for unilateral exercises
+- ✅ Better understanding of exercise context while logging workouts
+- ✅ Consistent UI patterns across workout logging and editing views
+
+**Technical:**
+- Created reusable `ExerciseInfoSheet` component in WorkoutLoggingView.swift
+- Updated `WorkoutLoggingView` section headers with info button and conditional badge
+- Updated `WorkoutEditView` section headers for consistency
+- Badge appears only when `exerciseEntry.isUnilateral` is true
+
+---
+
 ### [Development/Production Database Separation] - 2025-10-06
 
 **Added:**
