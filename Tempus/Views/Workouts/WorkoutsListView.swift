@@ -852,7 +852,7 @@ struct StatBubble: View {
                 HStack(spacing: 2) {
                     Image(systemName: absolute >= 0 ? "arrow.up" : "arrow.down")
                         .font(.system(size: 8, weight: .bold))
-                    Text(absolute >= 0 ? "+\(absolute)" : "\(absolute)")
+                    Text(formatWeightChange(absolute))
                         .font(.system(size: 9, weight: .semibold))
                 }
                 .foregroundStyle(absolute >= 0 ? .green : .secondary)
@@ -916,6 +916,18 @@ struct WeekNavigationView: View {
         }
         .padding(.vertical, 8)
     }
+}
+
+// Helper function to format weight change values
+private func formatWeightChange(_ change: Int) -> String {
+    let absChange = abs(change)
+    let prefix = change >= 0 ? "+" : "-"
+
+    if absChange >= 1000 {
+        return String(format: "%@%.1fk", prefix, Double(absChange) / 1000.0)
+    }
+
+    return "\(prefix)\(absChange)"
 }
 
 #Preview {

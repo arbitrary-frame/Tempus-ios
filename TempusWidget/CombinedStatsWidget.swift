@@ -155,10 +155,11 @@ struct CombinedStatsWidgetView: View {
 
             // Week-on-week change badge (top-left)
             if let weightChange = change, weightChange != 0 {
+                let formattedChange = formatWeightChange(Int(weightChange))
                 HStack(spacing: 1) {
                     Image(systemName: weightChange > 0 ? "arrow.up" : "arrow.down")
                         .font(.system(size: 6, weight: .bold))
-                    Text(String(format: "%+dkg", Int(weightChange)))
+                    Text(formattedChange)
                         .font(.system(size: 7, weight: .semibold))
                 }
                 .foregroundStyle(weightChange > 0 ? .green : .secondary)
@@ -172,6 +173,17 @@ struct CombinedStatsWidgetView: View {
             }
         }
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+    }
+
+    private func formatWeightChange(_ change: Int) -> String {
+        let absChange = abs(change)
+        let prefix = change >= 0 ? "+" : "-"
+
+        if absChange >= 1000 {
+            return String(format: "%@%.1fk", prefix, Double(absChange) / 1000.0)
+        }
+
+        return "\(prefix)\(absChange)"
     }
 }
 
