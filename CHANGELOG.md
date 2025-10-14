@@ -4,6 +4,42 @@ All notable changes to Tempus iOS workout tracking app.
 
 ## [Unreleased]
 
+### [Week-on-Week Weight Change Indicator] - 2025-10-14
+
+**Added:**
+- **Week-on-Week Weight Change Badge** on landing page and widgets
+  - Shows absolute kg change from previous week (e.g., "+250kg", "-50kg")
+  - Green badge with up arrow for positive gains
+  - Neutral badge with down arrow for decreases or zero change
+  - Appears on weight stat card (landing page) and all weight widgets
+- **Progressive Overload Tracking** at a glance
+  - Immediately see if weekly volume increased, decreased, or stayed same
+  - Concrete metric (kg) rather than percentage for actionable feedback
+  - Works with week navigation (shows change relative to displayed week)
+
+**Updated:**
+- `WorkoutStatsEntry` model with `totalWeightLastWeek` field and computed change properties
+- `WorkoutStatsProvider` calculates previous week's total volume with unilateral multiplier
+- `WeeklyStatsWithRing` displays change badge on weight stat bubble
+- `WeightWidget` (small) shows badge below "kg" label
+- `CombinedStatsWidget` (medium) shows change indicator on weight card
+- All widget previews updated with last week data
+
+**Benefits:**
+- ✅ Instant visibility of progressive overload week-on-week
+- ✅ Positive visual feedback motivates continued training gains
+- ✅ Quick identification of plateaus or volume decreases
+- ✅ Consistent badge design across landing page and widgets
+- ✅ No overlap or layout issues
+
+**Technical:**
+- Previous week calculated using date range predicates
+- Unilateral exercise multiplier (2x) applied consistently
+- Handles nil gracefully when no previous week data exists
+- Badge positioned below main stat to avoid title overlap
+
+---
+
 ### [Development/Production Database Separation] - 2025-10-06
 
 **Added:**
