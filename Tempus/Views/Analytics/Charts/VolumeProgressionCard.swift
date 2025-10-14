@@ -353,17 +353,11 @@ struct VolumeProgressionCard: View {
                                 }
                             }
 
-                            // 4-week moving average line (only for weeks with data)
-                            if hasMovingAverage {
-                                ForEach(weeklyData.filter { $0.movingAverage != nil }) { dataPoint in
-                                    LineMark(
-                                        x: .value("Week", dataPoint.weekStart, unit: .weekOfYear),
-                                        y: .value("Average", dataPoint.movingAverage!)
-                                    )
+                            // 4-week moving average reference line (horizontal)
+                            if let avgValue = averageOfMovingAverages {
+                                RuleMark(y: .value("Average", avgValue))
                                     .foregroundStyle(Color.gray)
                                     .lineStyle(StrokeStyle(lineWidth: 2))
-                                    .interpolationMethod(.linear)
-                                }
                             }
 
                             // Selection indicator
