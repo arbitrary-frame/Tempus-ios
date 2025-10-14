@@ -198,6 +198,12 @@ struct VolumeProgressionCard: View {
         weeklyData.contains { $0.movingAverage != nil }
     }
 
+    private var averageOfMovingAverages: Double? {
+        let movingAverages = weeklyData.compactMap { $0.movingAverage }
+        guard !movingAverages.isEmpty else { return nil }
+        return movingAverages.reduce(0.0, +) / Double(movingAverages.count)
+    }
+
     private var selectedDate: Date? {
         guard let rawSelectedDate else { return nil }
         // Find closest week in weeklyData
@@ -314,6 +320,18 @@ struct VolumeProgressionCard: View {
                                         .font(.caption2)
                                         .foregroundStyle(.secondary)
                                 }
+
+                                // Moving average legend (if available)
+                                if hasMovingAverage, let avgValue = averageOfMovingAverages {
+                                    HStack(spacing: 4) {
+                                        Rectangle()
+                                            .fill(Color.gray)
+                                            .frame(width: 16, height: 2)
+                                        Text("4 wk avg (\(formatVolume(avgValue)) kg)")
+                                            .font(.caption2)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
                             }
                         }
 
@@ -332,6 +350,19 @@ struct VolumeProgressionCard: View {
                                     Circle()
                                         .fill(.orange)
                                         .frame(width: 8, height: 8)
+                                }
+                            }
+
+                            // 4-week moving average line (only for weeks with data)
+                            if hasMovingAverage {
+                                ForEach(weeklyData.filter { $0.movingAverage != nil }) { dataPoint in
+                                    LineMark(
+                                        x: .value("Week", dataPoint.weekStart, unit: .weekOfYear),
+                                        y: .value("Average", dataPoint.movingAverage!)
+                                    )
+                                    .foregroundStyle(Color.gray)
+                                    .lineStyle(StrokeStyle(lineWidth: 2))
+                                    .interpolationMethod(.linear)
                                 }
                             }
 
