@@ -155,7 +155,7 @@ git checkout -b feature/descriptive-name
 5. **Create PR immediately:** `gh pr create --title "..." --body "..."`
 6. **⛔️ DO NOT update CHANGELOG.md yet** - Wait for user approval first
 7. **Provide PR URL to user** so they can review and test
-8. **User reviews and approves PR** (comments "approved", "lgtm", or similar on PR)
+8. **User reviews and approves** (tells you "approved", "lgtm", "looks good", etc. **in the conversation**)
 9. **After approval, immediately add CHANGELOG.md to the SAME PR:**
    ```bash
    # Edit CHANGELOG.md with changes
@@ -171,7 +171,7 @@ git checkout -b feature/descriptive-name
 - ✅ One PR contains everything (feature changes + changelog entry)
 - ✅ Include comprehensive test plan in PR description
 - ✅ Provide PR URL to user immediately after creation
-- ✅ Watch for user's approval comment, then add CHANGELOG.md commit to same PR
+- ✅ Watch for user's approval in conversation (not GitHub), then add CHANGELOG.md commit to same PR
 
 ### Commit Message Format
 - `Add [feature]` - New functionality
@@ -361,18 +361,19 @@ let predicate = #Predicate<WorkoutEntry> { workout in
 
 **Phase 2: After User Approves PR**
 
-- [ ] User comments "approved" or "lgtm" on PR
+- [ ] User tells you "approved" or "lgtm" **in the conversation** (not on GitHub)
 - [ ] Checkout feature branch: `git checkout feature/branch-name`
 - [ ] Update CHANGELOG.md with comprehensive entry
 - [ ] Commit: `git add CHANGELOG.md && git commit -m "Update CHANGELOG.md for [feature]"`
 - [ ] Push: `git push` (adds to same PR)
-- [ ] Notify user that CHANGELOG is updated
-- [ ] User merges the single PR containing feature + changelog
+- [ ] Notify user that CHANGELOG is updated and ready to merge
+- [ ] User goes to GitHub and merges the single PR containing feature + changelog
 
 **Remember:**
 - Always create PR immediately when work is complete
-- Wait for user's approval comment before updating CHANGELOG
+- Wait for user's approval **in the conversation** before updating CHANGELOG
 - One PR contains both feature and changelog
+- User doesn't need to comment on GitHub - just tell you here
 
 ---
 
