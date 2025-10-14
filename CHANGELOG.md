@@ -16,6 +16,8 @@ All notable changes to Tempus iOS workout tracking app.
   - Smart range picker: 4W, 12W, 6M, All
   - Empty state when <2 weeks of data
   - Positioned between Consistency and Personal Records cards
+  - **4-week moving average line** - Gray dashed horizontal line showing average volume
+  - Legend displays average value: "4 wk avg (8.2k kg)"
 
 - **Interactive Tap Selection** on both Analytics graphs
   - Tap any data point to see exact values
