@@ -4,6 +4,46 @@ All notable changes to Tempus iOS workout tracking app.
 
 ## [Unreleased]
 
+### [Enhanced Emoji Picker for Routines] - 2025-10-14
+
+**Added:**
+- **Comprehensive emoji picker sheet** with 10 categories
+  - Sheet presentation with drag to dismiss
+  - 320+ curated emojis organised by category
+  - Large 32pt emoji buttons for easy selection
+  - Categories: Fitness, Body Parts, Symbols, Achievement, Sports, Food, Faces, Animals, Nature, Activities
+
+- **Skin tone picker via long-press**
+  - Hold any supported emoji (0.5s) to see skin tone variants
+  - Popover shows all 6 options (default + 5 skin tones: 🏻 🏼 🏽 🏾 🏿)
+  - Supports 70+ emojis (hands, body parts, people, fitness activities)
+  - Works just like iOS keyboard behaviour
+
+- **Body Parts category**
+  - 50+ emojis: legs, feet, arms, hands, organs, face parts
+  - Perfect for muscle group or body part routines
+  - Examples: 🦵 🦶 💪 🦾 🫀 🫁 🧠 👁️ 👂 👃 👋 🤚 👍 👊
+
+**Removed:**
+- Custom 30-emoji grid (too restrictive)
+- Non-functional search bar
+- Keyboard approach that showed letters
+
+**Benefits:**
+- ✅ 10x more emoji options (30 → 320+)
+- ✅ Better organisation with categories
+- ✅ Skin tone support for representation
+- ✅ Cleaner UI (no confusing keyboard)
+- ✅ Familiar long-press pattern
+- ✅ Context menu for removing selected emoji
+
+**Technical:**
+- Replaced `EmojiSelectionGrid` with `EmojiPickerSheet`
+- Created `EmojiButton` component with long-press gesture
+- `.popover` presentation for skin tone variants
+- Set of 70+ emojis marked as `skinToneSupported`
+- Helper function strips existing skin tones for base emoji
+
 ### [Workout Card Improvements] - 2025-10-14
 
 **Fixed:**
