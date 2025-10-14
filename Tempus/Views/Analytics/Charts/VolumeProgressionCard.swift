@@ -215,7 +215,7 @@ struct VolumeProgressionCard: View {
             VStack(spacing: 4) {
                 Text(selectedDate, format: .dateTime.month(.abbreviated).day())
                     .font(.caption2.bold())
-                Text("\(formatVolume(dataPoint.totalVolume)) lifted")
+                Text("\(formatVolume(dataPoint.totalVolume))kg lifted")
                     .font(.caption)
                 // Show week-on-week change if not first week
                 if index > 0 {
