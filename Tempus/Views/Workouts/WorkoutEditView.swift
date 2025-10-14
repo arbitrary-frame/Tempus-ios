@@ -25,6 +25,7 @@ struct WorkoutEditView: View {
     @State private var showingDeleteConfirmation = false
     @State private var showingSaveAsRoutine = false
     @State private var showingReorderSheet = false
+    @State private var selectedExerciseForInfo: Exercise?
 
     // Cached previous workout data lookup - prevents N+1 query pattern
     private var previousWorkoutDataCache: [UUID: WorkoutExerciseData] {
@@ -80,10 +81,34 @@ struct WorkoutEditView: View {
                                 previousData: previousWorkoutDataCache[exerciseEntry.exerciseID]
                             )
                         } header: {
-                            HStack {
+                            HStack(spacing: 8) {
                                 Text(exerciseEntry.exerciseName)
                                     .font(.headline)
+
+                                // Info button
+                                if let exercise = allExercises.first(where: { $0.id == exerciseEntry.exerciseID }) {
+                                    Button {
+                                        selectedExerciseForInfo = exercise
+                                    } label: {
+                                        Image(systemName: "info.circle")
+                                            .font(.caption)
+                                            .symbolRenderingMode(.hierarchical)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    .buttonStyle(.borderless)
+                                }
+
+                                // Unilateral badge (if applicable)
+                                if exerciseEntry.isUnilateral {
+                                    Text("Unilateral")
+                                        .font(.caption)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 6)
+                                        .background(.regularMaterial, in: Capsule())
+                                }
+
                                 Spacer()
+
                                 Button(role: .destructive) {
                                     removeExercise(exerciseEntry)
                                 } label: {
@@ -162,6 +187,9 @@ struct WorkoutEditView: View {
             }
             .sheet(isPresented: $showingReorderSheet) {
                 WorkoutExerciseReorderView(exercises: $workoutExercises)
+            }
+            .sheet(item: $selectedExerciseForInfo) { exercise in
+                ExerciseInfoSheet(exercise: exercise)
             }
             .confirmationDialog("Delete this workout?", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
                 Button("Delete Workout", role: .destructive) {
