@@ -4,6 +4,38 @@ All notable changes to Tempus iOS workout tracking app.
 
 ## [Unreleased]
 
+### [Remove Cardio Muscle Group] - 2025-10-14
+
+**Removed:**
+- **Cardio muscle group option**
+  - Removed from MuscleGroup enum
+  - No longer appears in exercise creation/editing
+
+**Remaining Muscle Groups (9 total):**
+- Chest
+- Back
+- Shoulders
+- Biceps
+- Triceps
+- Legs
+- Core
+- Full Body
+- Other
+
+**Rationale:**
+- Tempus focuses on weight training and progressive overload
+- Cardio doesn't fit the app's model (sets, reps, weight)
+- Users can still use "Other" for cardio-related exercises if needed
+
+**Benefits:**
+- ✅ Clearer focus on weight training
+- ✅ Removes confusing option for strength tracking
+- ✅ Aligns muscle groups with app's core functionality
+
+**Technical:**
+- Removed `.cardio` case from MuscleGroup enum in Enums.swift
+- Removed associated `figure.run` icon mapping
+
 ### [Enhanced Emoji Picker for Routines] - 2025-10-14
 
 **Added:**

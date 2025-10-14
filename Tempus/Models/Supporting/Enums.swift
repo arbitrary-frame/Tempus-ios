@@ -16,7 +16,6 @@ enum MuscleGroup: String, CaseIterable, Identifiable {
     case triceps = "Triceps"
     case legs = "Legs"
     case core = "Core"
-    case cardio = "Cardio"
     case fullBody = "Full Body"
     case other = "Other"
 
@@ -47,9 +46,6 @@ enum MuscleGroup: String, CaseIterable, Identifiable {
         case .core:
             // Abs, planks, core stability (perfect symbol exists!)
             return "figure.core.training"
-        case .cardio:
-            // Running, cycling, aerobic exercise
-            return "figure.run"
         case .fullBody:
             // Compound movements involving multiple muscle groups
             return "figure.mixed.cardio"
