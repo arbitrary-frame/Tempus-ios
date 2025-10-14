@@ -315,12 +315,17 @@ struct ExerciseEntryView: View {
 
                     HStack(spacing: 4) {
                         ForEach(previous.sets.prefix(3), id: \.id) { set in
-                            Text(formatSet(set))
-                                .font(.caption)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(.ultraThinMaterial)
-                                .clipShape(Capsule())
+                            Button {
+                                addSetFromPrevious(set)
+                            } label: {
+                                Text(formatSet(set))
+                                    .font(.caption)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(.ultraThinMaterial)
+                                    .clipShape(Capsule())
+                            }
+                            .buttonStyle(.plain)
                         }
                         if previous.sets.count > 3 {
                             Text("+\(previous.sets.count - 3)")
@@ -407,6 +412,18 @@ struct ExerciseEntryView: View {
         exerciseEntry.sets.append(WorkoutSet(setNumber: newSetNumber, weightsAndReps: copiedWeightsAndReps))
     }
 
+    private func addSetFromPrevious(_ previousSet: WorkoutSet) {
+        let newSetNumber = exerciseEntry.sets.count + 1
+        HapticManager.shared.trigger(.selection)
+
+        // Copy all weight/rep pairs from the previous set (including drop sets)
+        let copiedWeightsAndReps = previousSet.weightsAndReps.map { wr in
+            WeightRep(weight: wr.weight, reps: wr.reps)
+        }
+
+        exerciseEntry.sets.append(WorkoutSet(setNumber: newSetNumber, weightsAndReps: copiedWeightsAndReps))
+    }
+
     private func deleteSet(_ set: WorkoutSet) {
         HapticManager.shared.trigger(.light)
         exerciseEntry.sets.removeAll { $0.id == set.id }
@@ -424,7 +441,11 @@ struct ExerciseEntryView: View {
             if wr.weight == 0 && wr.reps == 0 {
                 return "—"
             }
-            return "\(Int(wr.weight))kg × \(wr.reps)"
+            // Preserve decimals if present, otherwise show as integer
+            let weightString = wr.weight.truncatingRemainder(dividingBy: 1) == 0
+                ? String(format: "%.0f", wr.weight)
+                : String(format: "%.1f", wr.weight)
+            return "\(weightString)kg × \(wr.reps)"
         }.joined(separator: " → ")
         return weightReps
     }
