@@ -45,16 +45,15 @@ struct EmojiIconPicker: View {
     }
 }
 
-/// Full emoji picker sheet with search and categories
+/// Full emoji picker sheet with categories
 struct EmojiPickerSheet: View {
     @Binding var selectedEmoji: String?
     @Environment(\.dismiss) private var dismiss
-    @State private var searchText = ""
 
     // Comprehensive emoji collection organized by category
     private let emojiCategories: [(String, String, [String])] = [
-        ("⏱️", "Recents", []),  // Populated dynamically
         ("💪", "Fitness", ["💪", "🏋️", "🏋️‍♀️", "🏋️‍♂️", "🤸", "🤸‍♀️", "🤸‍♂️", "🤾", "🤾‍♀️", "🤾‍♂️", "🏃", "🏃‍♀️", "🏃‍♂️", "🚴", "🚴‍♀️", "🚴‍♂️", "🏊", "🏊‍♀️", "🏊‍♂️", "🧘", "🧘‍♀️", "🧘‍♂️", "🧗", "🧗‍♀️", "🧗‍♂️", "🤺", "🥊", "🥋", "⛷️", "🏂"]),
+        ("🦵", "Body Parts", ["🦵", "🦶", "👣", "🦴", "💪", "🦾", "🫀", "🫁", "🧠", "🦷", "👁️", "👀", "👂", "🦻", "👃", "👄", "🫦", "👅", "🤳", "💅", "🤲", "👐", "🙌", "👏", "🤝", "👍", "👎", "👊", "✊", "🤛", "🤜", "🤞", "✌️", "🤟", "🤘", "👌", "🤌", "🤏", "🫰", "🫱", "🫲", "🫳", "🫴", "🫷", "🫸", "👋", "🤚", "🖐️", "✋", "🖖"]),
         ("🔥", "Symbols", ["🔥", "⚡️", "💯", "🎯", "⭐️", "✨", "💥", "✅", "❌", "🚀", "📈", "📊", "⏰", "⏱️", "⏲️", "🎵", "🎶", "💊", "🧠", "❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍", "🤎", "💔"]),
         ("🏆", "Achievement", ["🏆", "🥇", "🥈", "🥉", "🏅", "🎖️", "👑", "💎", "🔱", "⚔️", "🛡️", "🎯", "📈", "✅", "💯", "⚡️", "🔥", "💪", "👊", "✊", "🤜", "🤛", "👏"]),
         ("⚽️", "Sports", ["⚽️", "🏀", "🏈", "⚾️", "🥎", "🎾", "🏐", "🏉", "🥏", "🎱", "🪀", "🏓", "🏸", "🏒", "🏑", "🥍", "🏏", "🪃", "🥅", "⛳️", "🪁", "🏹", "🎣", "🤿", "🥊", "🥋", "🎽", "🛹", "🛼", "🛷"]),
@@ -65,27 +64,13 @@ struct EmojiPickerSheet: View {
         ("🎮", "Activities", ["🎮", "🕹️", "👾", "🎯", "🎲", "🎰", "🎳", "🎴", "🃏", "🎭", "🎨", "🧩", "🎪", "🎡", "🎢", "🎠", "🎬", "🎤", "🎧", "🎼", "🎹", "🥁", "🎷", "🎺", "🎸", "🪕", "🎻", "🎲", "♟️", "🎯"]),
     ]
 
-    private var filteredEmojis: [(String, String, [String])] {
-        if searchText.isEmpty {
-            return emojiCategories
-        }
-
-        return emojiCategories.compactMap { (icon, category, emojis) in
-            let filtered = emojis.filter { emoji in
-                // Simple emoji matching - could be enhanced with emoji names
-                return true
-            }
-            return filtered.isEmpty ? nil : (icon, category, filtered)
-        }
-    }
-
     private let columns = Array(repeating: GridItem(.adaptive(minimum: 44), spacing: 12), count: 8)
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    ForEach(filteredEmojis, id: \.1) { (icon, category, emojis) in
+                    ForEach(emojiCategories, id: \.1) { (icon, category, emojis) in
                         if !emojis.isEmpty {
                             VStack(alignment: .leading, spacing: 12) {
                                 HStack(spacing: 8) {
@@ -124,7 +109,6 @@ struct EmojiPickerSheet: View {
             }
             .navigationTitle("Choose Emoji")
             .navigationBarTitleDisplayMode(.inline)
-            .searchable(text: $searchText, prompt: "Search emojis")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
