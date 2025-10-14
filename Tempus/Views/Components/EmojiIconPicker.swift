@@ -49,6 +49,22 @@ struct EmojiIconPicker: View {
 struct EmojiPickerSheet: View {
     @Binding var selectedEmoji: String?
     @Environment(\.dismiss) private var dismiss
+    @State private var showingSkinTones: String? = nil
+
+    // Skin tone modifiers
+    private let skinToneModifiers = ["", "🏻", "🏼", "🏽", "🏾", "🏿"]
+
+    // Emojis that support skin tone variations
+    private let skinToneSupported: Set<String> = [
+        "👋", "🤚", "🖐️", "✋", "🖖", "👌", "🤌", "🤏", "✌️", "🤞", "🤟", "🤘",
+        "🤙", "👈", "👉", "👆", "🖕", "👇", "☝️", "👍", "👎", "✊", "👊", "🤛",
+        "🤜", "👏", "🙌", "👐", "🤲", "🤝", "🙏", "✍️", "💅", "🤳", "💪", "🦵",
+        "🦶", "👂", "🦻", "👃", "👶", "👧", "🧒", "👦", "👩", "🧑", "👨", "👩‍🦱",
+        "🧑‍🦱", "👨‍🦱", "👩‍🦰", "🧑‍🦰", "👨‍🦰", "👱‍♀️", "👱", "👱‍♂️", "👩‍🦳", "🧑‍🦳",
+        "👨‍🦳", "👩‍🦲", "🧑‍🦲", "👨‍🦲", "🧔‍♀️", "🧔", "🧔‍♂️", "🏋️", "🏋️‍♀️", "🏋️‍♂️",
+        "🤸", "🤸‍♀️", "🤸‍♂️", "🤾", "🤾‍♀️", "🤾‍♂️", "🏃", "🏃‍♀️", "🏃‍♂️", "🚴",
+        "🚴‍♀️", "🚴‍♂️", "🏊", "🏊‍♀️", "🏊‍♂️", "🧘", "🧘‍♀️", "🧘‍♂️", "🧗", "🧗‍♀️", "🧗‍♂️"
+    ]
 
     // Comprehensive emoji collection organized by category
     private let emojiCategories: [(String, String, [String])] = [
@@ -84,6 +100,9 @@ struct EmojiPickerSheet: View {
 
                                 LazyVGrid(columns: columns, spacing: 12) {
                                     ForEach(emojis, id: \.self) { emoji in
+                                        let baseEmoji = getBaseEmoji(emoji)
+                                        let supportsSkinTone = skinToneSupported.contains(baseEmoji)
+
                                         Button {
                                             selectedEmoji = emoji
                                             HapticManager.shared.trigger(.selection)
@@ -98,6 +117,21 @@ struct EmojiPickerSheet: View {
                                                 )
                                         }
                                         .buttonStyle(.plain)
+                                        .contextMenu {
+                                            if supportsSkinTone {
+                                                ForEach(skinToneModifiers, id: \.self) { modifier in
+                                                    let modifiedEmoji = modifier.isEmpty ? baseEmoji : baseEmoji + modifier
+                                                    Button {
+                                                        selectedEmoji = modifiedEmoji
+                                                        HapticManager.shared.trigger(.selection)
+                                                        dismiss()
+                                                    } label: {
+                                                        Text(modifiedEmoji)
+                                                            .font(.system(size: 24))
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                                 .padding(.horizontal)
@@ -127,6 +161,17 @@ struct EmojiPickerSheet: View {
                 }
             }
         }
+    }
+
+    // Helper function to strip skin tone modifiers from emoji
+    private func getBaseEmoji(_ emoji: String) -> String {
+        // Remove all skin tone modifiers to get base emoji
+        let skinTones: [String] = ["🏻", "🏼", "🏽", "🏾", "🏿"]
+        var result = emoji
+        for tone in skinTones {
+            result = result.replacingOccurrences(of: tone, with: "")
+        }
+        return result
     }
 }
 
