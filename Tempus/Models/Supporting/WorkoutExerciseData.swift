@@ -13,13 +13,15 @@ struct WorkoutExerciseData: Codable, Identifiable {
     let id: UUID
     let exerciseID: UUID
     let exerciseName: String
+    let isUnilateral: Bool // Preserved for accurate volume calculations (single limb exercises)
     var sets: [WorkoutSet]
     var notes: String?
 
-    init(exerciseID: UUID, exerciseName: String, sets: [WorkoutSet] = [], notes: String? = nil) {
+    init(exerciseID: UUID, exerciseName: String, isUnilateral: Bool = false, sets: [WorkoutSet] = [], notes: String? = nil) {
         self.id = UUID()
         self.exerciseID = exerciseID
         self.exerciseName = exerciseName
+        self.isUnilateral = isUnilateral
         self.sets = sets
         self.notes = notes
     }
