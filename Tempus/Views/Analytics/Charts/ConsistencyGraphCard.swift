@@ -13,6 +13,7 @@ struct ConsistencyGraphCard: View {
     let weeklyGoal: Int
 
     @State private var selectedRange: DateRange = .smart
+    @State private var rawSelectedDate: Date?
 
     enum DateRange: String, CaseIterable {
         case fourWeeks = "4W"
@@ -173,9 +174,34 @@ struct ConsistencyGraphCard: View {
         }
     }
 
+    private var selectedDate: Date? {
+        guard let rawSelectedDate else { return nil }
+        // Find closest week in weeklyData
+        return weeklyData.min(by: {
+            abs($0.weekStart.timeIntervalSince(rawSelectedDate)) <
+            abs($1.weekStart.timeIntervalSince(rawSelectedDate))
+        })?.weekStart
+    }
+
     private var displayedWeeks: [WeeklyData] {
         // Show last 12 weeks by default for initial view
         Array(weeklyData.suffix(12))
+    }
+
+    @ViewBuilder
+    private var selectionPopover: some View {
+        if let selectedDate,
+           let dataPoint = weeklyData.first(where: { $0.weekStart == selectedDate }) {
+            VStack(spacing: 4) {
+                Text(selectedDate, format: .dateTime.month(.abbreviated).day())
+                    .font(.caption2.bold())
+                Text("\(dataPoint.workoutCount) workout\(dataPoint.workoutCount == 1 ? "" : "s")")
+                    .font(.caption)
+            }
+            .padding(8)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+            .shadow(radius: 2)
+        }
     }
 
     var body: some View {
@@ -296,6 +322,17 @@ struct ConsistencyGraphCard: View {
                             RuleMark(y: .value("Goal", weeklyGoal))
                                 .foregroundStyle(Color.gray)
                                 .lineStyle(StrokeStyle(lineWidth: 2, dash: [8, 6]))
+
+                            // Selection indicator
+                            if let selectedDate {
+                                RuleMark(x: .value("Selected", selectedDate, unit: .weekOfYear))
+                                    .foregroundStyle(Color.gray.opacity(0.3))
+                                    .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 5]))
+                                    .zIndex(-1)
+                                    .annotation(position: .top, spacing: 0, overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                                        selectionPopover
+                                    }
+                            }
                         }
                         .chartYScale(domain: 0...max(weeklyGoal + 2, maxWorkouts + 1))
                         .chartXAxis {
@@ -314,6 +351,7 @@ struct ConsistencyGraphCard: View {
                                 }
                             }
                         }
+                        .chartXSelection(value: $rawSelectedDate)
                         .frame(height: 200)
                         .accessibilityLabel("Weekly consistency chart showing workouts per week with a goal line at \(weeklyGoal) workouts")
                     }

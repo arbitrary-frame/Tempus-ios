@@ -12,6 +12,7 @@ struct VolumeProgressionCard: View {
     let workouts: [WorkoutEntry]
 
     @State private var selectedRange: DateRange = .smart
+    @State private var rawSelectedDate: Date?
 
     enum DateRange: String, CaseIterable {
         case fourWeeks = "4W"
@@ -197,6 +198,40 @@ struct VolumeProgressionCard: View {
         weeklyData.contains { $0.movingAverage != nil }
     }
 
+    private var selectedDate: Date? {
+        guard let rawSelectedDate else { return nil }
+        // Find closest week in weeklyData
+        return weeklyData.min(by: {
+            abs($0.weekStart.timeIntervalSince(rawSelectedDate)) <
+            abs($1.weekStart.timeIntervalSince(rawSelectedDate))
+        })?.weekStart
+    }
+
+    @ViewBuilder
+    private var selectionPopover: some View {
+        if let selectedDate,
+           let index = weeklyData.firstIndex(where: { $0.weekStart == selectedDate }) {
+            let dataPoint = weeklyData[index]
+            VStack(spacing: 4) {
+                Text(selectedDate, format: .dateTime.month(.abbreviated).day())
+                    .font(.caption2.bold())
+                Text("\(formatVolume(dataPoint.totalVolume)) lifted")
+                    .font(.caption)
+                // Show week-on-week change if not first week
+                if index > 0 {
+                    let previousVolume = weeklyData[index - 1].totalVolume
+                    let change = dataPoint.totalVolume - previousVolume
+                    Text(formatWeightChange(Int(change)))
+                        .font(.caption2)
+                        .foregroundStyle(change > 0 ? .green : .secondary)
+                }
+            }
+            .padding(8)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+            .shadow(radius: 2)
+        }
+    }
+
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 20)
@@ -299,6 +334,17 @@ struct VolumeProgressionCard: View {
                                         .frame(width: 8, height: 8)
                                 }
                             }
+
+                            // Selection indicator
+                            if let selectedDate {
+                                RuleMark(x: .value("Selected", selectedDate, unit: .weekOfYear))
+                                    .foregroundStyle(Color.gray.opacity(0.3))
+                                    .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 5]))
+                                    .zIndex(-1)
+                                    .annotation(position: .top, spacing: 0, overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                                        selectionPopover
+                                    }
+                            }
                         }
                         .chartYScale(domain: 0...(maxVolume * 1.1))
                         .chartXAxis {
@@ -317,6 +363,7 @@ struct VolumeProgressionCard: View {
                                 }
                             }
                         }
+                        .chartXSelection(value: $rawSelectedDate)
                         .frame(height: 200)
                         .accessibilityLabel("Volume progression chart showing total weight lifted per week")
                     }
@@ -332,6 +379,17 @@ struct VolumeProgressionCard: View {
             return String(format: "%.1fk", Double(kg) / 1000.0)
         }
         return "\(kg)"
+    }
+
+    private func formatWeightChange(_ change: Int) -> String {
+        let absChange = abs(change)
+        let prefix = change >= 0 ? "+" : "-"
+
+        if absChange >= 1000 {
+            return String(format: "%@%.1fk", prefix, Double(absChange) / 1000.0)
+        }
+
+        return "\(prefix)\(absChange)"
     }
 }
 
