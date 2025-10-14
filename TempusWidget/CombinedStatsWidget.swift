@@ -53,12 +53,13 @@ struct CombinedStatsWidgetView: View {
                     accentColor: .orange
                 )
 
-                // Weight
-                statCard(
+                // Weight with week-on-week change
+                statCardWithChange(
                     icon: "dumbbell.fill",
                     value: entry.formattedWeight,
                     label: "kg",
-                    accentColor: .orange
+                    accentColor: .orange,
+                    change: entry.weekOnWeekWeightChange
                 )
             }
         }
@@ -129,6 +130,49 @@ struct CombinedStatsWidgetView: View {
         .padding(.horizontal, 4)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
     }
+
+    private func statCardWithChange(icon: String, value: String, label: String, accentColor: Color, change: Double?) -> some View {
+        ZStack(alignment: .topLeading) {
+            VStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.title2)
+                    .foregroundStyle(accentColor)
+                    .symbolRenderingMode(.hierarchical)
+                    .frame(height: 50)
+
+                Text(value)
+                    .font(.title3.bold())
+                    .minimumScaleFactor(0.8)
+                    .lineLimit(1)
+
+                Text(label)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .padding(.horizontal, 4)
+
+            // Week-on-week change badge (top-left)
+            if let weightChange = change, weightChange != 0 {
+                HStack(spacing: 1) {
+                    Image(systemName: weightChange > 0 ? "arrow.up" : "arrow.down")
+                        .font(.system(size: 6, weight: .bold))
+                    Text(String(format: "%+dkg", Int(weightChange)))
+                        .font(.system(size: 7, weight: .semibold))
+                }
+                .foregroundStyle(weightChange > 0 ? .green : .secondary)
+                .padding(.horizontal, 3)
+                .padding(.vertical, 1)
+                .background(
+                    (weightChange > 0 ? Color.green.opacity(0.15) : Color.secondary.opacity(0.1)),
+                    in: Capsule()
+                )
+                .padding(4)
+            }
+        }
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+    }
 }
 
 #Preview(as: .systemMedium) {
@@ -139,13 +183,15 @@ struct CombinedStatsWidgetView: View {
         workoutsCompleted: 2,
         weeklyGoal: 3,
         exercisesThisWeek: 8,
-        totalWeightThisWeek: 1250.0
+        totalWeightThisWeek: 1250.0,
+        totalWeightLastWeek: 1000.0
     )
     WorkoutStatsEntry(
         date: Date(),
         workoutsCompleted: 3,
         weeklyGoal: 3,
         exercisesThisWeek: 15,
-        totalWeightThisWeek: 2450.0
+        totalWeightThisWeek: 2450.0,
+        totalWeightLastWeek: 2200.0
     )
 }
