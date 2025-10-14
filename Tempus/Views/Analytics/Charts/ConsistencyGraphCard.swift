@@ -145,11 +145,11 @@ struct ConsistencyGraphCard: View {
     private var xAxisStride: Int {
         // Dynamic stride: show fewer labels when there's more data to prevent overlap
         let count = weeklyData.count
-        if count <= 8 {
+        if count <= 4 {
             return 1  // Show every week
-        } else if count <= 16 {
+        } else if count <= 8 {
             return 2  // Show every 2 weeks
-        } else if count <= 26 {
+        } else if count <= 16 {
             return 3  // Show every 3 weeks
         } else {
             return 4  // Show every 4 weeks for very long ranges
