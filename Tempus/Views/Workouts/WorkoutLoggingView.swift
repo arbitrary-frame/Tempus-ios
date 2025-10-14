@@ -424,7 +424,11 @@ struct ExerciseEntryView: View {
             if wr.weight == 0 && wr.reps == 0 {
                 return "—"
             }
-            return "\(Int(wr.weight))kg × \(wr.reps)"
+            // Preserve decimals if present, otherwise show as integer
+            let weightString = wr.weight.truncatingRemainder(dividingBy: 1) == 0
+                ? String(format: "%.0f", wr.weight)
+                : String(format: "%.1f", wr.weight)
+            return "\(weightString)kg × \(wr.reps)"
         }.joined(separator: " → ")
         return weightReps
     }
