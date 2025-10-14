@@ -29,52 +29,55 @@ struct WeightWidgetView: View {
     @Environment(\.widgetRenderingMode) var renderingMode
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
-            VStack(spacing: 6) {
+        VStack(spacing: 6) {
+            HStack {
                 Text("This Week")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
-
-                Spacer()
-
-                // Icon
-                Image(systemName: "dumbbell.fill")
-                    .font(.system(size: 40))
-                    .foregroundStyle(.orange)
-                    .symbolRenderingMode(.hierarchical)
-                    .frame(height: 50)
-
-                // Value
-                Text(entry.formattedWeight)
-                    .font(.system(size: 32, weight: .bold, design: .rounded))
-                    .minimumScaleFactor(0.5)
-                    .lineLimit(1)
-
-                // Label
-                Text("kg")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-
                 Spacer()
             }
 
-            // Week-on-week change badge (top-left)
+            // Week-on-week change badge (left-aligned below "This Week")
             if let change = entry.weekOnWeekWeightChange, change != 0 {
-                HStack(spacing: 2) {
-                    Image(systemName: change > 0 ? "arrow.up" : "arrow.down")
-                        .font(.system(size: 8, weight: .bold))
-                    Text(entry.weekOnWeekChangeFormatted)
-                        .font(.system(size: 9, weight: .semibold))
+                HStack {
+                    HStack(spacing: 2) {
+                        Image(systemName: change > 0 ? "arrow.up" : "arrow.down")
+                            .font(.system(size: 8, weight: .bold))
+                        Text(entry.weekOnWeekChangeFormatted)
+                            .font(.system(size: 9, weight: .semibold))
+                    }
+                    .foregroundStyle(change > 0 ? .green : .secondary)
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 2)
+                    .background(
+                        (change > 0 ? Color.green.opacity(0.15) : Color.secondary.opacity(0.1)),
+                        in: Capsule()
+                    )
+                    Spacer()
                 }
-                .foregroundStyle(change > 0 ? .green : .secondary)
-                .padding(.horizontal, 4)
-                .padding(.vertical, 2)
-                .background(
-                    (change > 0 ? Color.green.opacity(0.15) : Color.secondary.opacity(0.1)),
-                    in: Capsule()
-                )
-                .padding(6)
             }
+
+            Spacer()
+
+            // Icon
+            Image(systemName: "dumbbell.fill")
+                .font(.system(size: 40))
+                .foregroundStyle(.orange)
+                .symbolRenderingMode(.hierarchical)
+                .frame(height: 50)
+
+            // Value
+            Text(entry.formattedWeight)
+                .font(.system(size: 32, weight: .bold, design: .rounded))
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
+
+            // Label
+            Text("kg")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            Spacer()
         }
         .padding()
         .widgetURL(URL(string: "tempus://workouts"))
