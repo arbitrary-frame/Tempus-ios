@@ -30,12 +30,9 @@ struct WeightWidgetView: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            HStack {
-                Text("This Week")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                Spacer()
-            }
+            Text("This Week")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
 
             Spacer()
 
