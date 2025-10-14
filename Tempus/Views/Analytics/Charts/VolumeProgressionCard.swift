@@ -357,7 +357,7 @@ struct VolumeProgressionCard: View {
                             if let avgValue = averageOfMovingAverages {
                                 RuleMark(y: .value("Average", avgValue))
                                     .foregroundStyle(Color.gray)
-                                    .lineStyle(StrokeStyle(lineWidth: 2))
+                                    .lineStyle(StrokeStyle(lineWidth: 2, dash: [8, 6]))
                             }
 
                             // Selection indicator
