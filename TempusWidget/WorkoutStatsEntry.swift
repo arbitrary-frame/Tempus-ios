@@ -34,16 +34,22 @@ struct WorkoutStatsEntry: TimelineEntry {
         return totalWeightThisWeek - lastWeek
     }
 
-    /// Formatted week-on-week change (e.g., "+250kg", "-50kg", "—")
+    /// Formatted week-on-week change (e.g., "+250", "-12.7k", "—")
     var weekOnWeekChangeFormatted: String {
         guard let change = weekOnWeekWeightChange else { return "—" }
         let kg = Int(change)
-        if kg > 0 {
-            return "+\(kg)kg"
-        } else if kg < 0 {
-            return "\(kg)kg"
-        } else {
+
+        if kg == 0 {
             return "—"
         }
+
+        let absKg = abs(kg)
+        let prefix = kg > 0 ? "+" : ""
+
+        if absKg >= 1000 {
+            return String(format: "%@%.1fk", prefix, Double(kg) / 1000.0)
+        }
+
+        return "\(prefix)\(kg)"
     }
 }
