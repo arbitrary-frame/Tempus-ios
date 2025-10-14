@@ -4,6 +4,57 @@ All notable changes to Tempus iOS workout tracking app.
 
 ## [Unreleased]
 
+### [Volume Progression Graph & Interactive Charts] - 2025-10-14
+
+**Added:**
+- **Volume Progression Graph** on Analytics page
+  - Line chart showing weekly total weight lifted over time
+  - Tracks progressive overload trends with historical data
+  - Orange solid line with circular markers
+  - Catmull-Rom interpolation for smooth curves
+  - Auto-scale Y-axis with 'k' suffix for large values (e.g., "2.5k")
+  - Smart range picker: 4W, 12W, 6M, All
+  - Empty state when <2 weeks of data
+  - Positioned between Consistency and Personal Records cards
+  - **4-week moving average line** - Gray dashed horizontal line showing average volume
+  - Legend displays average value: "4 wk avg (8.2k kg)"
+
+- **Interactive Tap Selection** on both Analytics graphs
+  - Tap any data point to see exact values
+  - Vertical dashed gray selection indicator line
+  - Floating popover with `.regularMaterial` background
+  - **Consistency Graph**: Shows date + workout count
+  - **Volume Graph**: Shows date + volume + week-on-week change
+  - Week-on-week change displayed in green (positive) or neutral
+  - Selection snaps to nearest data point for clean UX
+  - Works seamlessly with existing range picker
+
+**Technical:**
+- Uses Swift Charts with `chartXSelection` (iOS 17+)
+- Reuses date range logic from ConsistencyGraphCard
+- Weekly volume calculation via `workout.totalVolume` (includes unilateral 2x)
+- Fills gaps (weeks with 0 workouts show as 0 volume)
+- RuleMark with `.zIndex(-1)` renders selection behind data
+- Annotation with overflow resolution prevents clipping
+- No performance impact (native Swift Charts features)
+
+**Benefits:**
+- ✅ Visual tracking of progressive overload week-on-week
+- ✅ Historical context beyond current week badges
+- ✅ Identify plateaus, deload weeks, and growth phases
+- ✅ Tap to explore exact values for any week
+- ✅ Consistent Liquid Glass aesthetic
+- ✅ Enhanced data exploration and analysis
+
+**Design:**
+- `.ultraThinMaterial` background, 20pt corner radius
+- Height: 220pt (consistent with other analytics cards)
+- Legend showing line type
+- Dynamic X-axis stride based on data density
+- Popover: 8pt padding, 2pt shadow, rounded corners
+
+---
+
 ### [Week-on-Week Weight Change Indicator] - 2025-10-14
 
 **Added:**
