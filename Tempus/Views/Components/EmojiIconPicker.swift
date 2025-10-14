@@ -100,38 +100,17 @@ struct EmojiPickerSheet: View {
 
                                 LazyVGrid(columns: columns, spacing: 12) {
                                     ForEach(emojis, id: \.self) { emoji in
-                                        let baseEmoji = getBaseEmoji(emoji)
-                                        let supportsSkinTone = skinToneSupported.contains(baseEmoji)
-
-                                        Button {
-                                            selectedEmoji = emoji
-                                            HapticManager.shared.trigger(.selection)
-                                            dismiss()
-                                        } label: {
-                                            Text(emoji)
-                                                .font(.system(size: 32))
-                                                .frame(width: 44, height: 44)
-                                                .background(
-                                                    selectedEmoji == emoji ? Color.accentColor.opacity(0.2) : Color.clear,
-                                                    in: RoundedRectangle(cornerRadius: 8)
-                                                )
-                                        }
-                                        .buttonStyle(.plain)
-                                        .contextMenu {
-                                            if supportsSkinTone {
-                                                ForEach(skinToneModifiers, id: \.self) { modifier in
-                                                    let modifiedEmoji = modifier.isEmpty ? baseEmoji : baseEmoji + modifier
-                                                    Button {
-                                                        selectedEmoji = modifiedEmoji
-                                                        HapticManager.shared.trigger(.selection)
-                                                        dismiss()
-                                                    } label: {
-                                                        Text(modifiedEmoji)
-                                                            .font(.system(size: 24))
-                                                    }
-                                                }
+                                        EmojiButton(
+                                            emoji: emoji,
+                                            isSelected: selectedEmoji == emoji,
+                                            skinToneSupported: skinToneSupported.contains(getBaseEmoji(emoji)),
+                                            skinToneModifiers: skinToneModifiers,
+                                            onSelect: { selectedEmoji in
+                                                self.selectedEmoji = selectedEmoji
+                                                HapticManager.shared.trigger(.selection)
+                                                dismiss()
                                             }
-                                        }
+                                        )
                                     }
                                 }
                                 .padding(.horizontal)
@@ -172,6 +151,72 @@ struct EmojiPickerSheet: View {
             result = result.replacingOccurrences(of: tone, with: "")
         }
         return result
+    }
+}
+
+/// Individual emoji button with skin tone picker
+struct EmojiButton: View {
+    let emoji: String
+    let isSelected: Bool
+    let skinToneSupported: Bool
+    let skinToneModifiers: [String]
+    let onSelect: (String) -> Void
+
+    @State private var showingSkinTones = false
+
+    private var baseEmoji: String {
+        let skinTones: [String] = ["🏻", "🏼", "🏽", "🏾", "🏿"]
+        var result = emoji
+        for tone in skinTones {
+            result = result.replacingOccurrences(of: tone, with: "")
+        }
+        return result
+    }
+
+    var body: some View {
+        Text(emoji)
+            .font(.system(size: 32))
+            .frame(width: 44, height: 44)
+            .background(
+                isSelected ? Color.accentColor.opacity(0.2) : Color.clear,
+                in: RoundedRectangle(cornerRadius: 8)
+            )
+            .onTapGesture {
+                onSelect(emoji)
+            }
+            .onLongPressGesture(minimumDuration: 0.5) {
+                if skinToneSupported {
+                    HapticManager.shared.trigger(.light)
+                    showingSkinTones = true
+                }
+            }
+            .popover(isPresented: $showingSkinTones) {
+                VStack(spacing: 0) {
+                    Text("Skin Tone")
+                        .font(.caption.bold())
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 12)
+                        .padding(.bottom, 8)
+
+                    HStack(spacing: 8) {
+                        ForEach(skinToneModifiers, id: \.self) { modifier in
+                            let modifiedEmoji = modifier.isEmpty ? baseEmoji : baseEmoji + modifier
+                            Button {
+                                onSelect(modifiedEmoji)
+                                showingSkinTones = false
+                            } label: {
+                                Text(modifiedEmoji)
+                                    .font(.system(size: 32))
+                                    .frame(width: 44, height: 44)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.bottom, 12)
+                }
+                .presentationCompactAdaptation(.popover)
+            }
     }
 }
 
