@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-/// Inline emoji icon picker - tap to open emoji selection popover
+/// Inline emoji icon picker - tap to open emoji selection sheet
 struct EmojiIconPicker: View {
     @Binding var selectedEmoji: String?
     @State private var showingPicker = false
@@ -27,74 +27,196 @@ struct EmojiIconPicker: View {
         }
         .frame(width: 44, height: 44)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
-        .popover(isPresented: $showingPicker, arrowEdge: .bottom) {
-            EmojiSelectionGrid(selectedEmoji: $selectedEmoji, dismiss: { showingPicker = false })
+        .sheet(isPresented: $showingPicker) {
+            EmojiPickerSheet(selectedEmoji: $selectedEmoji)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
+        .contextMenu {
+            if selectedEmoji != nil {
+                Button(role: .destructive) {
+                    selectedEmoji = nil
+                    HapticManager.shared.trigger(.light)
+                } label: {
+                    Label("Remove Emoji", systemImage: "trash")
+                }
+            }
         }
     }
 }
 
-/// Compact emoji selection grid shown in popover
-struct EmojiSelectionGrid: View {
+/// Full emoji picker sheet with categories
+struct EmojiPickerSheet: View {
     @Binding var selectedEmoji: String?
-    let dismiss: () -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var showingSkinTones: String? = nil
 
-    // Curated workout emojis
-    private let emojis = [
-        "💪", "🏋️", "🔥", "⚡️", "💯", "🎯",
-        "🏃", "🚴", "🏊", "🤸", "🧘", "🥊",
-        "⚽️", "🏀", "🎾", "🏐", "⛷️", "🧗",
-        "❤️", "⭐️", "✨", "🏆", "🥇", "📈",
-        "⏰", "✅", "🎵", "🥗", "💊", "🧠"
+    // Skin tone modifiers
+    private let skinToneModifiers = ["", "🏻", "🏼", "🏽", "🏾", "🏿"]
+
+    // Emojis that support skin tone variations
+    private let skinToneSupported: Set<String> = [
+        "👋", "🤚", "🖐️", "✋", "🖖", "👌", "🤌", "🤏", "✌️", "🤞", "🤟", "🤘",
+        "🤙", "👈", "👉", "👆", "🖕", "👇", "☝️", "👍", "👎", "✊", "👊", "🤛",
+        "🤜", "👏", "🙌", "👐", "🤲", "🤝", "🙏", "✍️", "💅", "🤳", "💪", "🦵",
+        "🦶", "👂", "🦻", "👃", "👶", "👧", "🧒", "👦", "👩", "🧑", "👨", "👩‍🦱",
+        "🧑‍🦱", "👨‍🦱", "👩‍🦰", "🧑‍🦰", "👨‍🦰", "👱‍♀️", "👱", "👱‍♂️", "👩‍🦳", "🧑‍🦳",
+        "👨‍🦳", "👩‍🦲", "🧑‍🦲", "👨‍🦲", "🧔‍♀️", "🧔", "🧔‍♂️", "🏋️", "🏋️‍♀️", "🏋️‍♂️",
+        "🤸", "🤸‍♀️", "🤸‍♂️", "🤾", "🤾‍♀️", "🤾‍♂️", "🏃", "🏃‍♀️", "🏃‍♂️", "🚴",
+        "🚴‍♀️", "🚴‍♂️", "🏊", "🏊‍♀️", "🏊‍♂️", "🧘", "🧘‍♀️", "🧘‍♂️", "🧗", "🧗‍♀️", "🧗‍♂️"
     ]
 
-    private let columns = Array(repeating: GridItem(.fixed(44), spacing: 8), count: 6)
+    // Comprehensive emoji collection organized by category
+    private let emojiCategories: [(String, String, [String])] = [
+        ("💪", "Fitness", ["💪", "🏋️", "🏋️‍♀️", "🏋️‍♂️", "🤸", "🤸‍♀️", "🤸‍♂️", "🤾", "🤾‍♀️", "🤾‍♂️", "🏃", "🏃‍♀️", "🏃‍♂️", "🚴", "🚴‍♀️", "🚴‍♂️", "🏊", "🏊‍♀️", "🏊‍♂️", "🧘", "🧘‍♀️", "🧘‍♂️", "🧗", "🧗‍♀️", "🧗‍♂️", "🤺", "🥊", "🥋", "⛷️", "🏂"]),
+        ("🦵", "Body Parts", ["🦵", "🦶", "👣", "🦴", "💪", "🦾", "🫀", "🫁", "🧠", "🦷", "👁️", "👀", "👂", "🦻", "👃", "👄", "🫦", "👅", "🤳", "💅", "🤲", "👐", "🙌", "👏", "🤝", "👍", "👎", "👊", "✊", "🤛", "🤜", "🤞", "✌️", "🤟", "🤘", "👌", "🤌", "🤏", "🫰", "🫱", "🫲", "🫳", "🫴", "🫷", "🫸", "👋", "🤚", "🖐️", "✋", "🖖"]),
+        ("🔥", "Symbols", ["🔥", "⚡️", "💯", "🎯", "⭐️", "✨", "💥", "✅", "❌", "🚀", "📈", "📊", "⏰", "⏱️", "⏲️", "🎵", "🎶", "💊", "🧠", "❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍", "🤎", "💔"]),
+        ("🏆", "Achievement", ["🏆", "🥇", "🥈", "🥉", "🏅", "🎖️", "👑", "💎", "🔱", "⚔️", "🛡️", "🎯", "📈", "✅", "💯", "⚡️", "🔥", "💪", "👊", "✊", "🤜", "🤛", "👏"]),
+        ("⚽️", "Sports", ["⚽️", "🏀", "🏈", "⚾️", "🥎", "🎾", "🏐", "🏉", "🥏", "🎱", "🪀", "🏓", "🏸", "🏒", "🏑", "🥍", "🏏", "🪃", "🥅", "⛳️", "🪁", "🏹", "🎣", "🤿", "🥊", "🥋", "🎽", "🛹", "🛼", "🛷"]),
+        ("🍎", "Food", ["🍎", "🥗", "🥑", "🥦", "🥒", "🌽", "🥕", "🧄", "🧅", "🍇", "🍊", "🍋", "🍌", "🍉", "🍓", "🫐", "🍒", "🍑", "🥭", "🍍", "🥥", "🥝", "🍅", "🍆", "🥔", "🥐", "🥖", "🧀", "🥚"]),
+        ("😀", "Faces", ["😀", "😃", "😄", "😁", "😆", "😅", "🤣", "😂", "🙂", "🙃", "🫠", "😉", "😊", "😇", "🥰", "😍", "🤩", "😘", "😗", "😚", "😙", "🥲", "😋", "😛", "😜", "🤪", "😝", "🤑", "🤗", "🤭"]),
+        ("🐶", "Animals", ["🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯", "🦁", "🐮", "🐷", "🐸", "🐵", "🐔", "🐧", "🐦", "🐤", "🦆", "🦅", "🦉", "🦇", "🐺", "🐗", "🐴", "🦄", "🐝", "🪱", "🐛"]),
+        ("🌈", "Nature", ["🌈", "☀️", "🌤️", "⛅️", "🌥️", "☁️", "🌦️", "🌧️", "⛈️", "🌩️", "🌨️", "❄️", "☃️", "⛄️", "🌬️", "💨", "🌪️", "🌫️", "☔️", "💧", "💦", "🌊", "🌍", "🌎", "🌏", "🪐", "⭐️", "🌟", "✨", "💫"]),
+        ("🎮", "Activities", ["🎮", "🕹️", "👾", "🎯", "🎲", "🎰", "🎳", "🎴", "🃏", "🎭", "🎨", "🧩", "🎪", "🎡", "🎢", "🎠", "🎬", "🎤", "🎧", "🎼", "🎹", "🥁", "🎷", "🎺", "🎸", "🪕", "🎻", "🎲", "♟️", "🎯"]),
+    ]
+
+    private let columns = Array(repeating: GridItem(.adaptive(minimum: 44), spacing: 12), count: 8)
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Header with remove option
-            HStack {
-                Text("Choose Icon")
-                    .font(.headline)
-                    .padding()
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    ForEach(emojiCategories, id: \.1) { (icon, category, emojis) in
+                        if !emojis.isEmpty {
+                            VStack(alignment: .leading, spacing: 12) {
+                                HStack(spacing: 8) {
+                                    Text(icon)
+                                        .font(.title3)
+                                    Text(category)
+                                        .font(.headline)
+                                        .foregroundStyle(.secondary)
+                                }
+                                .padding(.horizontal)
 
-                Spacer()
+                                LazyVGrid(columns: columns, spacing: 12) {
+                                    ForEach(emojis, id: \.self) { emoji in
+                                        EmojiButton(
+                                            emoji: emoji,
+                                            isSelected: selectedEmoji == emoji,
+                                            skinToneSupported: skinToneSupported.contains(getBaseEmoji(emoji)),
+                                            skinToneModifiers: skinToneModifiers,
+                                            onSelect: { selectedEmoji in
+                                                self.selectedEmoji = selectedEmoji
+                                                HapticManager.shared.trigger(.selection)
+                                                dismiss()
+                                            }
+                                        )
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
+                        }
+                    }
+                }
+                .padding(.vertical)
+            }
+            .navigationTitle("Choose Emoji")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
 
                 if selectedEmoji != nil {
-                    Button {
-                        selectedEmoji = nil
-                        dismiss()
-                    } label: {
-                        Text("Remove")
-                            .font(.subheadline)
-                            .foregroundStyle(.red)
+                    ToolbarItem(placement: .destructiveAction) {
+                        Button("Remove", role: .destructive) {
+                            selectedEmoji = nil
+                            HapticManager.shared.trigger(.light)
+                            dismiss()
+                        }
                     }
-                    .padding()
                 }
             }
-
-            Divider()
-
-            // Emoji grid
-            LazyVGrid(columns: columns, spacing: 8) {
-                ForEach(emojis, id: \.self) { emoji in
-                    Button {
-                        selectedEmoji = emoji
-                        dismiss()
-                    } label: {
-                        Text(emoji)
-                            .font(.title2)
-                            .frame(width: 44, height: 44)
-                            .background(
-                                selectedEmoji == emoji ? Color.accent.opacity(0.2) : Color.clear,
-                                in: RoundedRectangle(cornerRadius: 6)
-                            )
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .padding()
         }
-        .frame(width: 300, height: 280)
+    }
+
+    // Helper function to strip skin tone modifiers from emoji
+    private func getBaseEmoji(_ emoji: String) -> String {
+        // Remove all skin tone modifiers to get base emoji
+        let skinTones: [String] = ["🏻", "🏼", "🏽", "🏾", "🏿"]
+        var result = emoji
+        for tone in skinTones {
+            result = result.replacingOccurrences(of: tone, with: "")
+        }
+        return result
+    }
+}
+
+/// Individual emoji button with skin tone picker
+struct EmojiButton: View {
+    let emoji: String
+    let isSelected: Bool
+    let skinToneSupported: Bool
+    let skinToneModifiers: [String]
+    let onSelect: (String) -> Void
+
+    @State private var showingSkinTones = false
+
+    private var baseEmoji: String {
+        let skinTones: [String] = ["🏻", "🏼", "🏽", "🏾", "🏿"]
+        var result = emoji
+        for tone in skinTones {
+            result = result.replacingOccurrences(of: tone, with: "")
+        }
+        return result
+    }
+
+    var body: some View {
+        Text(emoji)
+            .font(.system(size: 32))
+            .frame(width: 44, height: 44)
+            .background(
+                isSelected ? Color.accentColor.opacity(0.2) : Color.clear,
+                in: RoundedRectangle(cornerRadius: 8)
+            )
+            .onTapGesture {
+                onSelect(emoji)
+            }
+            .onLongPressGesture(minimumDuration: 0.5) {
+                if skinToneSupported {
+                    HapticManager.shared.trigger(.light)
+                    showingSkinTones = true
+                }
+            }
+            .popover(isPresented: $showingSkinTones) {
+                VStack(spacing: 0) {
+                    Text("Skin Tone")
+                        .font(.caption.bold())
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 12)
+                        .padding(.bottom, 8)
+
+                    HStack(spacing: 8) {
+                        ForEach(skinToneModifiers, id: \.self) { modifier in
+                            let modifiedEmoji = modifier.isEmpty ? baseEmoji : baseEmoji + modifier
+                            Button {
+                                onSelect(modifiedEmoji)
+                                showingSkinTones = false
+                            } label: {
+                                Text(modifiedEmoji)
+                                    .font(.system(size: 32))
+                                    .frame(width: 44, height: 44)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.bottom, 12)
+                }
+                .presentationCompactAdaptation(.popover)
+            }
     }
 }
 
