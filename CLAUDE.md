@@ -120,11 +120,29 @@ gh pr create --title "Title" --body "Description"
 
 ## Repository Etiquette
 
-### Branching Strategy
-1. **⛔️ NEVER commit to master** - Protected branch, all changes via PRs
-2. Check current branch: `git branch`
-3. Create feature branch: `git checkout -b feature/descriptive-name`
-4. Branch naming: `feature/`, `fix/`, `refactor/`
+### Branching Strategy (CRITICAL: Start Here for Every New Task)
+
+**⛔️ BEFORE starting ANY new work, ALWAYS run these commands:**
+
+```bash
+# 1. Fetch latest from remote
+git fetch origin
+
+# 2. Switch to master (NEVER create branches from feature branches!)
+git checkout master
+
+# 3. Pull latest master
+git pull origin master
+
+# 4. NOW create your feature branch
+git checkout -b feature/descriptive-name
+```
+
+**Key Rules:**
+- **⛔️ NEVER commit to master** - Protected branch, all changes via PRs
+- **⛔️ NEVER create feature branches from other feature branches** - Always branch from master
+- **⛔️ ALWAYS verify you're on master first:** `git branch --show-current` should show "master"
+- Branch naming: `feature/`, `fix/`, `refactor/`
 
 ### Pull Request Workflow (IMPORTANT: Follow These Steps)
 
