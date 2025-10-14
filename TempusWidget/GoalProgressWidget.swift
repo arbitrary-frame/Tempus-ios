@@ -85,13 +85,15 @@ struct GoalProgressWidgetView: View {
         workoutsCompleted: 2,
         weeklyGoal: 3,
         exercisesThisWeek: 8,
-        totalWeightThisWeek: 1250.0
+        totalWeightThisWeek: 1250.0,
+        totalWeightLastWeek: nil
     )
     WorkoutStatsEntry(
         date: Date(),
         workoutsCompleted: 3,
         weeklyGoal: 3,
         exercisesThisWeek: 12,
-        totalWeightThisWeek: 1850.0
+        totalWeightThisWeek: 1850.0,
+        totalWeightLastWeek: nil
     )
 }

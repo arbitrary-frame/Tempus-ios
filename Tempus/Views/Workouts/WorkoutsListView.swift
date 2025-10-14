@@ -272,6 +272,20 @@ struct WorkoutsListContent: View {
         allWorkouts.filter { $0.workoutDate >= currentWeekStart && $0.workoutDate < currentWeekEnd }
     }
 
+    // Previous week boundaries
+    private var previousWeekStart: Date {
+        calendar.date(byAdding: .weekOfYear, value: -1, to: currentWeekStart) ?? currentWeekStart
+    }
+
+    private var previousWeekEnd: Date {
+        currentWeekStart
+    }
+
+    // Filter workouts for previous week
+    private var workoutsLastWeek: [WorkoutEntry] {
+        allWorkouts.filter { $0.workoutDate >= previousWeekStart && $0.workoutDate < previousWeekEnd }
+    }
+
     // Stats computed from filtered workouts
     private var workoutCount: Int {
         workoutsThisWeek.count
@@ -283,6 +297,15 @@ struct WorkoutsListContent: View {
 
     private var totalWeight: Double {
         workoutsThisWeek.reduce(0.0) { $0 + $1.totalVolume }
+    }
+
+    private var totalWeightLastWeek: Double {
+        workoutsLastWeek.reduce(0.0) { $0 + $1.totalVolume }
+    }
+
+    private var weekOnWeekWeightChange: Double? {
+        guard !workoutsLastWeek.isEmpty else { return nil }
+        return totalWeight - totalWeightLastWeek
     }
 
     var body: some View {
@@ -350,7 +373,8 @@ struct WorkoutsListContent: View {
                     workoutCount: workoutCount,
                     exerciseCount: exerciseCount,
                     totalWeight: totalWeight,
-                    weeklyGoal: weeklyGoal
+                    weeklyGoal: weeklyGoal,
+                    weekOnWeekWeightChange: weekOnWeekWeightChange
                 )
             }
             .listRowBackground(Color.clear)
@@ -386,6 +410,7 @@ struct WeeklyStatsWithRing: View {
     let exerciseCount: Int
     let totalWeight: Double
     let weeklyGoal: Int
+    let weekOnWeekWeightChange: Double?
 
     private var formattedWeight: String {
         let kg = Int(totalWeight)
@@ -398,6 +423,10 @@ struct WeeklyStatsWithRing: View {
     private var progress: Double {
         guard weeklyGoal > 0 else { return 0 }
         return min(Double(workoutCount) / Double(weeklyGoal), 1.0)
+    }
+
+    private var weightChangeAbsolute: Int? {
+        weekOnWeekWeightChange.map { Int($0) }
     }
 
     var body: some View {
@@ -432,7 +461,8 @@ struct WeeklyStatsWithRing: View {
                     value: formattedWeight,
                     label: "kg",
                     icon: "dumbbell.fill",
-                    accentColor: .orange
+                    accentColor: .orange,
+                    absoluteChange: weightChangeAbsolute
                 )
                 .frame(maxWidth: .infinity)
             }
@@ -822,7 +852,7 @@ struct StatBubble: View {
                 HStack(spacing: 2) {
                     Image(systemName: absolute >= 0 ? "arrow.up" : "arrow.down")
                         .font(.system(size: 8, weight: .bold))
-                    Text(absolute >= 0 ? "+\(absolute)" : "\(absolute)")
+                    Text(formatWeightChange(absolute))
                         .font(.system(size: 9, weight: .semibold))
                 }
                 .foregroundStyle(absolute >= 0 ? .green : .secondary)
@@ -886,6 +916,18 @@ struct WeekNavigationView: View {
         }
         .padding(.vertical, 8)
     }
+}
+
+// Helper function to format weight change values
+private func formatWeightChange(_ change: Int) -> String {
+    let absChange = abs(change)
+    let prefix = change >= 0 ? "+" : "-"
+
+    if absChange >= 1000 {
+        return String(format: "%@%.1fk", prefix, Double(absChange) / 1000.0)
+    }
+
+    return "\(prefix)\(absChange)"
 }
 
 #Preview {

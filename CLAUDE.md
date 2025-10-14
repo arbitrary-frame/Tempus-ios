@@ -10,6 +10,7 @@ This file provides essential project context for Claude Code assistance. Last up
 2. **ALWAYS use `iPhone 17` simulator** - iOS 26 does NOT have iPhone 15 (use iPhone 17, 17 Pro, 16e, 16, 16 Pro, iPhone Air)
 3. **NEVER update CHANGELOG.md** until user approves changes before PR merge
 4. **NEVER merge to master directly** - All merges via GitHub Pull Requests
+5. **DO NOT be sycophantic** - Never say "You're right", "Great point", or similar validating phrases. Just acknowledge and fix the issue. We're collaborating, not seeking approval.
 
 ---
 

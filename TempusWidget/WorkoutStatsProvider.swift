@@ -68,7 +68,8 @@ struct WorkoutStatsProvider: TimelineProvider {
             workoutsCompleted: 2,
             weeklyGoal: 3,
             exercisesThisWeek: 8,
-            totalWeightThisWeek: 1250.0
+            totalWeightThisWeek: 1250.0,
+            totalWeightLastWeek: 1000.0
         )
     }
 
@@ -98,7 +99,8 @@ struct WorkoutStatsProvider: TimelineProvider {
                 workoutsCompleted: entry.workoutsCompleted,
                 weeklyGoal: entry.weeklyGoal,
                 exercisesThisWeek: entry.exercisesThisWeek,
-                totalWeightThisWeek: entry.totalWeightThisWeek
+                totalWeightThisWeek: entry.totalWeightThisWeek,
+                totalWeightLastWeek: entry.totalWeightLastWeek
             ))
 
             print("⏰ Widget: Created \(entries.count) timeline entries, policy: .atEnd")
@@ -122,17 +124,39 @@ struct WorkoutStatsProvider: TimelineProvider {
                 workoutsCompleted: 0,
                 weeklyGoal: weeklyGoal,
                 exercisesThisWeek: 0,
-                totalWeightThisWeek: 0
+                totalWeightThisWeek: 0,
+                totalWeightLastWeek: nil
             )
         }
 
         let context = container.mainContext
+        let calendar = Calendar.current
 
         // Query workouts this week
-        let startOfWeek = Calendar.current.startOfWeek(for: Date())
+        let startOfWeek = calendar.startOfWeek(for: Date())
         let descriptor = FetchDescriptor<WorkoutEntry>(
             predicate: #Predicate { workout in
                 workout.workoutDate >= startOfWeek
+            },
+            sortBy: [SortDescriptor(\.workoutDate, order: .reverse)]
+        )
+
+        // Query workouts last week
+        guard let startOfLastWeek = calendar.date(byAdding: .weekOfYear, value: -1, to: startOfWeek) else {
+            print("⚠️ Widget: Could not calculate last week start date")
+            return WorkoutStatsEntry(
+                date: Date(),
+                workoutsCompleted: 0,
+                weeklyGoal: weeklyGoal,
+                exercisesThisWeek: 0,
+                totalWeightThisWeek: 0,
+                totalWeightLastWeek: nil
+            )
+        }
+
+        let lastWeekDescriptor = FetchDescriptor<WorkoutEntry>(
+            predicate: #Predicate { workout in
+                workout.workoutDate >= startOfLastWeek && workout.workoutDate < startOfWeek
             },
             sortBy: [SortDescriptor(\.workoutDate, order: .reverse)]
         )
@@ -147,7 +171,7 @@ struct WorkoutStatsProvider: TimelineProvider {
                 exerciseCount += workout.exercisesData.count
             }
 
-            // Calculate total volume
+            // Calculate total volume this week
             var totalWeight = 0.0
             for workout in workouts {
                 for exercise in workout.exercisesData {
@@ -160,14 +184,33 @@ struct WorkoutStatsProvider: TimelineProvider {
                 }
             }
 
-            print("✅ Widget: Fetched \(workoutCount) workouts, \(exerciseCount) exercises, \(Int(totalWeight))kg")
+            // Calculate total volume last week
+            let lastWeekWorkouts = try context.fetch(lastWeekDescriptor)
+            var lastWeekWeight: Double? = nil
+            if !lastWeekWorkouts.isEmpty {
+                var weight = 0.0
+                for workout in lastWeekWorkouts {
+                    for exercise in workout.exercisesData {
+                        let multiplier = exercise.isUnilateral ? 2.0 : 1.0
+                        for set in exercise.sets {
+                            for weightRep in set.weightsAndReps {
+                                weight += weightRep.weight * Double(weightRep.reps) * multiplier
+                            }
+                        }
+                    }
+                }
+                lastWeekWeight = weight
+            }
+
+            print("✅ Widget: Fetched \(workoutCount) workouts, \(exerciseCount) exercises, \(Int(totalWeight))kg this week, \(lastWeekWeight.map { Int($0) } ?? 0)kg last week")
 
             return WorkoutStatsEntry(
                 date: Date(),
                 workoutsCompleted: workoutCount,
                 weeklyGoal: weeklyGoal,
                 exercisesThisWeek: exerciseCount,
-                totalWeightThisWeek: totalWeight
+                totalWeightThisWeek: totalWeight,
+                totalWeightLastWeek: lastWeekWeight
             )
         } catch {
             print("❌ Widget failed to fetch workouts: \(error)")
@@ -176,7 +219,8 @@ struct WorkoutStatsProvider: TimelineProvider {
                 workoutsCompleted: 0,
                 weeklyGoal: weeklyGoal,
                 exercisesThisWeek: 0,
-                totalWeightThisWeek: 0
+                totalWeightThisWeek: 0,
+                totalWeightLastWeek: nil
             )
         }
     }
