@@ -4,6 +4,33 @@ All notable changes to Tempus iOS workout tracking app.
 
 ## [Unreleased]
 
+### [Workout Card Improvements] - 2025-10-14
+
+**Fixed:**
+- **Consistent exercise icon** across workout cards and stats
+  - Changed workout card exercise badge icon to `list.bullet.clipboard`
+  - Now matches Week Summary stats bubble icon
+  - Eliminates visual inconsistency
+
+**Added:**
+- **Total weight badge** on workout cards
+  - Shows total volume lifted in each workout (e.g., "7.3k kg")
+  - Displayed alongside exercise count badge
+  - Uses same formatting as Week Summary stats
+  - Dumbbell icon for quick visual recognition
+
+**Benefits:**
+- ✅ Consistent visual language throughout UI
+- ✅ Quick workout intensity overview without opening details
+- ✅ Helps identify heavier vs lighter training sessions
+- ✅ Maintains clean, compact card design
+
+**Technical:**
+- Updated `WorkoutCardView` in WorkoutsListView.swift
+- Added `formattedWeight` computed property
+- Both badges use `.regularMaterial` background
+- 6pt spacing between badges for clean alignment
+
 ### [Decimal Weight Display & Tap-to-Populate] - 2025-10-14
 
 **Fixed:**
