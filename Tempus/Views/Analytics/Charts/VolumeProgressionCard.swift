@@ -275,22 +275,9 @@ struct VolumeProgressionCard: View {
                                     Circle()
                                         .fill(.orange)
                                         .frame(width: 8, height: 8)
-                                    Text("Volume")
+                                    Text("Weekly Volume")
                                         .font(.caption2)
                                         .foregroundStyle(.secondary)
-                                }
-
-                                // Moving average legend item (only if available)
-                                if hasMovingAverage {
-                                    HStack(spacing: 4) {
-                                        Rectangle()
-                                            .stroke(style: StrokeStyle(lineWidth: 2, dash: [4, 3]))
-                                            .foregroundStyle(Color.gray)
-                                            .frame(width: 16, height: 2)
-                                        Text("4W Avg")
-                                            .font(.caption2)
-                                            .foregroundStyle(.secondary)
-                                    }
                                 }
                             }
                         }
@@ -310,24 +297,6 @@ struct VolumeProgressionCard: View {
                                     Circle()
                                         .fill(.orange)
                                         .frame(width: 8, height: 8)
-                                }
-                            }
-
-                            // Moving average line (only for weeks with data)
-                            if hasMovingAverage {
-                                ForEach(weeklyData.filter { $0.movingAverage != nil }) { dataPoint in
-                                    LineMark(
-                                        x: .value("Week", dataPoint.weekStart, unit: .weekOfYear),
-                                        y: .value("Average", dataPoint.movingAverage!)
-                                    )
-                                    .foregroundStyle(Color.gray)
-                                    .lineStyle(StrokeStyle(lineWidth: 2, dash: [8, 6]))
-                                    .interpolationMethod(.catmullRom)
-                                    .symbol {
-                                        Circle()
-                                            .fill(Color.gray)
-                                            .frame(width: 6, height: 6)
-                                    }
                                 }
                             }
                         }
