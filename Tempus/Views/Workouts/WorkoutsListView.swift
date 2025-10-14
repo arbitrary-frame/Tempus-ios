@@ -557,6 +557,14 @@ struct WorkoutCardView: View {
         return Self.dateFormatter.string(from: workout.workoutDate)
     }
 
+    var formattedWeight: String {
+        let kg = Int(workout.totalVolume)
+        if kg >= 1000 {
+            return String(format: "%.1fk", Double(kg) / 1000.0)
+        }
+        return "\(kg)"
+    }
+
     var body: some View {
         ZStack {
             // Liquid Glass background with depth
@@ -578,16 +586,30 @@ struct WorkoutCardView: View {
 
                     Spacer()
 
-                    // Exercise count badge
-                    HStack(spacing: 4) {
-                        Image(systemName: "list.bullet.clipboard")
-                            .font(.caption)
-                        Text("\(workout.exercisesData.count)")
-                            .font(.caption.bold())
+                    // Stats badges
+                    HStack(spacing: 6) {
+                        // Exercise count badge
+                        HStack(spacing: 4) {
+                            Image(systemName: "list.bullet.clipboard")
+                                .font(.caption)
+                            Text("\(workout.exercisesData.count)")
+                                .font(.caption.bold())
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(.regularMaterial, in: Capsule())
+
+                        // Weight badge
+                        HStack(spacing: 4) {
+                            Image(systemName: "dumbbell.fill")
+                                .font(.caption)
+                            Text("\(formattedWeight) kg")
+                                .font(.caption.bold())
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(.regularMaterial, in: Capsule())
                     }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(.regularMaterial, in: Capsule())
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
