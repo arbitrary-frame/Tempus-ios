@@ -116,6 +116,10 @@ struct AnalyticsView: View {
                             ConsistencyGraphCard(workouts: workouts, weeklyGoal: weeklyWorkoutGoal)
                                 .padding(.horizontal)
 
+                            // Volume Progression Graph
+                            VolumeProgressionCard(workouts: workouts)
+                                .padding(.horizontal)
+
                             // Personal Records Card
                             PersonalRecordsCard(workouts: workouts, exercises: exercises)
                                 .padding(.horizontal)
