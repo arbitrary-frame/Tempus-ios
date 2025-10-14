@@ -315,12 +315,17 @@ struct ExerciseEntryView: View {
 
                     HStack(spacing: 4) {
                         ForEach(previous.sets.prefix(3), id: \.id) { set in
-                            Text(formatSet(set))
-                                .font(.caption)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(.ultraThinMaterial)
-                                .clipShape(Capsule())
+                            Button {
+                                addSetFromPrevious(set)
+                            } label: {
+                                Text(formatSet(set))
+                                    .font(.caption)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(.ultraThinMaterial)
+                                    .clipShape(Capsule())
+                            }
+                            .buttonStyle(.plain)
                         }
                         if previous.sets.count > 3 {
                             Text("+\(previous.sets.count - 3)")
@@ -401,6 +406,18 @@ struct ExerciseEntryView: View {
 
         // Copy all weight/rep pairs from the last set (including drop sets)
         let copiedWeightsAndReps = lastSet.weightsAndReps.map { wr in
+            WeightRep(weight: wr.weight, reps: wr.reps)
+        }
+
+        exerciseEntry.sets.append(WorkoutSet(setNumber: newSetNumber, weightsAndReps: copiedWeightsAndReps))
+    }
+
+    private func addSetFromPrevious(_ previousSet: WorkoutSet) {
+        let newSetNumber = exerciseEntry.sets.count + 1
+        HapticManager.shared.trigger(.selection)
+
+        // Copy all weight/rep pairs from the previous set (including drop sets)
+        let copiedWeightsAndReps = previousSet.weightsAndReps.map { wr in
             WeightRep(weight: wr.weight, reps: wr.reps)
         }
 
