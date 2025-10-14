@@ -25,6 +25,21 @@ struct WorkoutExerciseData: Codable, Identifiable {
         self.sets = sets
         self.notes = notes
     }
+
+    // Custom decoding to handle missing isUnilateral in old data
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try container.decode(UUID.self, forKey: .id)
+        self.exerciseID = try container.decode(UUID.self, forKey: .exerciseID)
+        self.exerciseName = try container.decode(String.self, forKey: .exerciseName)
+        self.isUnilateral = try container.decodeIfPresent(Bool.self, forKey: .isUnilateral) ?? false
+        self.sets = try container.decode([WorkoutSet].self, forKey: .sets)
+        self.notes = try container.decodeIfPresent(String.self, forKey: .notes)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, exerciseID, exerciseName, isUnilateral, sets, notes
+    }
 }
 
 struct WorkoutSet: Codable, Identifiable {
