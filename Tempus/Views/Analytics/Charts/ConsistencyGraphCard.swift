@@ -214,7 +214,7 @@ struct ConsistencyGraphCard: View {
                 // Header
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Weekly Consistency")
+                        Text("Workouts per week")
                             .font(.headline)
                             .foregroundStyle(.primary)
 
