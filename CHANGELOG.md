@@ -4,6 +4,34 @@ All notable changes to Tempus iOS workout tracking app.
 
 ## [Unreleased]
 
+### [Analytics Page UI Updates] - 2025-10-15
+
+**Changed:**
+- **Reordered Analytics Cards** - Personal Records now displayed at top
+  - PR card first (most engaging content)
+  - Workouts per week graph second
+  - Volume lifted per week graph third
+
+- **Improved Graph Titles**
+  - "Weekly Consistency" → "Workouts per week" (clearer, more descriptive)
+  - "Volume Progression" → "Volume lifted per week" (explicit about metric)
+
+- **Simplified Legend Labels**
+  - "Weekly Volume" → "Volume" (removes redundant "Weekly" prefix)
+
+**Benefits:**
+- ✅ Most engaging content (PRs) appears first
+- ✅ Graph titles self-explanatory without context
+- ✅ Cleaner, more concise legend labels
+- ✅ Better information hierarchy
+
+**Technical:**
+- AnalyticsView.swift - Reordered LazyVStack card order
+- ConsistencyGraphCard.swift - Updated title text
+- VolumeProgressionCard.swift - Updated title and legend text
+
+---
+
 ### [Preset Exercises & Routines Library] - 2025-10-14
 
 **Added:**
