@@ -33,6 +33,14 @@ struct ExercisesListView: View {
         }
     }
 
+    var archivedExercises: [Exercise] {
+        exercises.filter { $0.isArchived }
+    }
+
+    var hasArchivedExercises: Bool {
+        !archivedExercises.isEmpty
+    }
+
     var groupedExercises: [String: [Exercise]] {
         Dictionary(grouping: filteredExercises) { $0.muscleGroup }
     }
@@ -57,6 +65,16 @@ struct ExercisesListView: View {
         guard let exercise = exerciseToDelete else { return }
         modelContext.delete(exercise)
         try? modelContext.save()
+        HapticManager.shared.trigger(.success)
+        exerciseToDelete = nil
+    }
+
+    private func archiveExercise(_ exercise: Exercise?) {
+        guard let exercise else { return }
+        exercise.isArchived = true
+        exercise.updatedAt = Date()
+        try? modelContext.save()
+        HapticManager.shared.trigger(.success)
         exerciseToDelete = nil
     }
 
@@ -114,6 +132,40 @@ struct ExercisesListView: View {
                     }
                 } else {
                     List {
+                        // Archive entry point (WhatsApp-style)
+                        if hasArchivedExercises {
+                            Section {
+                                NavigationLink(destination: ArchivedExercisesView()) {
+                                    HStack {
+                                        Image(systemName: "archivebox")
+                                            .font(.title3)
+                                            .symbolRenderingMode(.hierarchical)
+                                            .foregroundStyle(.secondary)
+
+                                        Text("Archived")
+                                            .font(.headline)
+                                            .foregroundStyle(.secondary)
+
+                                        Spacer()
+
+                                        Text("\(archivedExercises.count)")
+                                            .font(.subheadline)
+                                            .foregroundStyle(.tertiary)
+
+                                        Image(systemName: "chevron.right")
+                                            .font(.caption)
+                                            .foregroundStyle(.tertiary)
+                                    }
+                                    .padding(.vertical, 4)
+                                }
+                            }
+                            .listRowBackground(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(.regularMaterial)
+                                    .padding(.vertical, 2)
+                            )
+                        }
+
                         ForEach(groupedExercises.keys.sorted(), id: \.self) { muscleGroup in
                             Section {
                                 ForEach(groupedExercises[muscleGroup] ?? []) { exercise in
@@ -136,6 +188,13 @@ struct ExercisesListView: View {
                                         } label: {
                                             Label("Delete", systemImage: "trash")
                                         }
+
+                                        Button {
+                                            archiveExercise(exercise)
+                                        } label: {
+                                            Label("Archive", systemImage: "archivebox")
+                                        }
+                                        .tint(.orange)
                                     }
                                 }
                             } header: {
@@ -193,10 +252,15 @@ struct ExercisesListView: View {
                 Text("This action cannot be undone.")
             }
             .alert("Cannot Delete Exercise", isPresented: $showingCannotDeleteAlert) {
-                Button("OK", role: .cancel) { }
+                Button("Archive Instead", role: .destructive) {
+                    archiveExercise(exerciseToDelete)
+                }
+                Button("Cancel", role: .cancel) {
+                    exerciseToDelete = nil
+                }
             } message: {
                 if let exercise = exerciseToDelete {
-                    Text("'\(exercise.name)' has been used in past workouts and cannot be deleted. Historical workout data will be preserved.")
+                    Text("'\(exercise.name)' has been used in past workouts and cannot be deleted. You can archive it instead to hide it from this list whilst preserving all historical data.")
                 }
             }
         }
@@ -224,7 +288,8 @@ struct ExerciseRowView: View {
                 }
             }
         }
-        .padding(.vertical, 4)
+        .frame(minHeight: 60) // Consistent minimum height for swipe actions
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

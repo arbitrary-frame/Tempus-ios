@@ -4,6 +4,54 @@ All notable changes to Tempus iOS workout tracking app.
 
 ## [Unreleased]
 
+### [Exercise Archive System] - 2025-10-15
+
+**Added:**
+- **WhatsApp-style Exercise Archive** - Hide unwanted exercises without losing historical data
+  - Discrete "Archived" entry at top of exercises list (only appears when archives exist)
+  - Shows count badge of archived exercises
+  - Tapping opens dedicated ArchivedExercisesView
+  - Searchable archive view grouped by muscle group
+
+- **Archive/Restore Functionality**
+  - **Swipe actions on main list:** Delete (red) + Archive (orange)
+  - **Swipe actions in archive:** Restore (green) + Delete (red, if unused)
+  - Archive immediately hides exercise from main list
+  - Restore returns exercise to main list
+  - All actions include confirmation dialogs
+
+- **Smart Delete Behaviour**
+  - **Unused exercises:** Standard delete confirmation
+  - **Used exercises:** "Cannot Delete Exercise" alert with "Archive Instead" option
+  - Delete confirmation clarifies: "This action cannot be undone"
+  - Archive alert explains: "Hide from this list whilst preserving all historical data"
+
+- **Routine Delete Confirmation**
+  - All routine deletions now show confirmation dialog
+  - Message clarifies: "The exercises in this routine will not be affected"
+  - Consistent with exercise delete warnings
+
+**Changed:**
+- Exercise rows now have minimum height (60pt) for consistent swipe action alignment
+- Archive/Delete buttons properly aligned regardless of exercise tags
+
+**Benefits:**
+- ✅ Clean main exercises list without data loss
+- ✅ Reversible archiving (restore anytime)
+- ✅ Familiar WhatsApp UI pattern (discrete, unobtrusive)
+- ✅ Historical workout data completely preserved
+- ✅ Can still permanently delete truly unused exercises
+- ✅ Consistent delete warnings across exercises and routines
+
+**Technical:**
+- ArchivedExercisesView.swift (new) - Archive view with restore functionality
+- ExercisesListView.swift - Archive entry point, swipe actions, archive/restore functions
+- WorkoutRoutinesListView.swift - Delete confirmation dialog
+- ExerciseRowView - minHeight: 60 for consistent swipe action alignment
+- Exercise.isArchived field already existed (no schema changes)
+
+---
+
 ### [Unilateral Tag Migration System] - 2025-10-15
 
 **Changed:**

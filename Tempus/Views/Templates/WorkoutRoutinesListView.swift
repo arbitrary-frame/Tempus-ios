@@ -17,6 +17,8 @@ struct WorkoutRoutinesListView: View {
     @State private var showingPresetBrowser = false
     @State private var selectedRoutine: WorkoutRoutine?
     @State private var routineToStart: WorkoutRoutine?
+    @State private var routineToDelete: WorkoutRoutine?
+    @State private var showingDeleteConfirmation = false
 
     private var currentStreak: Int {
         AnalyticsHelper.calculateCurrentStreak(workouts: workouts, weeklyGoal: weeklyWorkoutGoal)
@@ -92,7 +94,8 @@ struct WorkoutRoutinesListView: View {
                             )
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                 Button(role: .destructive) {
-                                    deleteRoutine(routine)
+                                    routineToDelete = routine
+                                    showingDeleteConfirmation = true
                                 } label: {
                                     Label("Delete", systemImage: "trash")
                                 }
@@ -145,14 +148,25 @@ struct WorkoutRoutinesListView: View {
             .fullScreenCover(item: $routineToStart) { routine in
                 WorkoutLoggingView(routine: routine)
             }
+            .alert("Delete this routine?", isPresented: $showingDeleteConfirmation) {
+                Button("Delete", role: .destructive) {
+                    confirmDelete()
+                }
+                Button("Cancel", role: .cancel) {
+                    routineToDelete = nil
+                }
+            } message: {
+                Text("This action cannot be undone. The exercises in this routine will not be affected.")
+            }
         }
     }
 
-    private func deleteRoutine(_ routine: WorkoutRoutine) {
-        HapticManager.shared.trigger(.warning)
-        withAnimation {
-            modelContext.delete(routine)
-        }
+    private func confirmDelete() {
+        guard let routine = routineToDelete else { return }
+        modelContext.delete(routine)
+        try? modelContext.save()
+        HapticManager.shared.trigger(.success)
+        routineToDelete = nil
     }
 }
 
