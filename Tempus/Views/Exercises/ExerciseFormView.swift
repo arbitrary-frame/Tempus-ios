@@ -21,7 +21,18 @@ struct ExerciseFormView: View {
     @State private var tags: [String] = []
     @State private var showingValidationError = false
     @State private var validationMessage = ""
-    @State private var showingUnilateralLockAlert = false
+    @State private var showingUnilateralMigrationConfirm = false
+    @State private var pendingUnilateralChange: UnilateralChange?
+
+    enum UnilateralChange {
+        case addingUnilateral
+        case removingUnilateral
+
+        var affectedWorkoutsCount: Int {
+            // Will be set when showing dialog
+            0
+        }
+    }
 
     let isEditing: Bool
     let exerciseToEdit: Exercise?
@@ -42,16 +53,10 @@ struct ExerciseFormView: View {
         !name.trimmingCharacters(in: .whitespaces).isEmpty
     }
 
-    private var isExerciseUsedInWorkouts: Bool {
-        guard let exercise = exerciseToEdit else { return false }
-        return allWorkouts.contains { workout in
-            workout.exercisesData.contains { $0.exerciseID == exercise.id }
-        }
-    }
-
-    private var canChangeUnilateralTag: Bool {
-        // Can change if not editing, or if editing but not used in workouts
-        return !isEditing || !isExerciseUsedInWorkouts
+    private func affectedWorkoutsCount(for exerciseID: UUID) -> Int {
+        return allWorkouts.filter { workout in
+            workout.exercisesData.contains { $0.exerciseID == exerciseID }
+        }.count
     }
 
     var body: some View {
@@ -188,10 +193,32 @@ struct ExerciseFormView: View {
                     .disabled(!isValid)
                 }
             }
-            .alert("Cannot Change Unilateral Status", isPresented: $showingUnilateralLockAlert) {
-                Button("OK", role: .cancel) { }
+            .alert("Update Historical Data?", isPresented: $showingUnilateralMigrationConfirm) {
+                Button("Cancel", role: .cancel) {
+                    // Revert tag change
+                    if let change = pendingUnilateralChange {
+                        switch change {
+                        case .addingUnilateral:
+                            tags.removeAll { $0 == "unilateral" }
+                        case .removingUnilateral:
+                            tags.append("unilateral")
+                        }
+                    }
+                    pendingUnilateralChange = nil
+                }
+                Button("Confirm", role: .destructive) {
+                    saveExerciseWithMigration()
+                }
             } message: {
-                Text("This exercise has been logged in past workouts. Changing the unilateral status would make your historical volume data inaccurate. Create a new exercise if you need different tracking.")
+                if let change = pendingUnilateralChange, let exercise = exerciseToEdit {
+                    let count = affectedWorkoutsCount(for: exercise.id)
+                    switch change {
+                    case .addingUnilateral:
+                        Text("This exercise appears in \(count) workout\(count == 1 ? "" : "s"). All logged weights will be halved (e.g., 60kg → 30kg) to maintain accurate volume tracking. The total volume lifted will remain the same.")
+                    case .removingUnilateral:
+                        Text("This exercise appears in \(count) workout\(count == 1 ? "" : "s"). All logged weights will be doubled (e.g., 30kg → 60kg) to maintain accurate volume tracking. The total volume lifted will remain the same.")
+                    }
+                }
             }
         }
     }
@@ -210,23 +237,11 @@ struct ExerciseFormView: View {
     private func addSuggestedTag(_ tag: String) {
         guard !tags.contains(tag) else { return }
 
-        // Check if trying to add unilateral to a used exercise
-        if tag == "unilateral" && !canChangeUnilateralTag {
-            showingUnilateralLockAlert = true
-            return
-        }
-
         HapticManager.shared.trigger(.light)
         tags.append(tag)
     }
 
     private func removeTag(_ tag: String) {
-        // Check if trying to remove unilateral from a used exercise
-        if tag == "unilateral" && !canChangeUnilateralTag {
-            showingUnilateralLockAlert = true
-            return
-        }
-
         HapticManager.shared.trigger(.light)
         tags.removeAll { $0 == tag }
     }
@@ -247,8 +262,20 @@ struct ExerciseFormView: View {
             return
         }
 
+        // Check if unilateral status changed for an existing exercise with workouts
         if isEditing, let exercise = exerciseToEdit {
-            // Update existing exercise
+            let oldIsUnilateral = exercise.tags.contains("unilateral")
+            let newIsUnilateral = tags.contains("unilateral")
+            let affectedCount = affectedWorkoutsCount(for: exercise.id)
+
+            if oldIsUnilateral != newIsUnilateral && affectedCount > 0 {
+                // Show confirmation dialog
+                pendingUnilateralChange = newIsUnilateral ? .addingUnilateral : .removingUnilateral
+                showingUnilateralMigrationConfirm = true
+                return
+            }
+
+            // No unilateral change or no workouts affected - save directly
             exercise.name = trimmedName
             exercise.exerciseDescription = exerciseDescription.isEmpty ? nil : exerciseDescription
             exercise.muscleGroup = muscleGroup.rawValue
@@ -266,6 +293,86 @@ struct ExerciseFormView: View {
         }
 
         HapticManager.shared.trigger(.success)
+        dismiss()
+    }
+
+    private func saveExerciseWithMigration() {
+        guard let exercise = exerciseToEdit, let change = pendingUnilateralChange else {
+            dismiss()
+            return
+        }
+
+        let trimmedName = name.trimmingCharacters(in: .whitespaces)
+        let newIsUnilateral = tags.contains("unilateral")
+
+        // Update all affected workouts
+        for workout in allWorkouts {
+            var needsUpdate = false
+            var updatedExercisesData = workout.exercisesData
+
+            for (index, exerciseData) in updatedExercisesData.enumerated() where exerciseData.exerciseID == exercise.id {
+                needsUpdate = true
+
+                // Update isUnilateral flag
+                var updatedSets = exerciseData.sets
+
+                // Adjust weights in all sets
+                for (setIndex, set) in updatedSets.enumerated() {
+                    var updatedWeightsAndReps = set.weightsAndReps
+
+                    for (weightRepIndex, weightRep) in updatedWeightsAndReps.enumerated() {
+                        var updatedWeightRep = weightRep
+
+                        switch change {
+                        case .addingUnilateral:
+                            // Halve the weight (was non-unilateral, now unilateral)
+                            updatedWeightRep.weight = weightRep.weight / 2.0
+                        case .removingUnilateral:
+                            // Double the weight (was unilateral, now non-unilateral)
+                            updatedWeightRep.weight = weightRep.weight * 2.0
+                        }
+
+                        updatedWeightsAndReps[weightRepIndex] = updatedWeightRep
+                    }
+
+                    updatedSets[setIndex] = WorkoutSet(
+                        setNumber: set.setNumber,
+                        weightsAndReps: updatedWeightsAndReps
+                    )
+                }
+
+                // Create new WorkoutExerciseData with updated values
+                updatedExercisesData[index] = WorkoutExerciseData(
+                    exerciseID: exerciseData.exerciseID,
+                    exerciseName: exerciseData.exerciseName,
+                    isUnilateral: newIsUnilateral,
+                    sets: updatedSets,
+                    notes: exerciseData.notes
+                )
+            }
+
+            if needsUpdate {
+                workout.exercisesData = updatedExercisesData
+            }
+        }
+
+        // Update the exercise itself
+        exercise.name = trimmedName
+        exercise.exerciseDescription = exerciseDescription.isEmpty ? nil : exerciseDescription
+        exercise.muscleGroup = muscleGroup.rawValue
+        exercise.tags = tags
+        exercise.updatedAt = Date()
+
+        // Save context
+        do {
+            try modelContext.save()
+            HapticManager.shared.trigger(.success)
+        } catch {
+            print("ERROR: Failed to save migration: \(error)")
+            HapticManager.shared.trigger(.error)
+        }
+
+        pendingUnilateralChange = nil
         dismiss()
     }
 }
