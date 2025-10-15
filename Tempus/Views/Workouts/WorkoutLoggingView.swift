@@ -210,10 +210,14 @@ struct WorkoutLoggingView: View {
     }
 
     private func updateWorkoutNameIfNeeded(for date: Date) {
-        // Only auto-update if workout is from routine
-        guard isFromRoutine, let routineName = routineName else { return }
-
-        workoutName = "\(routineName) - \(Self.dateFormatter.string(from: date))"
+        // Auto-update workout name when date changes
+        if isFromRoutine, let routineName = routineName {
+            // From routine: "Routine Name - Date"
+            workoutName = "\(routineName) - \(Self.dateFormatter.string(from: date))"
+        } else {
+            // Quick log: "Workout - Date"
+            workoutName = "Workout - \(Self.dateFormatter.string(from: date))"
+        }
     }
 
 
