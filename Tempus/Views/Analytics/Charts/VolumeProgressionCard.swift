@@ -248,7 +248,7 @@ struct VolumeProgressionCard: View {
                 // Header
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Volume Progression")
+                        Text("Volume lifted per week")
                             .font(.headline)
                             .foregroundStyle(.primary)
 
@@ -316,7 +316,7 @@ struct VolumeProgressionCard: View {
                                     Circle()
                                         .fill(.orange)
                                         .frame(width: 8, height: 8)
-                                    Text("Weekly Volume")
+                                    Text("Volume")
                                         .font(.caption2)
                                         .foregroundStyle(.secondary)
                                 }

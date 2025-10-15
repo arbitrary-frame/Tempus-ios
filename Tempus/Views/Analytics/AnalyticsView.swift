@@ -112,16 +112,16 @@ struct AnalyticsView: View {
                 } else {
                     ScrollView {
                         LazyVStack(spacing: 16) {
+                            // Personal Records Card
+                            PersonalRecordsCard(workouts: workouts, exercises: exercises)
+                                .padding(.horizontal)
+
                             // Weekly Consistency Graph
                             ConsistencyGraphCard(workouts: workouts, weeklyGoal: weeklyWorkoutGoal)
                                 .padding(.horizontal)
 
                             // Volume Progression Graph
                             VolumeProgressionCard(workouts: workouts)
-                                .padding(.horizontal)
-
-                            // Personal Records Card
-                            PersonalRecordsCard(workouts: workouts, exercises: exercises)
                                 .padding(.horizontal)
                         }
                         .padding(.top)
