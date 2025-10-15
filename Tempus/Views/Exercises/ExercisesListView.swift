@@ -275,8 +275,9 @@ struct ExerciseRowView: View {
             Text(exercise.name)
                 .font(.headline)
 
-            if !exercise.tags.isEmpty {
-                HStack(spacing: 8) {
+            // Always show tags row to maintain consistent height
+            HStack(spacing: 8) {
+                if !exercise.tags.isEmpty {
                     ForEach(exercise.tags.prefix(3), id: \.self) { tag in
                         Text(tag)
                             .font(.caption)
@@ -285,6 +286,13 @@ struct ExerciseRowView: View {
                             .background(Color.secondary.opacity(0.2))
                             .clipShape(Capsule())
                     }
+                } else {
+                    // Invisible spacer to maintain consistent height
+                    Text(" ")
+                        .font(.caption)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .opacity(0)
                 }
             }
         }
