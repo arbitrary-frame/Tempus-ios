@@ -193,7 +193,7 @@ struct ExerciseFormView: View {
                     .disabled(!isValid)
                 }
             }
-            .alert("Update Historical Data?", isPresented: $showingUnilateralMigrationConfirm) {
+            .alert("Unilateral Tag Changed", isPresented: $showingUnilateralMigrationConfirm) {
                 Button("Cancel", role: .cancel) {
                     // Revert tag change
                     if let change = pendingUnilateralChange {
@@ -206,7 +206,7 @@ struct ExerciseFormView: View {
                     }
                     pendingUnilateralChange = nil
                 }
-                Button("Confirm", role: .destructive) {
+                Button("Update All Workouts", role: .destructive) {
                     saveExerciseWithMigration()
                 }
             } message: {
@@ -214,9 +214,9 @@ struct ExerciseFormView: View {
                     let count = affectedWorkoutsCount(for: exercise.id)
                     switch change {
                     case .addingUnilateral:
-                        Text("This exercise appears in \(count) workout\(count == 1 ? "" : "s"). All logged weights will be halved (e.g., 60kg → 30kg) to maintain accurate volume tracking. The total volume lifted will remain the same.")
+                        Text("You've added the 'unilateral' tag to this exercise. This exercise appears in \(count) workout\(count == 1 ? "" : "s"). All logged weights will be automatically halved (e.g., 60kg → 30kg) to maintain accurate volume tracking.\n\nAlternatively, cancel and create a new exercise instead.")
                     case .removingUnilateral:
-                        Text("This exercise appears in \(count) workout\(count == 1 ? "" : "s"). All logged weights will be doubled (e.g., 30kg → 60kg) to maintain accurate volume tracking. The total volume lifted will remain the same.")
+                        Text("You've removed the 'unilateral' tag from this exercise. This exercise appears in \(count) workout\(count == 1 ? "" : "s"). All logged weights will be automatically doubled (e.g., 30kg → 60kg) to maintain accurate volume tracking.\n\nAlternatively, cancel and create a new exercise instead.")
                     }
                 }
             }
