@@ -14,6 +14,7 @@ final class WorkoutRoutine {
     var name: String
     var routineDescription: String?
     var emoji: String?
+    var isArchived: Bool
     var createdAt: Date
     var updatedAt: Date
 
@@ -29,6 +30,7 @@ final class WorkoutRoutine {
         self.name = name
         self.routineDescription = routineDescription
         self.emoji = emoji
+        self.isArchived = false
         self.exercises = exercises
         self.createdAt = Date()
         self.updatedAt = Date()

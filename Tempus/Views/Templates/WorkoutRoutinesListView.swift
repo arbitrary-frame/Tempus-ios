@@ -17,15 +17,30 @@ struct WorkoutRoutinesListView: View {
     @State private var showingPresetBrowser = false
     @State private var selectedRoutine: WorkoutRoutine?
     @State private var routineToStart: WorkoutRoutine?
+    @State private var routineToDelete: WorkoutRoutine?
+    @State private var showingDeleteConfirmation = false
+    @State private var showingCannotDeleteAlert = false
 
     private var currentStreak: Int {
         AnalyticsHelper.calculateCurrentStreak(workouts: workouts, weeklyGoal: weeklyWorkoutGoal)
     }
 
+    var filteredRoutines: [WorkoutRoutine] {
+        routines.filter { !$0.isArchived }
+    }
+
+    var archivedRoutines: [WorkoutRoutine] {
+        routines.filter { $0.isArchived }
+    }
+
+    var hasArchivedRoutines: Bool {
+        !archivedRoutines.isEmpty
+    }
+
     var body: some View {
         NavigationStack {
             Group {
-                if routines.isEmpty {
+                if filteredRoutines.isEmpty {
                     VStack(spacing: 0) {
                         Spacer()
 
@@ -76,7 +91,41 @@ struct WorkoutRoutinesListView: View {
                     }
                 } else {
                     List {
-                        ForEach(routines) { routine in
+                        // Archive entry point (WhatsApp-style)
+                        if hasArchivedRoutines {
+                            Section {
+                                NavigationLink(destination: ArchivedRoutinesView()) {
+                                    HStack {
+                                        Image(systemName: "archivebox")
+                                            .font(.title3)
+                                            .symbolRenderingMode(.hierarchical)
+                                            .foregroundStyle(.secondary)
+
+                                        Text("Archived")
+                                            .font(.headline)
+                                            .foregroundStyle(.secondary)
+
+                                        Spacer()
+
+                                        Text("\(archivedRoutines.count)")
+                                            .font(.subheadline)
+                                            .foregroundStyle(.tertiary)
+
+                                        Image(systemName: "chevron.right")
+                                            .font(.caption)
+                                            .foregroundStyle(.tertiary)
+                                    }
+                                    .padding(.vertical, 4)
+                                }
+                            }
+                            .listRowBackground(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(.regularMaterial)
+                                    .padding(.vertical, 2)
+                            )
+                        }
+
+                        ForEach(filteredRoutines) { routine in
                             Button {
                                 selectedRoutine = routine
                             } label: {
@@ -92,10 +141,17 @@ struct WorkoutRoutinesListView: View {
                             )
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                 Button(role: .destructive) {
-                                    deleteRoutine(routine)
+                                    requestDelete(routine)
                                 } label: {
                                     Label("Delete", systemImage: "trash")
                                 }
+
+                                Button {
+                                    archiveRoutine(routine)
+                                } label: {
+                                    Label("Archive", systemImage: "archivebox")
+                                }
+                                .tint(.orange)
 
                                 Button {
                                     routineToStart = routine
@@ -145,14 +201,60 @@ struct WorkoutRoutinesListView: View {
             .fullScreenCover(item: $routineToStart) { routine in
                 WorkoutLoggingView(routine: routine)
             }
+            .alert("Delete this routine?", isPresented: $showingDeleteConfirmation) {
+                Button("Delete", role: .destructive) {
+                    confirmDelete()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This action cannot be undone. The exercises in this routine will not be affected.")
+            }
+            .alert("Cannot Delete Routine", isPresented: $showingCannotDeleteAlert) {
+                Button("Archive Instead", role: .destructive) {
+                    archiveRoutine(routineToDelete)
+                }
+                Button("Cancel", role: .cancel) {
+                    routineToDelete = nil
+                }
+            } message: {
+                if let routine = routineToDelete {
+                    Text("'\(routine.name)' has been used in past workouts and cannot be deleted. You can archive it instead to hide it from this list whilst preserving all historical data.")
+                }
+            }
         }
     }
 
-    private func deleteRoutine(_ routine: WorkoutRoutine) {
-        HapticManager.shared.trigger(.warning)
-        withAnimation {
-            modelContext.delete(routine)
+    // Check if routine has been used in any workouts
+    private func isRoutineUsed(_ routine: WorkoutRoutine) -> Bool {
+        return workouts.contains { workout in
+            workout.routine?.id == routine.id
         }
+    }
+
+    private func requestDelete(_ routine: WorkoutRoutine) {
+        routineToDelete = routine
+        if isRoutineUsed(routine) {
+            showingCannotDeleteAlert = true
+        } else {
+            showingDeleteConfirmation = true
+        }
+    }
+
+    private func confirmDelete() {
+        guard let routine = routineToDelete else { return }
+        modelContext.delete(routine)
+        try? modelContext.save()
+        HapticManager.shared.trigger(.success)
+        routineToDelete = nil
+    }
+
+    private func archiveRoutine(_ routine: WorkoutRoutine?) {
+        guard let routine else { return }
+        routine.isArchived = true
+        routine.updatedAt = Date()
+        try? modelContext.save()
+        HapticManager.shared.trigger(.success)
+        routineToDelete = nil
     }
 }
 
