@@ -4,6 +4,49 @@ All notable changes to Tempus iOS workout tracking app.
 
 ## [Unreleased]
 
+### [Unilateral Tag Migration System] - 2025-10-15
+
+**Changed:**
+- **Removed Unilateral Tag Blocking** - Users can now freely add/remove "unilateral" tag from exercises at any time
+
+**Added:**
+- **Automatic Historical Data Migration** - When toggling unilateral status on exercises with existing workout logs:
+  - Confirmation dialog explains the change and asks for approval
+  - All historical workout data automatically adjusted to maintain accurate volume
+  - isUnilateral flag updated in all WorkoutExerciseData entries
+
+- **Smart Weight Adjustment**
+  - **Adding unilateral tag:** All logged weights halved (60kg → 30kg)
+  - **Removing unilateral tag:** All logged weights doubled (30kg → 60kg)
+  - Total volume remains unchanged (60×10 = 30×2×10 = 600kg)
+
+- **Clear User Communication**
+  - Dialog title: "Unilateral Tag Changed"
+  - Explains why warning appeared (tag was added/removed)
+  - Shows number of affected workouts
+  - Provides weight adjustment example
+  - Suggests alternative: "Cancel and create a new exercise instead"
+  - Action button: "Update All Workouts"
+
+**Benefits:**
+- ✅ Can correct mistakes without creating duplicate exercises
+- ✅ User assumes responsibility for logging accuracy
+- ✅ Historical data automatically corrected
+- ✅ Volume tracking remains accurate across all analytics
+- ✅ PRs update automatically
+- ✅ Clear warning with cancel option
+- ✅ No manual data cleanup required
+
+**Technical:**
+- ExerciseFormView.swift - Detection, confirmation dialog, migration logic
+- Iterates through all WorkoutEntry exercisesData arrays
+- Updates WorkoutExerciseData → WorkoutSet → WeightRep structures
+- Atomic save via modelContext.save()
+- Removed canChangeUnilateralTag restriction
+- Removed showingUnilateralLockAlert (replaced with migration dialog)
+
+---
+
 ### [Analytics Page UI Updates] - 2025-10-15
 
 **Changed:**
