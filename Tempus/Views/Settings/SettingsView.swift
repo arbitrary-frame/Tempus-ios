@@ -7,6 +7,8 @@
 
 import SwiftUI
 import SwiftData
+import WidgetKit
+import UniformTypeIdentifiers
 
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
@@ -24,6 +26,12 @@ struct SettingsView: View {
     @State private var exportErrorMessage = ""
     @State private var showingSampleDataLoaded = false
     @State private var showingDataCleared = false
+    @State private var showingImportPicker = false
+    @State private var showingImportConfirmation = false
+    @State private var importData: ExportData?
+    @State private var showingImportSuccess = false
+    @State private var showingImportError = false
+    @State private var importErrorMessage = ""
 
     var body: some View {
         NavigationStack {
@@ -48,6 +56,12 @@ struct SettingsView: View {
 
                 // Data Section
                 Section("Data") {
+                    Button {
+                        showingImportPicker = true
+                    } label: {
+                        Label("Import Data", systemImage: "square.and.arrow.down")
+                    }
+
                     Button {
                         exportAllData()
                     } label: {
@@ -132,10 +146,41 @@ struct SettingsView: View {
                 ShareSheet(items: [item.url])
                     .presentationDetents([.medium, .large])
             }
+            .fileImporter(
+                isPresented: $showingImportPicker,
+                allowedContentTypes: [.json],
+                allowsMultipleSelection: false
+            ) { result in
+                handleImportFile(result: result)
+            }
             .alert("Export Error", isPresented: $showingExportError) {
                 Button("OK", role: .cancel) { }
             } message: {
                 Text(exportErrorMessage)
+            }
+            .alert("Import Data?", isPresented: $showingImportConfirmation) {
+                Button("Cancel", role: .cancel) {
+                    importData = nil
+                }
+                Button("Import", role: .destructive) {
+                    performImport()
+                }
+            } message: {
+                if let data = importData {
+                    Text("This will replace ALL your current data with the imported data.\n\nImporting: \(data.metadata.totalWorkouts) workouts, \(data.metadata.totalExercises) exercises, \(data.metadata.totalRoutines) routines.\n\nThis action cannot be undone.")
+                }
+            }
+            .alert("Import Successful!", isPresented: $showingImportSuccess) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                if let data = importData {
+                    Text("Successfully imported \(data.metadata.totalWorkouts) workouts, \(data.metadata.totalExercises) exercises, and \(data.metadata.totalRoutines) routines.")
+                }
+            }
+            .alert("Import Error", isPresented: $showingImportError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(importErrorMessage)
             }
             .alert("Reset App to Default?", isPresented: $showingResetConfirmation) {
                 Button("Cancel", role: .cancel) { }
@@ -275,6 +320,153 @@ struct SettingsView: View {
             // Show error to user
             exportErrorMessage = "Failed to export data: \(error.localizedDescription)"
             showingExportError = true
+            HapticManager.shared.trigger(.error)
+        }
+    }
+
+    private func handleImportFile(result: Result<[URL], Error>) {
+        do {
+            let fileURL = try result.get().first
+            guard let fileURL = fileURL else {
+                importErrorMessage = "No file selected"
+                showingImportError = true
+                return
+            }
+
+            // Read and decode JSON
+            let data = try Data(contentsOf: fileURL)
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            let exportData = try decoder.decode(ExportData.self, from: data)
+
+            // Store data and show confirmation
+            importData = exportData
+            showingImportConfirmation = true
+        } catch {
+            importErrorMessage = "Failed to read import file: \(error.localizedDescription)"
+            showingImportError = true
+            HapticManager.shared.trigger(.error)
+        }
+    }
+
+    private func performImport() {
+        guard let data = importData else { return }
+
+        do {
+            HapticManager.shared.trigger(.warning)
+
+            // Step 1: Delete all existing data
+            for workout in workouts {
+                modelContext.delete(workout)
+            }
+            for routine in routines {
+                modelContext.delete(routine)
+            }
+            for exercise in exercises {
+                modelContext.delete(exercise)
+            }
+
+            // Step 2: Import exercises first (maintain UUIDs)
+            var exerciseMap: [String: Exercise] = [:]
+            for exportExercise in data.exercises {
+                guard let uuid = UUID(uuidString: exportExercise.id) else { continue }
+
+                let exercise = Exercise(
+                    name: exportExercise.name,
+                    muscleGroup: exportExercise.muscleGroup,
+                    tags: exportExercise.tags,
+                    exerciseDescription: exportExercise.description,
+                    imageURL: exportExercise.imageURL
+                )
+                exercise.id = uuid
+                exercise.isArchived = exportExercise.isArchived
+                exercise.createdAt = exportExercise.createdAt
+                exercise.updatedAt = exportExercise.updatedAt
+
+                modelContext.insert(exercise)
+                exerciseMap[exportExercise.id] = exercise
+            }
+
+            // Step 3: Import routines (link to exercises)
+            var routineMap: [String: WorkoutRoutine] = [:]
+            for exportRoutine in data.routines {
+                guard let uuid = UUID(uuidString: exportRoutine.id) else { continue }
+
+                // Link to exercises
+                let linkedExercises = exportRoutine.exerciseIDs.compactMap { exerciseMap[$0] }
+
+                let routine = WorkoutRoutine(
+                    name: exportRoutine.name,
+                    routineDescription: exportRoutine.description,
+                    emoji: exportRoutine.emoji,
+                    exercises: linkedExercises
+                )
+                routine.id = uuid
+                routine.createdAt = exportRoutine.createdAt
+                routine.updatedAt = exportRoutine.updatedAt
+
+                modelContext.insert(routine)
+                routineMap[exportRoutine.id] = routine
+            }
+
+            // Step 4: Import workouts
+            for exportWorkout in data.workouts {
+                guard let uuid = UUID(uuidString: exportWorkout.id) else { continue }
+
+                // Convert exercises data
+                let exercisesData = exportWorkout.exercises.map { exportExercise -> WorkoutExerciseData in
+                    guard let exerciseUUID = UUID(uuidString: exportExercise.exerciseID) else {
+                        fatalError("Invalid exercise ID")
+                    }
+
+                    let sets = exportExercise.sets.map { exportSet -> WorkoutSet in
+                        let weightsAndReps = exportSet.weightsAndReps.map { exportWR in
+                            WeightRep(weight: exportWR.weight, reps: exportWR.reps)
+                        }
+                        return WorkoutSet(setNumber: exportSet.setNumber, weightsAndReps: weightsAndReps)
+                    }
+
+                    return WorkoutExerciseData(
+                        exerciseID: exerciseUUID,
+                        exerciseName: exportExercise.name,
+                        isUnilateral: exportExercise.isUnilateral,
+                        sets: sets,
+                        notes: exportExercise.notes
+                    )
+                }
+
+                // Link to routine if applicable
+                let routine = exportWorkout.routineID.flatMap { routineMap[$0] }
+
+                let workout = WorkoutEntry(
+                    name: exportWorkout.name,
+                    date: exportWorkout.date,
+                    routine: routine,
+                    exercisesData: exercisesData,
+                    notes: exportWorkout.notes
+                )
+                workout.id = uuid
+                workout.createdAt = exportWorkout.createdAt
+
+                modelContext.insert(workout)
+            }
+
+            // Step 5: Import user settings
+            userName = data.userSettings.userName
+            weeklyWorkoutGoal = data.userSettings.weeklyWorkoutGoal
+
+            // Step 6: Save everything
+            try modelContext.save()
+
+            // Step 7: Reload widgets
+            WidgetCenter.shared.reloadAllTimelines()
+
+            // Success!
+            HapticManager.shared.trigger(.success)
+            showingImportSuccess = true
+        } catch {
+            importErrorMessage = "Import failed: \(error.localizedDescription)"
+            showingImportError = true
             HapticManager.shared.trigger(.error)
         }
     }
