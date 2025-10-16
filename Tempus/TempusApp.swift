@@ -27,12 +27,12 @@ struct TempusApp: App {
         // Conditional database path AND App Group based on build configuration
         #if DEVELOPMENT
         let databaseName = "dev-database.store"
-        let appGroupIdentifier = "group.tempus-ios.Tempus.dev"
+        let appGroupIdentifier = "group.tempus.dev"
         print("🧪 [DEVELOPMENT] Using dev database: \(databaseName)")
         print("🧪 [DEVELOPMENT] Using dev App Group: \(appGroupIdentifier)")
         #else
         let databaseName = "production-database.store"
-        let appGroupIdentifier = "group.tempus-ios.Tempus"
+        let appGroupIdentifier = "group.tempus.prod"
         print("✅ [PRODUCTION] Using production database: \(databaseName)")
         print("✅ [PRODUCTION] Using production App Group: \(appGroupIdentifier)")
         #endif

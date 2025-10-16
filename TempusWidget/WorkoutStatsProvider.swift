@@ -23,12 +23,12 @@ struct WorkoutStatsProvider: TimelineProvider {
         // Conditional database path AND App Group based on build configuration (MUST match main app)
         #if DEVELOPMENT
         let databaseName = "dev-database.store"
-        let appGroupIdentifier = "group.tempus-ios.Tempus.dev"
+        let appGroupIdentifier = "group.tempus.dev"
         print("🧪 [WIDGET DEVELOPMENT] Using dev database: \(databaseName)")
         print("🧪 [WIDGET DEVELOPMENT] Using dev App Group: \(appGroupIdentifier)")
         #else
         let databaseName = "production-database.store"
-        let appGroupIdentifier = "group.tempus-ios.Tempus"
+        let appGroupIdentifier = "group.tempus.prod"
         print("✅ [WIDGET PRODUCTION] Using production database: \(databaseName)")
         print("✅ [WIDGET PRODUCTION] Using production App Group: \(appGroupIdentifier)")
         #endif
