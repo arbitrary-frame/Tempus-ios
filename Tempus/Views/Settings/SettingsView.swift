@@ -333,6 +333,17 @@ struct SettingsView: View {
                 return
             }
 
+            // Start accessing security-scoped resource
+            guard fileURL.startAccessingSecurityScopedResource() else {
+                importErrorMessage = "Permission denied. Unable to access the file."
+                showingImportError = true
+                return
+            }
+
+            defer {
+                fileURL.stopAccessingSecurityScopedResource()
+            }
+
             // Read and decode JSON
             let data = try Data(contentsOf: fileURL)
             let decoder = JSONDecoder()
