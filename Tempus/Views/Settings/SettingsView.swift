@@ -198,6 +198,7 @@ struct SettingsView: View {
                     name: workout.workoutName,
                     date: workout.workoutDate,
                     notes: workout.notes,
+                    createdAt: workout.createdAt,
                     exercises: workout.exercisesData.map { exerciseData in
                         // Look up muscle group from Exercise database using exerciseID
                         let muscleGroup = exercises.first(where: { $0.id == exerciseData.exerciseID })?.muscleGroup
@@ -206,6 +207,7 @@ struct SettingsView: View {
                             exerciseID: exerciseData.exerciseID.uuidString,
                             name: exerciseData.exerciseName,
                             muscleGroup: muscleGroup,
+                            isUnilateral: exerciseData.isUnilateral,
                             sets: exerciseData.sets.map { set in
                                 ExportSet(
                                     setNumber: set.setNumber,
@@ -225,7 +227,11 @@ struct SettingsView: View {
                     name: exercise.name,
                     description: exercise.exerciseDescription,
                     muscleGroup: exercise.muscleGroup,
-                    tags: exercise.tags
+                    tags: exercise.tags,
+                    imageURL: exercise.imageURL,
+                    isArchived: exercise.isArchived,
+                    createdAt: exercise.createdAt,
+                    updatedAt: exercise.updatedAt
                 )
             },
             routines: routines.map { routine in
@@ -341,6 +347,7 @@ struct ExportWorkout: Codable, Sendable {
     let name: String
     let date: Date
     let notes: String?
+    let createdAt: Date
     let exercises: [ExportExercise]
 }
 
@@ -348,6 +355,7 @@ struct ExportExercise: Codable, Sendable {
     let exerciseID: String
     let name: String
     let muscleGroup: String?
+    let isUnilateral: Bool
     let sets: [ExportSet]
     let notes: String?
 }
@@ -368,6 +376,10 @@ struct ExportExerciseDefinition: Codable, Sendable {
     let description: String?
     let muscleGroup: String
     let tags: [String]
+    let imageURL: String?
+    let isArchived: Bool
+    let createdAt: Date
+    let updatedAt: Date
 }
 
 struct ExportRoutine: Codable, Sendable {
