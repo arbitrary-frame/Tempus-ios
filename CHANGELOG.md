@@ -4,6 +4,81 @@ All notable changes to Tempus iOS workout tracking app.
 
 ## [Unreleased]
 
+### [Complete Data Import/Export System] - 2025-10-16
+
+**Added:**
+- **Full Data Backup & Restore** for beta testing and data portability
+  - Export captures ALL app data: workouts, exercises, routines, user settings
+  - Import completely replaces existing data with exported snapshot
+  - Perfect app state restoration across devices or fresh installs
+
+- **Enhanced Export Format (v1.2.0)**
+  - **Exercise fields:** `imageURL`, `isArchived`, `createdAt`, `updatedAt`
+  - **Workout fields:** `createdAt`
+  - **Exercise data fields:** `isUnilateral` (preserves volume calculation accuracy)
+  - UUID preservation for maintaining relationships during import
+  - ISO8601 date encoding for cross-platform compatibility
+
+- **Import Functionality**
+  - "Import Data" button in Settings → Data section
+  - JSON file picker (Files app integration)
+  - Confirmation dialog showing import summary
+  - Full data replacement with atomic operation
+  - **Security-scoped resource access** for iOS file permission handling
+  - Success/error alerts with descriptive messages
+
+- **Complete Data Replacement Flow**
+  1. Delete all existing workouts, routines, exercises
+  2. Import exercises (maintain original UUIDs)
+  3. Import routines (link to imported exercises)
+  4. Import workouts (link to routines + exercises, preserve exercisesData)
+  5. Restore user settings (userName, weeklyWorkoutGoal)
+  6. Save all changes atomically
+  7. Reload widgets to reflect new data
+
+**Benefits:**
+- ✅ Complete app backup for beta testers
+- ✅ Easy data migration between devices
+- ✅ Safe testing environment (export → test → import if needed)
+- ✅ Preserve all relationships (routines → exercises, workouts → routines)
+- ✅ Exact state restoration (UUIDs, dates, settings)
+- ✅ No data loss during import/export cycle
+- ✅ Works with Files app and cloud storage
+
+**Technical:**
+- Added `startAccessingSecurityScopedResource()` for iOS file access
+- `defer` block ensures `stopAccessingSecurityScopedResource()` cleanup
+- ISO8601 date strategy for reliable serialization
+- UUID preservation via `exercise.id = uuid` pattern
+- Atomic import (all or nothing via try/catch)
+- Widget timeline reload after successful import
+- Comprehensive error handling with user-friendly messages
+
+**Fixed:**
+- **iOS file import permission error**
+  - Issue: "Permission denied" when accessing JSON from Downloads
+  - Root cause: iOS requires explicit security-scoped resource access
+  - Solution: Added `startAccessingSecurityScopedResource()` with defer cleanup
+  - Now works correctly with Files app, Downloads, iCloud Drive
+
+---
+
+### [Quick Log Date Title Bug Fix] - 2025-10-16
+
+**Fixed:**
+- **Workout name not updating when date changes in quick log workouts**
+  - Issue: Starting routine workout updated name on date change, but quick log didn't
+  - Root cause: `updateWorkoutNameIfNeeded()` only handled routine case
+  - Solution: Added else branch to update quick log names: "Workout - DD/MM/YYYY"
+  - Now both routine and quick log workouts update names correctly
+
+**Technical:**
+- Updated `updateWorkoutNameIfNeeded()` in WorkoutLoggingView.swift
+- Maintains UK date format (DD/MM/YYYY) via `Self.dateFormatter`
+- Consistent behaviour across all workout creation methods
+
+---
+
 ### [Exercise Archive System] - 2025-10-15
 
 **Added:**
