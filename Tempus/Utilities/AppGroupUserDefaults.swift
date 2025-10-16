@@ -13,9 +13,9 @@ import Combine
 extension UserDefaults {
     static let shared: UserDefaults = {
         #if DEVELOPMENT
-        let appGroupIdentifier = "group.tempus-ios.Tempus.dev"
+        let appGroupIdentifier = "group.tempus.dev"
         #else
-        let appGroupIdentifier = "group.tempus-ios.Tempus"
+        let appGroupIdentifier = "group.tempus.prod"
         #endif
 
         guard let userDefaults = UserDefaults(suiteName: appGroupIdentifier) else {

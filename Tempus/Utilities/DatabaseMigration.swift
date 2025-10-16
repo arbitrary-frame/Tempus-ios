@@ -15,11 +15,11 @@ enum DatabaseMigration {
     static func migrateToAppGroupIfNeeded() {
         #if DEVELOPMENT
         let databaseName = "dev-database.store"
-        let appGroupIdentifier = "group.tempus-ios.Tempus.dev"
+        let appGroupIdentifier = "group.tempus.dev"
         print("🔄 Checking for dev database migration...")
         #else
         let databaseName = "production-database.store"
-        let appGroupIdentifier = "group.tempus-ios.Tempus"
+        let appGroupIdentifier = "group.tempus.prod"
         print("🔄 Checking for production database migration...")
         #endif
 

@@ -4,8 +4,8 @@
 <dict>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.tempus-ios.Tempus</string>
-		<string>group.tempus-ios.Tempus.dev</string>
+		<string>group.tempus.dev</string>
+		<string>group.tempus.prod</string>
 	</array>
 </dict>
 </plist>
