@@ -16,75 +16,72 @@ struct OnboardingView: View {
 
     var body: some View {
         ZStack {
-            // Content for current page
+            // Content for current page - wrapped with ID for synchronized animation
             Group {
                 switch currentPage {
                 case 0:
                     WelcomeScreen(userName: $userName, weeklyGoal: $weeklyGoal, onNext: {
-                        withAnimation {
+                        withAnimation(.smooth(duration: 0.4)) {
                             currentPage += 1
                         }
                     })
-                    .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
                 case 1:
                     ValuePropositionScreen(onNext: {
-                        withAnimation {
+                        withAnimation(.smooth(duration: 0.4)) {
                             currentPage += 1
                         }
                     })
-                    .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
                 case 2:
                     PresetLibraryIntroScreen(onNext: {
-                        withAnimation {
+                        withAnimation(.smooth(duration: 0.4)) {
                             currentPage += 1
                         }
                     })
-                    .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
                 case 3:
                     SmartLoggingScreen(onNext: {
-                        withAnimation {
+                        withAnimation(.smooth(duration: 0.4)) {
                             currentPage += 1
                         }
                     })
-                    .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
                 case 4:
                     ProgressTrackingScreen(onNext: {
-                        withAnimation {
+                        withAnimation(.smooth(duration: 0.4)) {
                             currentPage += 1
                         }
                     })
-                    .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
                 case 5:
                     FinalScreen(userName: userName, weeklyGoal: weeklyGoal, onComplete: {
                         completeOnboarding()
                     })
-                    .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
                 default:
                     EmptyView()
                 }
             }
-
+            .id(currentPage) // Force complete view replacement for synchronized animation
+            .transition(.asymmetric(
+                insertion: .move(edge: .trailing).combined(with: .opacity),
+                removal: .move(edge: .leading).combined(with: .opacity)
+            ))
+            .animation(.smooth(duration: 0.4), value: currentPage)
+        }
+        .overlay(alignment: .topTrailing) {
             // Skip button (hide on first and last screen)
             if currentPage > 0 && currentPage < 5 {
-                VStack {
-                    HStack {
-                        Spacer()
-                        Button {
-                            completeOnboarding()
-                        } label: {
-                            Text("Skip")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                                .padding()
-                        }
-                    }
-                    Spacer()
+                Button {
+                    completeOnboarding()
+                } label: {
+                    Text("Skip")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                 }
+                .frame(minWidth: 44, minHeight: 44)
+                .padding(.trailing, 20)
+                .padding(.top, 20)
             }
-
-            // Page indicator
-            VStack {
-                Spacer()
+        }
+        .overlay(alignment: .bottom) {
+            // Page indicator (hide on first and last screen)
+            if currentPage > 0 && currentPage < 5 {
                 HStack(spacing: 8) {
                     ForEach(0..<6) { index in
                         Circle()
@@ -92,7 +89,8 @@ struct OnboardingView: View {
                             .frame(width: 8, height: 8)
                     }
                 }
-                .padding(.bottom, 100)
+                .padding(.bottom, 50)
+                .transition(.opacity)
             }
         }
         .preferredColorScheme(themeManager.colorScheme)
@@ -125,11 +123,13 @@ struct WelcomeScreen: View {
             VStack(spacing: 12) {
                 Text("Welcome to Tempus")
                     .font(.largeTitle.bold())
+                    .fixedSize(horizontal: false, vertical: true)
 
                 Text("Track your strength journey with intelligent progress tracking")
                     .font(.title3)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 32)
             }
 
@@ -204,11 +204,11 @@ struct ValuePropositionScreen: View {
     let onNext: () -> Void
 
     var body: some View {
-        VStack(spacing: 40) {
+        VStack(spacing: 32) {
             Spacer()
 
             Image(systemName: "figure.strengthtraining.traditional")
-                .font(.system(size: 90))
+                .font(.system(size: 80))
                 .foregroundStyle(.accent)
                 .symbolRenderingMode(.hierarchical)
 
@@ -216,6 +216,8 @@ struct ValuePropositionScreen: View {
                 Text("Your Workout Journey, Simplified")
                     .font(.title.bold())
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 20)
 
                 // 2x2 Grid of value props
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
@@ -238,9 +240,9 @@ struct ValuePropositionScreen: View {
                     )
 
                     ValuePropCard(
-                        icon: "flag.fill",
-                        title: "Built for the UK",
-                        description: "DD/MM/YYYY, kg weights, British English"
+                        icon: "arrow.triangle.2.circlepath",
+                        title: "Smart Templates",
+                        description: "Create reusable workout routines for faster logging"
                     )
                 }
                 .padding(.horizontal, 24)
@@ -276,7 +278,7 @@ struct ValuePropCard: View {
     var body: some View {
         VStack(spacing: 12) {
             Image(systemName: icon)
-                .font(.system(size: 36))
+                .font(.system(size: 32))
                 .foregroundStyle(.accent)
                 .symbolRenderingMode(.hierarchical)
 
@@ -284,16 +286,19 @@ struct ValuePropCard: View {
                 Text(title)
                     .font(.subheadline.bold())
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(2)
 
                 Text(description)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
                     .lineLimit(3)
             }
         }
-        .frame(maxWidth: .infinity, minHeight: 140)
-        .padding(16)
+        .frame(maxWidth: .infinity, minHeight: 160)
+        .padding(14)
         .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
@@ -304,47 +309,57 @@ struct PresetLibraryIntroScreen: View {
     let onNext: () -> Void
 
     var body: some View {
-        VStack(spacing: 40) {
+        VStack(spacing: 28) {
             Spacer()
 
             Image(systemName: "tray.and.arrow.down.fill")
-                .font(.system(size: 100))
+                .font(.system(size: 80))
                 .foregroundStyle(.accent)
                 .symbolRenderingMode(.hierarchical)
 
-            VStack(spacing: 16) {
+            VStack(spacing: 14) {
                 Text("Start Logging in Seconds")
-                    .font(.title.bold())
+                    .font(.title2.bold())
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 20)
 
                 VStack(alignment: .leading, spacing: 12) {
                     HStack(spacing: 12) {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundStyle(.accent)
+                            .font(.system(size: 20))
                         Text("30+ preset exercises across 8 muscle groups")
                             .font(.body)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
 
                     HStack(spacing: 12) {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundStyle(.accent)
+                            .font(.system(size: 20))
                         Text("7 curated workout routines (Push, Pull, Legs, and more)")
                             .font(.body)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
 
                     HStack(spacing: 12) {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundStyle(.accent)
+                            .font(.system(size: 20))
                         Text("Or create your own exercises from scratch")
                             .font(.body)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
-                .padding(.horizontal, 32)
+                .padding(.horizontal, 28)
 
                 Text("You'll see the preset library after onboarding")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 8)
+                    .padding(.horizontal, 20)
             }
 
             Spacer()
@@ -374,18 +389,20 @@ struct SmartLoggingScreen: View {
     let onNext: () -> Void
 
     var body: some View {
-        VStack(spacing: 40) {
+        VStack(spacing: 32) {
             Spacer()
 
             Image(systemName: "brain.head.profile")
-                .font(.system(size: 100))
+                .font(.system(size: 80))
                 .foregroundStyle(.accent)
                 .symbolRenderingMode(.hierarchical)
 
             VStack(spacing: 16) {
                 Text("Logging That Learns From You")
-                    .font(.title.bold())
+                    .font(.title2.bold())
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 20)
 
                 VStack(alignment: .leading, spacing: 12) {
                     FeatureRow(
@@ -412,7 +429,7 @@ struct SmartLoggingScreen: View {
                         description: "Track how you felt or exercise variations"
                     )
                 }
-                .padding(.horizontal, 32)
+                .padding(.horizontal, 28)
             }
 
             Spacer()
@@ -445,7 +462,7 @@ struct FeatureRow: View {
     var body: some View {
         HStack(spacing: 16) {
             Image(systemName: icon)
-                .font(.system(size: 28))
+                .font(.system(size: 26))
                 .foregroundStyle(.accent)
                 .symbolRenderingMode(.hierarchical)
                 .frame(width: 36)
@@ -453,9 +470,11 @@ struct FeatureRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.subheadline.bold())
+                    .fixedSize(horizontal: false, vertical: true)
                 Text(description)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -467,24 +486,27 @@ struct ProgressTrackingScreen: View {
     let onNext: () -> Void
 
     var body: some View {
-        VStack(spacing: 40) {
+        VStack(spacing: 28) {
             Spacer()
 
             Image(systemName: "chart.line.uptrend.xyaxis")
-                .font(.system(size: 100))
+                .font(.system(size: 80))
                 .foregroundStyle(.accent)
                 .symbolRenderingMode(.hierarchical)
 
-            VStack(spacing: 16) {
+            VStack(spacing: 14) {
                 Text("See Your Progress")
-                    .font(.title.bold())
+                    .font(.title2.bold())
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 20)
 
                 Text("Comprehensive analytics to track your strength journey")
                     .font(.body)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 28)
 
                 // 2x3 Grid of analytics features
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
@@ -495,7 +517,7 @@ struct ProgressTrackingScreen: View {
                     AnalyticsFeatureCard(icon: "app.badge.fill", label: "Home Widgets")
                     AnalyticsFeatureCard(icon: "calendar", label: "Workout Calendar")
                 }
-                .padding(.horizontal, 32)
+                .padding(.horizontal, 28)
             }
 
             Spacer()
@@ -527,15 +549,15 @@ struct AnalyticsFeatureCard: View {
     var body: some View {
         VStack(spacing: 8) {
             Image(systemName: icon)
-                .font(.system(size: 32))
+                .font(.system(size: 30))
                 .foregroundStyle(.accent)
                 .symbolRenderingMode(.hierarchical)
 
             Text(label)
                 .font(.caption.bold())
                 .multilineTextAlignment(.center)
-                .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
+                .lineLimit(2)
         }
         .frame(maxWidth: .infinity, minHeight: 90)
         .padding(12)
@@ -551,11 +573,11 @@ struct FinalScreen: View {
     let onComplete: () -> Void
 
     var body: some View {
-        VStack(spacing: 40) {
+        VStack(spacing: 32) {
             Spacer()
 
             Image(systemName: "figure.arms.open")
-                .font(.system(size: 100))
+                .font(.system(size: 80))
                 .foregroundStyle(.accent)
                 .symbolRenderingMode(.hierarchical)
 
@@ -563,18 +585,22 @@ struct FinalScreen: View {
                 Text(userName.isEmpty ? "You're Ready to Start!" : "\(userName), You're Ready to Start!")
                     .font(.title.bold())
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 20)
 
                 VStack(spacing: 8) {
                     Text("Your weekly goal: \(weeklyGoal) workout\(weeklyGoal == 1 ? "" : "s")")
                         .font(.body)
                         .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
 
                     Text("We've prepared 30+ exercises and 7 routines to get you started")
                         .font(.body)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, 20)
                 }
-                .padding(.horizontal, 32)
             }
 
             Spacer()
@@ -616,6 +642,7 @@ struct FinalScreen: View {
             Text("You can change your goal anytime in Settings")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 8)
 
             Spacer()
