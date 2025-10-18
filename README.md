@@ -6,35 +6,96 @@ A minimalist iOS workout tracking app built with Swift 6, SwiftUI, and SwiftData
 [![Swift](https://img.shields.io/badge/Swift-6.0-orange.svg)](https://swift.org)
 [![SwiftUI](https://img.shields.io/badge/SwiftUI-5.0-blue.svg)](https://developer.apple.com/xcode/swiftui/)
 
-> A powerful yet simple workout tracker focused on what matters: tracking your progress without the noise.
+---
+
+## 📱 App Store Description
+
+A powerful yet simple workout tracker focused on what matters: tracking your progress without the noise.
+
+Tempus is designed for lifters who want intelligent workout tracking without subscriptions, social features, or complicated interfaces. See your previous performance while logging exercises, track personal records automatically, and monitor your consistency with beautiful home screen widgets.
+
+**Core Features:**
+• **Smart Logging** - See your last workout's numbers while logging. Tap to copy previous sets and stay focused on progressive overload.
+• **30+ Preset Exercises** - Organized by muscle groups (chest, back, legs, shoulders, arms, core, cardio, full body) with support for custom exercises.
+• **Workout Routines** - Save your favourite workouts as templates with custom emoji icons for quick logging.
+• **Drop Set Support** - Log multiple weight/rep pairs per set for advanced training techniques.
+• **Personal Records** - Automatic PR tracking by exercise with historical data.
+• **Weekly Goals** - Set workout frequency goals and track consistency with progress rings.
+• **Home Widgets** - Beautiful iOS 26 widgets showing your weekly stats at a glance.
+• **Workout Calendar** - Visual calendar of your training history with colour-coded consistency.
+• **Analytics Dashboard** - Week-over-week comparisons, volume progression, and streak tracking.
+• **Complete Privacy** - Your data never leaves your device. No account, no tracking, no ads.
+• **Export/Import** - Full JSON backup of all your workout data whenever you need it.
+
+**Built for iOS 26:**
+• Liquid Glass design language with translucent materials
+• SF Symbols 7 icons throughout
+• Haptic feedback on every interaction
+• Dark mode optimized (light mode available)
+• UK-first design (metric units, DD/MM/YYYY dates)
+
+**Perfect for:**
+• Strength training and progressive overload
+• Bodybuilding and hypertrophy training
+• Powerlifting programs
+• General fitness and consistency tracking
+
+No subscriptions. No social features. No noise. Just you and your progress.
+
+---
 
 ## ✨ Features
 
-### 🏋️ Core Functionality
-- **Workout Logging** - Track exercises, sets, weights, and reps with drop set support
-- **Routines** - Create reusable workout templates with custom emoji icons
-- **Exercise Library** - Manage exercises organized by muscle groups with SF Symbols 7 icons
-- **Workout History** - View and edit past workouts with preserved data
-- **Previous Workout Preview** - See your last performance while logging exercises
+### 🏋️ Smart Workout Logging
+- **Previous Performance Display** - See your last workout's sets, reps, and weights while logging
+- **Tap to Copy** - Populate sets from previous workout with one tap
+- **Drop Set Support** - Log multiple weight/rep pairs per set for advanced techniques
+- **Exercise Notes** - Track how you felt or variations used
+- **Unilateral Exercise Support** - Automatic weight doubling for dumbbell exercises
+- **Workout History** - View and edit past workouts with fully preserved data
+
+### 📚 Exercise & Routine Management
+- **30+ Preset Exercises** - Pre-loaded exercises across 8 muscle groups
+- **Custom Exercises** - Create your own with muscle group tags and SF Symbols
+- **7 Preset Routines** - Push, Pull, Legs, Upper/Lower, Full Body templates
+- **Custom Routines** - Save workouts as reusable templates with emoji icons
+- **Exercise Archive** - Exercises used in workouts are archived, not deleted
+- **Preset Browser** - Browse and add preset exercises and routines anytime
 
 ### 📊 Analytics & Insights
-- **Weekly Goal Tracking** - Set and track weekly workout goals with progress rings
-- **Workout Calendar** - Visual calendar showing your workout history
-- **Statistics Dashboard** - Week-over-week comparisons and trend indicators
-- **Streak Tracking** - Track consecutive weeks meeting your goals
+- **Personal Records** - Automatic PR tracking with date and exercise details
+- **Weekly Goal Tracking** - Progress rings with celebration effects when goals met
+- **Workout Calendar** - Visual calendar with colour-coded workout frequency
+- **Volume Progression** - Track total weight lifted over time with trend charts
+- **Streak Tracking** - Monitor consecutive weeks meeting your goals
+- **Week-over-Week Stats** - Compare current week to previous with trend indicators
+- **Exercise Detail Views** - Deep dive into performance history per exercise
 
-### 📱 Home Screen Widgets
-- **Goal Progress Widget** (Small) - Circular progress ring showing workouts vs weekly goal
-- **Exercises Widget** (Small) - Exercise count for current week
-- **Weight Widget** (Small) - Total weight lifted this week
-- **Combined Stats Widget** (Medium) - All three stats in one widget
-- Auto-updates when workouts change, tap to open app
+### 📱 Home Screen Widgets (iOS 26)
+- **Goal Progress Widget** (Small) - Circular ring showing workouts vs weekly goal
+- **Exercises Widget** (Small) - Unique exercises performed this week
+- **Weight Widget** (Small) - Total weight lifted this week in kg
+- **Combined Stats Widget** (Medium) - All three stats in one compact widget
+- **Auto-Updates** - Widgets refresh when workouts are logged
+- **Deep Links** - Tap any widget to open app to Workouts tab
 
-### ⚙️ Customization & Data
+### ⚙️ Customization & Privacy
 - **Theme Support** - Dark mode default with light mode option
-- **Data Export/Import** - Full JSON export of all workout data
-- **Onboarding Flow** - Personalized setup with name and goal configuration
-- **Settings** - Customize weekly goals, theme, and manage data
+- **Weekly Goal Settings** - Customize target workout frequency (1-7 per week)
+- **Full Data Export** - Complete JSON export of exercises, routines, workouts, and settings
+- **Data Import** - Restore from JSON backups
+- **100% Offline** - All data stored locally with SwiftData
+- **No Account Required** - No sign-up, no tracking, complete privacy
+- **App Group Storage** - Shared data container for widgets
+
+### 🎨 Onboarding Experience
+- **6-Screen Flow** - Personalized setup with name and goal configuration
+- **Value Proposition** - Learn about progressive overload and analytics
+- **Preset Library Intro** - Discover 30+ exercises and 7 routines
+- **Smart Logging Guide** - Understand previous data display and tap-to-copy
+- **Progress Tracking Tour** - Preview PRs, streaks, widgets, and calendar
+- **Portrait Lock** - Onboarding stays in portrait for optimal experience
+- **Swipe Navigation** - Gesture-based flow with validation on first screen
 
 ## 🎨 Design Philosophy
 
@@ -144,12 +205,16 @@ TempusWidget/           # Widget extension
 ## 🆕 Recent Updates
 
 **v1.0.0 (October 2025)**
-- ✨ iOS 26 home screen widgets with real-time sync
-- 🎯 Weekly goal tracking with progress rings and streaks
-- 📊 Enhanced analytics with week-over-week comparisons
-- 📅 Visual workout calendar
-- ⚡ Major performance optimizations (15-20% faster startup)
-- 🎨 Refined Liquid Glass design throughout
+- ✨ **Onboarding Redesign** - 6-screen flow with swipe navigation, validation, and portrait lock
+- 🏋️ **Smart Workout Logging** - Previous performance display and tap-to-copy sets
+- 📊 **iOS 26 Widgets** - Home screen widgets with real-time sync and deep links
+- 🎯 **Weekly Goals** - Progress rings with celebration effects and streak tracking
+- 📅 **Workout Calendar** - Visual calendar with colour-coded workout frequency
+- 🏆 **Personal Records** - Automatic PR tracking with detailed history
+- 📚 **Preset Library** - 30+ exercises and 7 routines ready to use
+- 🔄 **Full Export/Import** - Complete JSON backup and restore
+- ⚡ **Performance** - 15-20% faster startup, optimized haptics, background export
+- 🎨 **Liquid Glass UI** - Refined translucent materials throughout
 
 See [CHANGELOG.md](CHANGELOG.md) for complete version history.
 
