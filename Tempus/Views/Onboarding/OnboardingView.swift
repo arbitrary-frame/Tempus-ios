@@ -166,8 +166,9 @@ struct OnboardingView: View {
         )
         .onAppear {
             // Lock to portrait orientation
-            UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
-            UIViewController.attemptRotationToDeviceOrientation()
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait))
+            }
         }
     }
 
