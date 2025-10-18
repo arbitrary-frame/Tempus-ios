@@ -10,6 +10,8 @@
 		E14D7CF52E8D3815009BC1C4 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E14D7CF42E8D3815009BC1C4 /* WidgetKit.framework */; };
 		E14D7CF72E8D3815009BC1C4 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E14D7CF62E8D3815009BC1C4 /* SwiftUI.framework */; };
 		E14D7D062E8D3815009BC1C4 /* TempusWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E14D7CF22E8D3815009BC1C4 /* TempusWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E1B3E6BC2EA35FE400A7193D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E1B3E6B52EA35FE400A7193D /* Assets.xcassets */; };
+		E1B3E6BD2EA35FE400A7193D /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = E1B3E6B42EA35FE400A7193D /* AppIcon.icon */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -41,6 +43,55 @@
 		E14D7CF42E8D3815009BC1C4 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		E14D7CF62E8D3815009BC1C4 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		E14D7D232E8D4021009BC1C4 /* TempusWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TempusWidgetExtension.entitlements; sourceTree = "<group>"; };
+		E1B3E67B2EA35FE400A7193D /* PresetExercises.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetExercises.swift; sourceTree = "<group>"; };
+		E1B3E67C2EA35FE400A7193D /* PresetRoutines.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetRoutines.swift; sourceTree = "<group>"; };
+		E1B3E67E2EA35FE400A7193D /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
+		E1B3E67F2EA35FE400A7193D /* WorkoutExerciseData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutExerciseData.swift; sourceTree = "<group>"; };
+		E1B3E6812EA35FE400A7193D /* Exercise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Exercise.swift; sourceTree = "<group>"; };
+		E1B3E6822EA35FE400A7193D /* OnboardingState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingState.swift; sourceTree = "<group>"; };
+		E1B3E6832EA35FE400A7193D /* WorkoutEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutEntry.swift; sourceTree = "<group>"; };
+		E1B3E6842EA35FE400A7193D /* WorkoutEntry+Analytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WorkoutEntry+Analytics.swift"; sourceTree = "<group>"; };
+		E1B3E6852EA35FE400A7193D /* WorkoutRoutine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutRoutine.swift; sourceTree = "<group>"; };
+		E1B3E6872EA35FE400A7193D /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
+		E1B3E6892EA35FE400A7193D /* AnalyticsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsHelper.swift; sourceTree = "<group>"; };
+		E1B3E68A2EA35FE400A7193D /* AppGroupUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupUserDefaults.swift; sourceTree = "<group>"; };
+		E1B3E68B2EA35FE400A7193D /* DatabaseMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseMigration.swift; sourceTree = "<group>"; };
+		E1B3E68C2EA35FE400A7193D /* ExerciseTagConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseTagConstants.swift; sourceTree = "<group>"; };
+		E1B3E68D2EA35FE400A7193D /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
+		E1B3E68E2EA35FE400A7193D /* SampleDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleDataManager.swift; sourceTree = "<group>"; };
+		E1B3E68F2EA35FE400A7193D /* TempusColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempusColors.swift; sourceTree = "<group>"; };
+		E1B3E6902EA35FE400A7193D /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
+		E1B3E6922EA35FE400A7193D /* ConsistencyGraphCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsistencyGraphCard.swift; sourceTree = "<group>"; };
+		E1B3E6932EA35FE400A7193D /* PersonalRecordsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalRecordsCard.swift; sourceTree = "<group>"; };
+		E1B3E6942EA35FE400A7193D /* VolumeProgressionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeProgressionCard.swift; sourceTree = "<group>"; };
+		E1B3E6962EA35FE400A7193D /* ExerciseDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseDetailView.swift; sourceTree = "<group>"; };
+		E1B3E6972EA35FE400A7193D /* PersonalRecordsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalRecordsListView.swift; sourceTree = "<group>"; };
+		E1B3E6992EA35FE400A7193D /* AnalyticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsView.swift; sourceTree = "<group>"; };
+		E1B3E69B2EA35FE400A7193D /* EmojiIconPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiIconPicker.swift; sourceTree = "<group>"; };
+		E1B3E69C2EA35FE400A7193D /* FlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowLayout.swift; sourceTree = "<group>"; };
+		E1B3E69E2EA35FE400A7193D /* ArchivedExercisesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArchivedExercisesView.swift; sourceTree = "<group>"; };
+		E1B3E69F2EA35FE400A7193D /* ExerciseFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseFormView.swift; sourceTree = "<group>"; };
+		E1B3E6A02EA35FE400A7193D /* ExercisesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExercisesListView.swift; sourceTree = "<group>"; };
+		E1B3E6A12EA35FE400A7193D /* PresetExercisesBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetExercisesBrowserView.swift; sourceTree = "<group>"; };
+		E1B3E6A32EA35FE400A7193D /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		E1B3E6A52EA35FE400A7193D /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		E1B3E6A72EA35FE400A7193D /* PresetRoutinesBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetRoutinesBrowserView.swift; sourceTree = "<group>"; };
+		E1B3E6A82EA35FE400A7193D /* SaveWorkoutAsRoutineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveWorkoutAsRoutineView.swift; sourceTree = "<group>"; };
+		E1B3E6A92EA35FE400A7193D /* WorkoutRoutineFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutRoutineFormView.swift; sourceTree = "<group>"; };
+		E1B3E6AA2EA35FE400A7193D /* WorkoutRoutinesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutRoutinesListView.swift; sourceTree = "<group>"; };
+		E1B3E6AC2EA35FE400A7193D /* WeeklyWorkoutsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyWorkoutsView.swift; sourceTree = "<group>"; };
+		E1B3E6AD2EA35FE400A7193D /* WorkoutCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutCalendarView.swift; sourceTree = "<group>"; };
+		E1B3E6AE2EA35FE400A7193D /* WorkoutEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutEditView.swift; sourceTree = "<group>"; };
+		E1B3E6AF2EA35FE400A7193D /* WorkoutLoggingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutLoggingView.swift; sourceTree = "<group>"; };
+		E1B3E6B02EA35FE400A7193D /* WorkoutsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutsListView.swift; sourceTree = "<group>"; };
+		E1B3E6B12EA35FE400A7193D /* WorkoutsListView.swift.backup */ = {isa = PBXFileReference; lastKnownFileType = text; path = WorkoutsListView.swift.backup; sourceTree = "<group>"; };
+		E1B3E6B42EA35FE400A7193D /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
+		E1B3E6B52EA35FE400A7193D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E1B3E6B62EA35FE400A7193D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		E1B3E6B72EA35FE400A7193D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E1B3E6B82EA35FE400A7193D /* Tempus.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Tempus.entitlements; sourceTree = "<group>"; };
+		E1B3E6B92EA35FE400A7193D /* TempusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempusApp.swift; sourceTree = "<group>"; };
+		E1B3E6EC2EA3600000A7193D /* BuildNumber.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = BuildNumber.xcconfig; sourceTree = "<group>"; };
 		E1BCFC202E8B7A560021412E /* Tempus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tempus.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -55,6 +106,8 @@
 		E14D7D0E2E8D388C009BC1C4 /* Exceptions for "Tempus" folder in "Tempus" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				AppIcon.icon,
+				Assets.xcassets,
 				Info.plist,
 			);
 			target = E1BCFC1F2E8B7A560021412E /* Tempus */;
@@ -121,6 +174,181 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		E1B3E67D2EA35FE400A7193D /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				E1B3E67B2EA35FE400A7193D /* PresetExercises.swift */,
+				E1B3E67C2EA35FE400A7193D /* PresetRoutines.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		E1B3E6802EA35FE400A7193D /* Supporting */ = {
+			isa = PBXGroup;
+			children = (
+				E1B3E67E2EA35FE400A7193D /* Enums.swift */,
+				E1B3E67F2EA35FE400A7193D /* WorkoutExerciseData.swift */,
+			);
+			path = Supporting;
+			sourceTree = "<group>";
+		};
+		E1B3E6862EA35FE400A7193D /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				E1B3E6802EA35FE400A7193D /* Supporting */,
+				E1B3E6812EA35FE400A7193D /* Exercise.swift */,
+				E1B3E6822EA35FE400A7193D /* OnboardingState.swift */,
+				E1B3E6832EA35FE400A7193D /* WorkoutEntry.swift */,
+				E1B3E6842EA35FE400A7193D /* WorkoutEntry+Analytics.swift */,
+				E1B3E6852EA35FE400A7193D /* WorkoutRoutine.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		E1B3E6882EA35FE400A7193D /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				E1B3E6872EA35FE400A7193D /* AnalyticsService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		E1B3E6912EA35FE400A7193D /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				E1B3E6892EA35FE400A7193D /* AnalyticsHelper.swift */,
+				E1B3E68A2EA35FE400A7193D /* AppGroupUserDefaults.swift */,
+				E1B3E68B2EA35FE400A7193D /* DatabaseMigration.swift */,
+				E1B3E68C2EA35FE400A7193D /* ExerciseTagConstants.swift */,
+				E1B3E68D2EA35FE400A7193D /* HapticManager.swift */,
+				E1B3E68E2EA35FE400A7193D /* SampleDataManager.swift */,
+				E1B3E68F2EA35FE400A7193D /* TempusColors.swift */,
+				E1B3E6902EA35FE400A7193D /* ThemeManager.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		E1B3E6952EA35FE400A7193D /* Charts */ = {
+			isa = PBXGroup;
+			children = (
+				E1B3E6922EA35FE400A7193D /* ConsistencyGraphCard.swift */,
+				E1B3E6932EA35FE400A7193D /* PersonalRecordsCard.swift */,
+				E1B3E6942EA35FE400A7193D /* VolumeProgressionCard.swift */,
+			);
+			path = Charts;
+			sourceTree = "<group>";
+		};
+		E1B3E6982EA35FE400A7193D /* Detail */ = {
+			isa = PBXGroup;
+			children = (
+				E1B3E6962EA35FE400A7193D /* ExerciseDetailView.swift */,
+				E1B3E6972EA35FE400A7193D /* PersonalRecordsListView.swift */,
+			);
+			path = Detail;
+			sourceTree = "<group>";
+		};
+		E1B3E69A2EA35FE400A7193D /* Analytics */ = {
+			isa = PBXGroup;
+			children = (
+				E1B3E6952EA35FE400A7193D /* Charts */,
+				E1B3E6982EA35FE400A7193D /* Detail */,
+				E1B3E6992EA35FE400A7193D /* AnalyticsView.swift */,
+			);
+			path = Analytics;
+			sourceTree = "<group>";
+		};
+		E1B3E69D2EA35FE400A7193D /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				E1B3E69B2EA35FE400A7193D /* EmojiIconPicker.swift */,
+				E1B3E69C2EA35FE400A7193D /* FlowLayout.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		E1B3E6A22EA35FE400A7193D /* Exercises */ = {
+			isa = PBXGroup;
+			children = (
+				E1B3E69E2EA35FE400A7193D /* ArchivedExercisesView.swift */,
+				E1B3E69F2EA35FE400A7193D /* ExerciseFormView.swift */,
+				E1B3E6A02EA35FE400A7193D /* ExercisesListView.swift */,
+				E1B3E6A12EA35FE400A7193D /* PresetExercisesBrowserView.swift */,
+			);
+			path = Exercises;
+			sourceTree = "<group>";
+		};
+		E1B3E6A42EA35FE400A7193D /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				E1B3E6A32EA35FE400A7193D /* OnboardingView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		E1B3E6A62EA35FE400A7193D /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				E1B3E6A52EA35FE400A7193D /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		E1B3E6AB2EA35FE400A7193D /* Templates */ = {
+			isa = PBXGroup;
+			children = (
+				E1B3E6A72EA35FE400A7193D /* PresetRoutinesBrowserView.swift */,
+				E1B3E6A82EA35FE400A7193D /* SaveWorkoutAsRoutineView.swift */,
+				E1B3E6A92EA35FE400A7193D /* WorkoutRoutineFormView.swift */,
+				E1B3E6AA2EA35FE400A7193D /* WorkoutRoutinesListView.swift */,
+			);
+			path = Templates;
+			sourceTree = "<group>";
+		};
+		E1B3E6B22EA35FE400A7193D /* Workouts */ = {
+			isa = PBXGroup;
+			children = (
+				E1B3E6AC2EA35FE400A7193D /* WeeklyWorkoutsView.swift */,
+				E1B3E6AD2EA35FE400A7193D /* WorkoutCalendarView.swift */,
+				E1B3E6AE2EA35FE400A7193D /* WorkoutEditView.swift */,
+				E1B3E6AF2EA35FE400A7193D /* WorkoutLoggingView.swift */,
+				E1B3E6B02EA35FE400A7193D /* WorkoutsListView.swift */,
+				E1B3E6B12EA35FE400A7193D /* WorkoutsListView.swift.backup */,
+			);
+			path = Workouts;
+			sourceTree = "<group>";
+		};
+		E1B3E6B32EA35FE400A7193D /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				E1B3E69A2EA35FE400A7193D /* Analytics */,
+				E1B3E69D2EA35FE400A7193D /* Components */,
+				E1B3E6A22EA35FE400A7193D /* Exercises */,
+				E1B3E6A42EA35FE400A7193D /* Onboarding */,
+				E1B3E6A62EA35FE400A7193D /* Settings */,
+				E1B3E6AB2EA35FE400A7193D /* Templates */,
+				E1B3E6B22EA35FE400A7193D /* Workouts */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		E1B3E6BA2EA35FE400A7193D /* Tempus */ = {
+			isa = PBXGroup;
+			children = (
+				E1B3E67D2EA35FE400A7193D /* Data */,
+				E1B3E6862EA35FE400A7193D /* Models */,
+				E1B3E6882EA35FE400A7193D /* Services */,
+				E1B3E6912EA35FE400A7193D /* Utilities */,
+				E1B3E6B32EA35FE400A7193D /* Views */,
+				E1B3E6B42EA35FE400A7193D /* AppIcon.icon */,
+				E1B3E6B52EA35FE400A7193D /* Assets.xcassets */,
+				E1B3E6B62EA35FE400A7193D /* ContentView.swift */,
+				E1B3E6B72EA35FE400A7193D /* Info.plist */,
+				E1B3E6B82EA35FE400A7193D /* Tempus.entitlements */,
+				E1B3E6B92EA35FE400A7193D /* TempusApp.swift */,
+			);
+			path = Tempus;
+			sourceTree = "<group>";
+		};
 		E1BCFC172E8B7A560021412E = {
 			isa = PBXGroup;
 			children = (
@@ -129,6 +357,8 @@
 				E14D7CF82E8D3815009BC1C4 /* TempusWidget */,
 				E14D7CF32E8D3815009BC1C4 /* Frameworks */,
 				E1BCFC212E8B7A560021412E /* Products */,
+				E1B3E6BA2EA35FE400A7193D /* Tempus */,
+				E1B3E6EC2EA3600000A7193D /* BuildNumber.xcconfig */,
 			);
 			sourceTree = "<group>";
 		};
@@ -240,6 +470,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E1B3E6BC2EA35FE400A7193D /* Assets.xcassets in Resources */,
+				E1B3E6BD2EA35FE400A7193D /* AppIcon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -305,6 +537,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = "";
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 8259S3SF4M;
@@ -326,6 +559,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = "";
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -343,7 +577,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Tempus/Tempus.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 75YDR5BB64;
 				ENABLE_APP_SANDBOX = YES;
@@ -352,6 +586,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Tempus/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -366,7 +601,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15.6;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.2;
 				OTHER_SWIFT_FLAGS = "";
 				"OTHER_SWIFT_FLAGS[arch=*]" = "-D DEVELOPMENT";
 				PRODUCT_BUNDLE_IDENTIFIER = "tempus-ios-dev.Tempus";
@@ -374,13 +609,14 @@
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Development;
@@ -392,7 +628,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = TempusWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 75YDR5BB64;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TempusWidget/Info.plist;
@@ -404,7 +640,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.2;
 				OTHER_SWIFT_FLAGS = "-D DEVELOPMENT";
 				PRODUCT_BUNDLE_IDENTIFIER = "tempus-ios-dev.Tempus.TempusWidget";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -426,7 +662,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = TempusWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 75YDR5BB64;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TempusWidget/Info.plist;
@@ -438,7 +674,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "tempus-ios.Tempus.TempusWidget";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -459,7 +695,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = TempusWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 75YDR5BB64;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TempusWidget/Info.plist;
@@ -471,7 +707,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "tempus-ios.Tempus.TempusWidget";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -520,6 +756,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = "";
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 8259S3SF4M;
@@ -541,6 +778,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = "";
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -584,6 +822,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = "";
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 8259S3SF4M;
@@ -599,6 +838,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = "";
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -615,7 +855,7 @@
 				CODE_SIGN_ENTITLEMENTS = Tempus/Tempus.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 75YDR5BB64;
 				ENABLE_APP_SANDBOX = YES;
@@ -624,6 +864,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Tempus/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -638,20 +879,21 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15.6;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "tempus-ios.Tempus";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Debug;
@@ -665,7 +907,7 @@
 				CODE_SIGN_ENTITLEMENTS = Tempus/Tempus.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 75YDR5BB64;
 				ENABLE_APP_SANDBOX = YES;
@@ -674,6 +916,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Tempus/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -688,20 +931,21 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15.6;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "tempus-ios.Tempus";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Release;
