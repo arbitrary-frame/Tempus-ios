@@ -164,6 +164,11 @@ struct OnboardingView: View {
                 }
 
         )
+        .onAppear {
+            // Lock to portrait orientation
+            UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
+            UIViewController.attemptRotationToDeviceOrientation()
+        }
     }
 
     private func completeOnboarding() {
@@ -290,32 +295,45 @@ struct ValuePropositionScreen: View {
                     .padding(.horizontal, 20)
 
                 // 2x2 Grid of value props
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                    ValuePropCard(
-                        icon: "figure.mixed.cardio",
-                        title: "Progressive Overload",
-                        description: "See previous performance for every exercise"
-                    )
+                // LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                //     ValuePropCard(
+                //         icon: "figure.mixed.cardio",
+                //         title: "Progressive Overload",
+                //         description: "See previous performance for every exercise"
+                //     )
 
-                    ValuePropCard(
-                        icon: "chart.line.uptrend.xyaxis",
-                        title: "Deep Analytics",
-                        description: "Personal records, streaks, and volume tracking"
-                    )
+                //     ValuePropCard(
+                //         icon: "chart.line.uptrend.xyaxis",
+                //         title: "Deep Analytics",
+                //         description: "Personal records, streaks, and volume tracking"
+                //     )
 
-                    ValuePropCard(
-                        icon: "lock.shield.fill",
-                        title: "Private & Offline",
-                        description: "Your data stays on your device, always"
-                    )
+                //     ValuePropCard(
+                //         icon: "lock.shield.fill",
+                //         title: "Private & Offline",
+                //         description: "Your data stays on your device, always"
+                //     )
 
-                    ValuePropCard(
-                        icon: "arrow.triangle.2.circlepath",
-                        title: "Smart Templates",
-                        description: "Create reusable workout routines for faster logging"
-                    )
-                }
-                .padding(.horizontal, 24)
+                //     ValuePropCard(
+                //         icon: "arrow.triangle.2.circlepath",
+                //         title: "Smart Templates",
+                //         description: "Create reusable workout routines for faster logging"
+                //     )
+                // }
+                // .padding(.horizontal, 24)
+                Grid(horizontalSpacing: 12, verticalSpacing: 12) {
+                  GridRow {
+                      ValuePropCard(icon: "figure.mixed.cardio", title: "Progressive Overload", description: "See previous performance for every exercise")
+                      ValuePropCard(icon: "chart.line.uptrend.xyaxis", title: "Deep Analytics", description: "Personal records, streaks, and volume tracking")
+                  }
+
+                  GridRow {
+                      ValuePropCard(icon: "lock.shield.fill", title: "Private & Offline", description: "Your data stays on your device, always")
+                      ValuePropCard(icon: "arrow.triangle.2.circlepath", title: "Smart Templates", description: "Create reusable workout routines for faster logging")
+                  }
+              }
+              .padding(.horizontal, 24)
+              .transition(.move(edge: .trailing))
             }
 
 
@@ -580,13 +598,21 @@ struct ProgressTrackingScreen: View {
                     .padding(.horizontal, 28)
 
                 // 2x3 Grid of analytics features
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                    AnalyticsFeatureCard(icon: "trophy.fill", label: "Personal Records")
-                    AnalyticsFeatureCard(icon: "chart.bar.fill", label: "Weekly Consistency")
-                    AnalyticsFeatureCard(icon: "flame.fill", label: "Streak Tracking")
-                    AnalyticsFeatureCard(icon: "chart.xyaxis.line", label: "Volume Progression")
-                    AnalyticsFeatureCard(icon: "app.badge.fill", label: "Home Widgets")
-                    AnalyticsFeatureCard(icon: "calendar", label: "Workout Calendar")
+                Grid(horizontalSpacing: 12, verticalSpacing: 12) {
+                    GridRow {
+                        AnalyticsFeatureCard(icon: "trophy.fill", label: "Personal Records")
+                        AnalyticsFeatureCard(icon: "chart.bar.fill", label: "Weekly Consistency")
+                    }
+
+                    GridRow {
+                        AnalyticsFeatureCard(icon: "flame.fill", label: "Streak Tracking")
+                        AnalyticsFeatureCard(icon: "chart.xyaxis.line", label: "Volume Progression")
+                    }
+
+                    GridRow {
+                        AnalyticsFeatureCard(icon: "app.badge.fill", label: "Home Widgets")
+                        AnalyticsFeatureCard(icon: "calendar", label: "Workout Calendar")
+                    }
                 }
                 .padding(.horizontal, 28)
             }
