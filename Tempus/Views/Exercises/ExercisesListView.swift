@@ -13,6 +13,7 @@ struct ExercisesListView: View {
     @Query(sort: \Exercise.name) private var exercises: [Exercise]
     @Query(sort: \WorkoutEntry.workoutDate, order: .reverse) private var workouts: [WorkoutEntry]
     @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
+    @Binding var showPresetBrowserFromOnboarding: Bool
     @State private var searchText = ""
     @State private var showingCreateForm = false
     @State private var showingPresetBrowser = false
@@ -263,6 +264,12 @@ struct ExercisesListView: View {
                     Text("'\(exercise.name)' has been used in past workouts and cannot be deleted. You can archive it instead to hide it from this list whilst preserving all historical data.")
                 }
             }
+            .onChange(of: showPresetBrowserFromOnboarding) { _, newValue in
+                if newValue {
+                    showingPresetBrowser = true
+                    showPresetBrowserFromOnboarding = false
+                }
+            }
         }
     }
 }
@@ -294,6 +301,6 @@ struct ExerciseRowView: View {
 }
 
 #Preview {
-    ExercisesListView()
+    ExercisesListView(showPresetBrowserFromOnboarding: .constant(false))
         .modelContainer(for: [Exercise.self, WorkoutRoutine.self, WorkoutEntry.self])
 }

@@ -11,10 +11,13 @@ import SwiftData
 struct ContentView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @Binding var selectedTab: Int
+    @Binding var postOnboardingAction: PostOnboardingAction
+    @State private var showPresetBrowser = false
+    @State private var showWorkoutLogger = false
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            WorkoutsListView()
+            WorkoutsListView(showWorkoutLoggerFromOnboarding: $showWorkoutLogger)
                 .tabItem {
                     Label("Workouts", systemImage: "figure.strengthtraining.traditional")
                 }
@@ -26,7 +29,7 @@ struct ContentView: View {
                 }
                 .tag(1)
 
-            ExercisesListView()
+            ExercisesListView(showPresetBrowserFromOnboarding: $showPresetBrowser)
                 .tabItem {
                     Label("Exercises", systemImage: "list.bullet.clipboard")
                 }
@@ -45,11 +48,33 @@ struct ContentView: View {
                 .tag(4)
         }
         .preferredColorScheme(themeManager.colorScheme)
+        .onAppear {
+            handlePostOnboardingAction()
+        }
+    }
+
+    private func handlePostOnboardingAction() {
+        switch postOnboardingAction {
+        case .browsePresets:
+            selectedTab = 2 // Exercises tab
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                showPresetBrowser = true
+                postOnboardingAction = .none
+            }
+        case .createWorkout:
+            selectedTab = 0 // Workouts tab
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                showWorkoutLogger = true
+                postOnboardingAction = .none
+            }
+        case .none:
+            break
+        }
     }
 }
 
 #Preview {
-    ContentView(selectedTab: .constant(0))
+    ContentView(selectedTab: .constant(0), postOnboardingAction: .constant(.none))
         .environmentObject(ThemeManager())
         .modelContainer(for: [Exercise.self, WorkoutRoutine.self, WorkoutEntry.self])
 }

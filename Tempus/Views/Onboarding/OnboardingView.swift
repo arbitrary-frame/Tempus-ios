@@ -10,6 +10,7 @@ import SwiftUI
 struct OnboardingView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @StateObject private var onboardingState = OnboardingState()
+    @Binding var postOnboardingAction: PostOnboardingAction
     @State private var currentPage = 0
     @State private var userName = ""
     @State private var weeklyGoal = 3
@@ -50,9 +51,18 @@ struct OnboardingView: View {
                         }
                     })
                 case 5:
-                    FinalScreen(userName: userName, weeklyGoal: weeklyGoal, onComplete: {
-                        completeOnboarding()
-                    })
+                    FinalScreen(
+                        userName: userName,
+                        weeklyGoal: weeklyGoal,
+                        onBrowsePresets: {
+                            postOnboardingAction = .browsePresets
+                            completeOnboarding()
+                        },
+                        onCreateWorkout: {
+                            postOnboardingAction = .createWorkout
+                            completeOnboarding()
+                        }
+                    )
                 default:
                     EmptyView()
                 }
@@ -570,7 +580,8 @@ struct AnalyticsFeatureCard: View {
 struct FinalScreen: View {
     let userName: String
     let weeklyGoal: Int
-    let onComplete: () -> Void
+    let onBrowsePresets: () -> Void
+    let onCreateWorkout: () -> Void
 
     var body: some View {
         VStack(spacing: 32) {
@@ -609,7 +620,7 @@ struct FinalScreen: View {
             VStack(spacing: 12) {
                 Button {
                     HapticManager.shared.trigger(.success)
-                    onComplete()
+                    onBrowsePresets()
                 } label: {
                     Label("Browse Preset Library", systemImage: "tray.and.arrow.down.fill")
                         .font(.headline)
@@ -622,7 +633,7 @@ struct FinalScreen: View {
 
                 Button {
                     HapticManager.shared.trigger(.success)
-                    onComplete()
+                    onCreateWorkout()
                 } label: {
                     Label("Create My First Workout", systemImage: "plus.circle.fill")
                         .font(.headline)
@@ -652,6 +663,6 @@ struct FinalScreen: View {
 }
 
 #Preview {
-    OnboardingView()
+    OnboardingView(postOnboardingAction: .constant(.none))
         .environmentObject(ThemeManager())
 }

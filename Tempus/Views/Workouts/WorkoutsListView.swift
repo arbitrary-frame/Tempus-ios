@@ -14,6 +14,7 @@ struct WorkoutsListView: View {
     @Query(sort: \WorkoutEntry.workoutDate, order: .reverse) private var workouts: [WorkoutEntry]
     @Query(sort: \WorkoutRoutine.name) private var routines: [WorkoutRoutine]
 
+    @Binding var showWorkoutLoggerFromOnboarding: Bool
     @State private var showingWorkoutLogging = false
     @State private var selectedWorkout: WorkoutEntry?
     @State private var showingRoutinePicker = false
@@ -198,6 +199,12 @@ struct WorkoutsListView: View {
             }
             .sheet(isPresented: $showingCalendar) {
                 WorkoutCalendarView()
+            }
+            .onChange(of: showWorkoutLoggerFromOnboarding) { _, newValue in
+                if newValue {
+                    showingWorkoutLogging = true
+                    showWorkoutLoggerFromOnboarding = false
+                }
             }
         }
     }
@@ -953,6 +960,6 @@ private func formatWeightChange(_ change: Int) -> String {
 }
 
 #Preview {
-    WorkoutsListView()
+    WorkoutsListView(showWorkoutLoggerFromOnboarding: .constant(false))
         .modelContainer(for: [Exercise.self, WorkoutRoutine.self, WorkoutEntry.self])
 }
