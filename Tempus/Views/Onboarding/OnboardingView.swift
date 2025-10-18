@@ -14,6 +14,7 @@ struct OnboardingView: View {
     @State private var currentPage = 0
     @State private var userName = ""
     @State private var weeklyGoal = 3
+    @State private var dragOffset: CGFloat = 0
     @State private var swipeDirection: Edge = .trailing
 
     var body: some View {
@@ -70,6 +71,7 @@ struct OnboardingView: View {
                 }
             }
             .id(currentPage) // Force complete view replacement for synchronized animation
+            .offset(x: dragOffset / 1.5) // 👈 Live dragging happens here
             .transition(.asymmetric(
                 insertion: .move(edge: swipeDirection).combined(with: .opacity),
                 removal: .move(edge: swipeDirection == .trailing ? .leading : .trailing).combined(with: .opacity)
@@ -107,37 +109,60 @@ struct OnboardingView: View {
         }
         .preferredColorScheme(themeManager.colorScheme)
         .gesture(
-            DragGesture(minimumDistance: 10)
+            DragGesture(minimumDistance: 5)
+                .onChanged { value in
+                // Detect drag direction
+                let translation = value.translation.width
+
+                // If on first page and swiping left (forward), block it
+                if currentPage == 0 && translation < 0 {
+                    dragOffset = 0 // don’t move
+                } else {
+                    dragOffset = translation
+                }
+            }
                 .onEnded { value in
                     let horizontalAmount = value.translation.width
-                    let horizontalVelocity = value.predictedEndTranslation.width
-                    
+                    let Velocity = value.predictedEndTranslation.width
+
                     // Swipe left → next
-                    if (horizontalAmount < -20 || horizontalVelocity < -100),
+                    if (horizontalAmount < -80 || Velocity < -150),
                        currentPage < 5 {
-                        
+
                         // 🚫 Prevent forward swipe on Welcome screen if inputs incomplete
-                        if currentPage == 0 && (userName.trimmingCharacters(in: .whitespaces).isEmpty || weeklyGoal <= 0) {
+                        if currentPage == 0 &&
+                            (userName.trimmingCharacters(in: .whitespaces).isEmpty || weeklyGoal <= 0) {
+                            withAnimation(.spring()) { dragOffset = 0 } // snap back
                             HapticManager.shared.trigger(.warning)
                             return
                         }
-        
+
                         swipeDirection = .trailing
                         withAnimation(.smooth(duration: 0.4)) {
                             currentPage += 1
+                            dragOffset = 0
                         }
                     }
-                    
+
                     // Swipe right → previous
-                    else if (horizontalAmount > 20 || horizontalVelocity > 100),
+                    else if (horizontalAmount > 80 || Velocity > 150),
                             currentPage > 0 {
                         swipeDirection = .leading
                         withAnimation(.smooth(duration: 0.4)) {
                             currentPage -= 1
+                            dragOffset = 0
                         }
                     }
+
+                    // Not enough drag - snap back
+                    else {
+                    withAnimation(.spring()) {
+                        dragOffset = 0
+                    }
+            }
+
                 }
-                    
+
         )
     }
 
@@ -293,7 +318,7 @@ struct ValuePropositionScreen: View {
                 .padding(.horizontal, 24)
             }
 
-            
+
 
             Button {
                 HapticManager.shared.trigger(.light)
