@@ -54,12 +54,8 @@ struct OnboardingView: View {
                     FinalScreen(
                         userName: userName,
                         weeklyGoal: weeklyGoal,
-                        onBrowsePresets: {
-                            postOnboardingAction = .browsePresets
-                            completeOnboarding()
-                        },
-                        onCreateWorkout: {
-                            postOnboardingAction = .createWorkout
+                        onGetStarted: {
+                            postOnboardingAction = .none
                             completeOnboarding()
                         }
                     )
@@ -580,8 +576,7 @@ struct AnalyticsFeatureCard: View {
 struct FinalScreen: View {
     let userName: String
     let weeklyGoal: Int
-    let onBrowsePresets: () -> Void
-    let onCreateWorkout: () -> Void
+    let onGetStarted: () -> Void
 
     var body: some View {
         VStack(spacing: 32) {
@@ -599,54 +594,59 @@ struct FinalScreen: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 20)
 
-                VStack(spacing: 8) {
+                VStack(spacing: 12) {
                     Text("Your weekly goal: \(weeklyGoal) workout\(weeklyGoal == 1 ? "" : "s")")
                         .font(.body)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
 
-                    Text("We've prepared 30+ exercises and 7 routines to get you started")
-                        .font(.body)
+                    VStack(spacing: 10) {
+                        HStack(spacing: 12) {
+                            Image(systemName: "tray.and.arrow.down.fill")
+                                .foregroundStyle(.accent)
+                                .font(.system(size: 18))
+                            Text("30+ preset exercises across 8 muscle groups")
+                                .font(.body)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                        HStack(spacing: 12) {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                                .foregroundStyle(.accent)
+                                .font(.system(size: 18))
+                            Text("7 curated workout routines ready to use")
+                                .font(.body)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .padding(.horizontal, 28)
+                    .padding(.top, 8)
+
+                    Text("Browse the Exercises and Routines tabs to explore what's available")
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
-                        .padding(.horizontal, 20)
+                        .padding(.horizontal, 28)
+                        .padding(.top, 8)
                 }
             }
 
             Spacer()
 
-            // Dual CTAs
-            VStack(spacing: 12) {
-                Button {
-                    HapticManager.shared.trigger(.success)
-                    onBrowsePresets()
-                } label: {
-                    Label("Browse Preset Library", systemImage: "tray.and.arrow.down.fill")
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(.accent)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-
-                Button {
-                    HapticManager.shared.trigger(.success)
-                    onCreateWorkout()
-                } label: {
-                    Label("Create My First Workout", systemImage: "plus.circle.fill")
-                        .font(.headline)
-                        .foregroundStyle(.accent)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(.accent.opacity(0.1))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(.accent, lineWidth: 2)
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
+            Button {
+                HapticManager.shared.trigger(.success)
+                onGetStarted()
+            } label: {
+                Text("Get Started")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(.accent)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .padding(.horizontal, 40)
 
