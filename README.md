@@ -12,12 +12,12 @@ A minimalist iOS workout tracking app built with Swift 6, SwiftUI, and SwiftData
 
 A powerful yet simple workout tracker focused on what matters: tracking your progress without the noise.
 
-Tempus is designed for lifters who want intelligent workout tracking without subscriptions, social features, or complicated interfaces. See your previous performance while logging exercises, track personal records automatically, and monitor your consistency with beautiful home screen widgets.
+Tempus is designed for lifters who want intelligent workout tracking without complicated interfaces. See your previous performance while logging exercises, track personal records automatically, and monitor your consistency with beautiful home screen widgets.
 
 **Core Features:**
 • **Smart Logging** - See your last workout's numbers while logging. Tap to copy previous sets and stay focused on progressive overload.
-• **30+ Preset Exercises** - Organized by muscle groups (chest, back, legs, shoulders, arms, core, cardio, full body) with support for custom exercises.
-• **Workout Routines** - Save your favourite workouts as templates with custom emoji icons for quick logging.
+• **30+ Preset Exercises** - Organized by muscle groups (chest, back, legs, shoulders, arms, core, full body) with support for custom exercises.
+• **Workout Routines** - Save your favourite workouts as templates for quick logging.
 • **Drop Set Support** - Log multiple weight/rep pairs per set for advanced training techniques.
 • **Personal Records** - Automatic PR tracking by exercise with historical data.
 • **Weekly Goals** - Set workout frequency goals and track consistency with progress rings.
@@ -32,15 +32,12 @@ Tempus is designed for lifters who want intelligent workout tracking without sub
 • SF Symbols 7 icons throughout
 • Haptic feedback on every interaction
 • Dark mode optimized (light mode available)
-• UK-first design (metric units, DD/MM/YYYY dates)
 
 **Perfect for:**
 • Strength training and progressive overload
-• Bodybuilding and hypertrophy training
-• Powerlifting programs
 • General fitness and consistency tracking
 
-No subscriptions. No social features. No noise. Just you and your progress.
+No noise. Just you and your progress.
 
 ---
 
