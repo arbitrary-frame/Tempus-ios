@@ -14,6 +14,7 @@ struct OnboardingView: View {
     @State private var currentPage = 0
     @State private var userName = ""
     @State private var weeklyGoal = 3
+    @State private var swipeDirection: Edge = .trailing
 
     var body: some View {
         ZStack {
@@ -22,30 +23,35 @@ struct OnboardingView: View {
                 switch currentPage {
                 case 0:
                     WelcomeScreen(userName: $userName, weeklyGoal: $weeklyGoal, onNext: {
+                        swipeDirection = .trailing
                         withAnimation(.smooth(duration: 0.4)) {
                             currentPage += 1
                         }
                     })
                 case 1:
                     ValuePropositionScreen(onNext: {
+                        swipeDirection = .trailing
                         withAnimation(.smooth(duration: 0.4)) {
                             currentPage += 1
                         }
                     })
                 case 2:
                     PresetLibraryIntroScreen(onNext: {
+                        swipeDirection = .trailing
                         withAnimation(.smooth(duration: 0.4)) {
                             currentPage += 1
                         }
                     })
                 case 3:
                     SmartLoggingScreen(onNext: {
+                        swipeDirection = .trailing
                         withAnimation(.smooth(duration: 0.4)) {
                             currentPage += 1
                         }
                     })
                 case 4:
                     ProgressTrackingScreen(onNext: {
+                        swipeDirection = .trailing
                         withAnimation(.smooth(duration: 0.4)) {
                             currentPage += 1
                         }
@@ -65,8 +71,8 @@ struct OnboardingView: View {
             }
             .id(currentPage) // Force complete view replacement for synchronized animation
             .transition(.asymmetric(
-                insertion: .move(edge: .trailing).combined(with: .opacity),
-                removal: .move(edge: .leading).combined(with: .opacity)
+                insertion: .move(edge: swipeDirection).combined(with: .opacity),
+                removal: .move(edge: swipeDirection == .trailing ? .leading : .trailing).combined(with: .opacity)
             ))
             .animation(.smooth(duration: 0.4), value: currentPage)
         }
@@ -100,6 +106,39 @@ struct OnboardingView: View {
             }
         }
         .preferredColorScheme(themeManager.colorScheme)
+        .gesture(
+            DragGesture(minimumDistance: 10)
+                .onEnded { value in
+                    let horizontalAmount = value.translation.width
+                    let horizontalVelocity = value.predictedEndTranslation.width
+                    
+                    // Swipe left → next
+                    if (horizontalAmount < -20 || horizontalVelocity < -100),
+                       currentPage < 5 {
+                        
+                        // 🚫 Prevent forward swipe on Welcome screen if inputs incomplete
+                        if currentPage == 0 && (userName.trimmingCharacters(in: .whitespaces).isEmpty || weeklyGoal <= 0) {
+                            HapticManager.shared.trigger(.warning)
+                            return
+                        }
+        
+                        swipeDirection = .trailing
+                        withAnimation(.smooth(duration: 0.4)) {
+                            currentPage += 1
+                        }
+                    }
+                    
+                    // Swipe right → previous
+                    else if (horizontalAmount > 20 || horizontalVelocity > 100),
+                            currentPage > 0 {
+                        swipeDirection = .leading
+                        withAnimation(.smooth(duration: 0.4)) {
+                            currentPage -= 1
+                        }
+                    }
+                }
+                    
+        )
     }
 
     private func completeOnboarding() {
@@ -218,7 +257,7 @@ struct ValuePropositionScreen: View {
                 .foregroundStyle(.accent)
                 .symbolRenderingMode(.hierarchical)
 
-            VStack(spacing: 16) {
+            VStack(spacing: 5) {
                 Text("Your Workout Journey, Simplified")
                     .font(.title.bold())
                     .multilineTextAlignment(.center)
@@ -254,7 +293,7 @@ struct ValuePropositionScreen: View {
                 .padding(.horizontal, 24)
             }
 
-            Spacer()
+            
 
             Button {
                 HapticManager.shared.trigger(.light)
@@ -269,6 +308,7 @@ struct ValuePropositionScreen: View {
                     .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .padding(.horizontal, 40)
+            .padding(.bottom, 20) // 👈 add extra padding
 
             Spacer()
         }
@@ -526,7 +566,6 @@ struct ProgressTrackingScreen: View {
                 .padding(.horizontal, 28)
             }
 
-            Spacer()
 
             Button {
                 HapticManager.shared.trigger(.light)
@@ -541,6 +580,7 @@ struct ProgressTrackingScreen: View {
                     .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .padding(.horizontal, 40)
+            .padding(.bottom, 20) // 👈 add extra padding
 
             Spacer()
         }
