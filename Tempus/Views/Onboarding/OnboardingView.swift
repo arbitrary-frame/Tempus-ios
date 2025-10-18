@@ -167,6 +167,11 @@ struct OnboardingView: View {
         .onAppear {
             // Lock to portrait orientation during onboarding
             AppDelegate.orientationLock = .portrait
+
+            // Force current orientation to portrait if not already
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait))
+            }
         }
         .onDisappear {
             // Restore all orientations when leaving onboarding
