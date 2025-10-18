@@ -8,11 +8,27 @@
 import SwiftUI
 import SwiftData
 
+enum PostOnboardingAction {
+    case none
+    case browsePresets
+    case createWorkout
+}
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+    static var orientationLock = UIInterfaceOrientationMask.all
+
+    func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+        return AppDelegate.orientationLock
+    }
+}
+
 @main
 struct TempusApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var themeManager = ThemeManager()
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
     @State private var selectedTab: Int = 0
+    @State private var postOnboardingAction: PostOnboardingAction = .none
 
     var sharedModelContainer: ModelContainer = {
         // CRITICAL: Migrate database from old location to App Group FIRST
@@ -63,13 +79,13 @@ struct TempusApp: App {
     var body: some Scene {
         WindowGroup {
             if hasCompletedOnboarding {
-                ContentView(selectedTab: $selectedTab)
+                ContentView(selectedTab: $selectedTab, postOnboardingAction: $postOnboardingAction)
                     .environmentObject(themeManager)
                     .onOpenURL { url in
                         handleDeepLink(url)
                     }
             } else {
-                OnboardingView()
+                OnboardingView(postOnboardingAction: $postOnboardingAction)
                     .environmentObject(themeManager)
             }
         }
