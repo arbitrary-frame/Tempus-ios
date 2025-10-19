@@ -88,9 +88,10 @@ struct WorkoutCalendarView: View {
         var totalWeight: Double = 0
         for workout in workoutsForSelectedWeek {
             for exercise in workout.exercisesData {
+                let multiplier = exercise.isUnilateral ? 2.0 : 1.0
                 for set in exercise.sets {
                     for weightRep in set.weightsAndReps {
-                        totalWeight += weightRep.weight * Double(weightRep.reps)
+                        totalWeight += weightRep.weight * Double(weightRep.reps) * multiplier
                     }
                 }
             }
