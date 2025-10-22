@@ -23,6 +23,9 @@ struct ExerciseFormView: View {
     @State private var validationMessage = ""
     @State private var showingUnilateralMigrationConfirm = false
     @State private var pendingUnilateralChange: UnilateralChange?
+    @State private var showingDeleteConfirmation = false
+    @State private var showingArchiveConfirmation = false
+    @State private var showingCannotDeleteAlert = false
 
     enum UnilateralChange {
         case addingUnilateral
@@ -186,6 +189,25 @@ struct ExerciseFormView: View {
                         dismiss()
                     }
                 }
+                if isEditing {
+                    ToolbarItem(placement: .primaryAction) {
+                        Menu {
+                            Button(role: .destructive) {
+                                requestDelete()
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+
+                            Button {
+                                showingArchiveConfirmation = true
+                            } label: {
+                                Label("Archive", systemImage: "archivebox")
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis.circle")
+                        }
+                    }
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(isEditing ? "Save" : "Create") {
                         saveExercise()
@@ -219,6 +241,30 @@ struct ExerciseFormView: View {
                         Text("You've removed the 'unilateral' tag from this exercise. This exercise appears in \(count) workout\(count == 1 ? "" : "s"). All logged weights will be automatically doubled (e.g., 30kg → 60kg) to maintain accurate volume tracking.\n\nAlternatively, cancel and create a new exercise instead.")
                     }
                 }
+            }
+            .alert("Cannot Delete Exercise", isPresented: $showingCannotDeleteAlert) {
+                Button("Cancel", role: .cancel) {}
+                Button("Archive Instead") {
+                    showingArchiveConfirmation = true
+                }
+            } message: {
+                Text("This exercise is used in your workout history and cannot be deleted. Would you like to archive it instead? Archived exercises are hidden from the library but remain in your workout history.")
+            }
+            .alert("Delete this exercise?", isPresented: $showingDeleteConfirmation) {
+                Button("Cancel", role: .cancel) {}
+                Button("Delete Exercise", role: .destructive) {
+                    confirmDelete()
+                }
+            } message: {
+                Text("This action cannot be undone.")
+            }
+            .alert("Archive this exercise?", isPresented: $showingArchiveConfirmation) {
+                Button("Cancel", role: .cancel) {}
+                Button("Archive Exercise", role: .destructive) {
+                    confirmArchive()
+                }
+            } message: {
+                Text("This exercise will be hidden from the library but remain in your workout history.")
             }
         }
     }
@@ -373,6 +419,44 @@ struct ExerciseFormView: View {
         }
 
         pendingUnilateralChange = nil
+        dismiss()
+    }
+
+    private func isExerciseUsed() -> Bool {
+        guard let exercise = exerciseToEdit else { return false }
+        return allWorkouts.contains { workout in
+            workout.exercisesData.contains { $0.exerciseID == exercise.id }
+        }
+    }
+
+    private func requestDelete() {
+        if isExerciseUsed() {
+            showingCannotDeleteAlert = true
+        } else {
+            showingDeleteConfirmation = true
+        }
+    }
+
+    private func confirmDelete() {
+        guard let exercise = exerciseToEdit else { return }
+        HapticManager.shared.trigger(.warning)
+
+        // Dismiss first to avoid crash
+        dismiss()
+
+        // Delay deletion slightly to allow sheet to dismiss
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            modelContext.delete(exercise)
+            try? modelContext.save()
+        }
+    }
+
+    private func confirmArchive() {
+        guard let exercise = exerciseToEdit else { return }
+        exercise.isArchived = true
+        exercise.updatedAt = Date()
+        try? modelContext.save()
+        HapticManager.shared.trigger(.success)
         dismiss()
     }
 }

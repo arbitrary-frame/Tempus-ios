@@ -18,6 +18,7 @@ struct WorkoutRoutineFormView: View {
     @State private var emoji: String
     @State private var selectedExercises: [Exercise]
     @State private var showingExercisePicker = false
+    @State private var showingDeleteConfirmation = false
 
     let isEditing: Bool
     let routineToEdit: WorkoutRoutine?
@@ -106,6 +107,15 @@ struct WorkoutRoutineFormView: View {
                         dismiss()
                     }
                 }
+                if isEditing {
+                    ToolbarItem(placement: .destructiveAction) {
+                        Button(role: .destructive) {
+                            showingDeleteConfirmation = true
+                        } label: {
+                            Image(systemName: "trash")
+                        }
+                    }
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(isEditing ? "Save" : "Create") {
                         saveRoutine()
@@ -115,6 +125,14 @@ struct WorkoutRoutineFormView: View {
             }
             .sheet(isPresented: $showingExercisePicker) {
                 RoutineExercisePickerView(selectedExercises: $selectedExercises)
+            }
+            .alert("Delete this routine?", isPresented: $showingDeleteConfirmation) {
+                Button("Cancel", role: .cancel) {}
+                Button("Delete Routine", role: .destructive) {
+                    confirmDelete()
+                }
+            } message: {
+                Text("This action cannot be undone. The exercises in this routine will not be affected.")
             }
         }
     }
@@ -153,6 +171,20 @@ struct WorkoutRoutineFormView: View {
 
         HapticManager.shared.trigger(.success)
         dismiss()
+    }
+
+    private func confirmDelete() {
+        guard let routine = routineToEdit else { return }
+        HapticManager.shared.trigger(.warning)
+
+        // Dismiss first to avoid crash
+        dismiss()
+
+        // Delay deletion slightly to allow sheet to dismiss
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            modelContext.delete(routine)
+            try? modelContext.save()
+        }
     }
 }
 
