@@ -12,6 +12,7 @@ struct WorkoutRoutinesListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \WorkoutRoutine.name) private var routines: [WorkoutRoutine]
     @Query(sort: \WorkoutEntry.workoutDate, order: .reverse) private var workouts: [WorkoutEntry]
+    @Query(sort: \Exercise.name) private var allExercises: [Exercise]
     @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
     @State private var showingCreateForm = false
     @State private var showingPresetBrowser = false
@@ -137,16 +138,16 @@ struct WorkoutRoutinesListView: View {
                 }
             }
             .sheet(isPresented: $showingCreateForm) {
-                WorkoutRoutineFormView()
+                WorkoutRoutineFormView(allExercises: allExercises)
             }
             .sheet(isPresented: $showingPresetBrowser) {
                 PresetRoutinesBrowserView()
             }
             .sheet(item: $selectedRoutine) { routine in
-                WorkoutRoutineFormView(routine: routine)
+                WorkoutRoutineFormView(routine: routine, allExercises: allExercises)
             }
             .fullScreenCover(item: $routineToStart) { routine in
-                WorkoutLoggingView(routine: routine)
+                WorkoutLoggingView(routine: routine, allExercises: allExercises)
             }
             .alert("Delete this routine?", isPresented: $showingDeleteConfirmation) {
                 Button("Delete", role: .destructive) {
@@ -197,7 +198,7 @@ struct RoutineRowView: View {
                     Image(systemName: "figure.mixed.cardio")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
-                    Text("\(routine.exercises.count) exercises")
+                    Text("\(!routine.exerciseIDs.isEmpty ? routine.exerciseIDs.count : routine.exercises.count) exercises")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

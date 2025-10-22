@@ -12,6 +12,7 @@ struct WorkoutCalendarView: View {
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \WorkoutEntry.workoutDate, order: .reverse) private var workouts: [WorkoutEntry]
     @Query(sort: \WorkoutRoutine.name) private var routines: [WorkoutRoutine]
+    @Query(sort: \Exercise.name) private var allExercises: [Exercise]
     @AppGroupStorage("weeklyWorkoutGoal") private var weeklyWorkoutGoal: Int = 3
 
     @State private var selectedMonth: Date = Date()
@@ -300,10 +301,10 @@ struct WorkoutCalendarView: View {
             }
             .fullScreenCover(item: $workoutToLog) { workout in
                 if let routine = workout.routine {
-                    WorkoutLoggingView(date: workout.date, routine: routine)
+                    WorkoutLoggingView(date: workout.date, routine: routine, allExercises: allExercises)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 } else {
-                    WorkoutLoggingView(date: workout.date)
+                    WorkoutLoggingView(date: workout.date, allExercises: allExercises)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
@@ -572,7 +573,7 @@ struct RoutinePickerForDate: View {
                             Text(routine.name)
                                 .font(.headline)
 
-                            Text("\(routine.exercises.count) exercises")
+                            Text("\(!routine.exerciseIDs.isEmpty ? routine.exerciseIDs.count : routine.exercises.count) exercises")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }

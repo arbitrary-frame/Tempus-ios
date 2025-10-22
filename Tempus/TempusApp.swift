@@ -70,6 +70,12 @@ struct TempusApp: App {
         do {
             let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
             print("📦 Database location: \(databaseURL.path)")
+
+            // Migrate existing routines to use exerciseIDs for order preservation
+            Task { @MainActor in
+                await migrateRoutineExercises(container: container)
+            }
+
             return container
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
@@ -98,6 +104,33 @@ struct TempusApp: App {
         // All widget taps go to workouts tab (index 0)
         if url.host == "workouts" {
             selectedTab = 0
+        }
+    }
+
+    /// One-time migration: Populate exerciseIDs from exercises relationship for existing routines
+    /// This preserves exercise order going forward without breaking existing data
+    @MainActor
+    private static func migrateRoutineExercises(container: ModelContainer) async {
+        let context = ModelContext(container)
+
+        do {
+            let routines = try context.fetch(FetchDescriptor<WorkoutRoutine>())
+
+            var migratedCount = 0
+            for routine in routines {
+                // Only migrate if exerciseIDs is empty but exercises exist
+                if routine.exerciseIDs.isEmpty && !routine.exercises.isEmpty {
+                    routine.exerciseIDs = routine.exercises.map { $0.id }
+                    migratedCount += 1
+                }
+            }
+
+            if migratedCount > 0 {
+                try context.save()
+                print("✅ Migrated \(migratedCount) routine(s) to use exerciseIDs for order preservation")
+            }
+        } catch {
+            print("⚠️ Routine migration error: \(error)")
         }
     }
 }

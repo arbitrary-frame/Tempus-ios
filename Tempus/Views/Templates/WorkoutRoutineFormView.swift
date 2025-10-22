@@ -23,7 +23,7 @@ struct WorkoutRoutineFormView: View {
     let isEditing: Bool
     let routineToEdit: WorkoutRoutine?
 
-    init(routine: WorkoutRoutine? = nil) {
+    init(routine: WorkoutRoutine? = nil, allExercises: [Exercise] = []) {
         self.isEditing = routine != nil
         self.routineToEdit = routine
 
@@ -31,7 +31,20 @@ struct WorkoutRoutineFormView: View {
             _name = State(initialValue: routine.name)
             _routineDescription = State(initialValue: routine.routineDescription ?? "")
             _emoji = State(initialValue: routine.emoji ?? "")
-            _selectedExercises = State(initialValue: routine.exercises)
+
+            // Use exerciseIDs for order if available (preserves user's order)
+            // Otherwise fall back to exercises relationship (backward compatibility)
+            let orderedExercises: [Exercise]
+            if !routine.exerciseIDs.isEmpty {
+                // Reconstruct exercise array in the order specified by exerciseIDs
+                orderedExercises = routine.exerciseIDs.compactMap { id in
+                    allExercises.first { $0.id == id }
+                }
+            } else {
+                // Fallback for routines created before exerciseIDs field existed
+                orderedExercises = routine.exercises
+            }
+            _selectedExercises = State(initialValue: orderedExercises)
         } else {
             _name = State(initialValue: "")
             _routineDescription = State(initialValue: "")
@@ -157,6 +170,7 @@ struct WorkoutRoutineFormView: View {
             routine.routineDescription = routineDescription.isEmpty ? nil : routineDescription
             routine.emoji = trimmedEmoji.isEmpty ? nil : trimmedEmoji
             routine.exercises = selectedExercises
+            routine.exerciseIDs = selectedExercises.map { $0.id }  // Save ordered IDs
             routine.updatedAt = Date()
         } else {
             // Create new routine
@@ -166,6 +180,7 @@ struct WorkoutRoutineFormView: View {
                 emoji: trimmedEmoji.isEmpty ? nil : trimmedEmoji,
                 exercises: selectedExercises
             )
+            newRoutine.exerciseIDs = selectedExercises.map { $0.id }  // Save ordered IDs
             modelContext.insert(newRoutine)
         }
 
