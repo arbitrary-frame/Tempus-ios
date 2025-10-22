@@ -13,6 +13,7 @@ struct WorkoutsListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \WorkoutEntry.workoutDate, order: .reverse) private var workouts: [WorkoutEntry]
     @Query(sort: \WorkoutRoutine.name) private var routines: [WorkoutRoutine]
+    @Query(sort: \Exercise.name) private var allExercises: [Exercise]
 
     @Binding var showWorkoutLoggerFromOnboarding: Bool
     @State private var showingWorkoutLogging = false
@@ -186,7 +187,7 @@ struct WorkoutsListView: View {
                 }
             }
             .fullScreenCover(isPresented: $showingWorkoutLogging) {
-                WorkoutLoggingView()
+                WorkoutLoggingView(allExercises: allExercises)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
             .fullScreenCover(item: $selectedWorkout) { workout in
@@ -194,7 +195,7 @@ struct WorkoutsListView: View {
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
             .fullScreenCover(item: $routineToStart) { routine in
-                WorkoutLoggingView(routine: routine)
+                WorkoutLoggingView(routine: routine, allExercises: allExercises)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
             .sheet(isPresented: $showingCalendar) {

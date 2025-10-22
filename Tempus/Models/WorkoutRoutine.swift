@@ -17,6 +17,10 @@ final class WorkoutRoutine {
     var createdAt: Date
     var updatedAt: Date
 
+    // Ordered array of exercise IDs to preserve exercise order
+    // SwiftData @Relationship arrays don't guarantee order across app restarts
+    var exerciseIDs: [UUID] = []
+
     // Relationships
     @Relationship(deleteRule: .nullify)
     var exercises: [Exercise]

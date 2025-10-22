@@ -49,7 +49,7 @@ struct WorkoutLoggingView: View {
         return formatter
     }()
 
-    init(date: Date = Date(), routine: WorkoutRoutine? = nil) {
+    init(date: Date = Date(), routine: WorkoutRoutine? = nil, allExercises: [Exercise] = []) {
         self.sourceRoutine = routine
 
         if let routine = routine {
@@ -58,8 +58,19 @@ struct WorkoutLoggingView: View {
             _workoutName = State(initialValue: "\(routine.name) - \(Self.dateFormatter.string(from: date))")
             _workoutDate = State(initialValue: date)
 
-            // Pre-populate exercises from routine
-            let entries = routine.exercises.map { exercise in
+            // Pre-populate exercises from routine using exerciseIDs for correct order
+            let orderedExercises: [Exercise]
+            if !routine.exerciseIDs.isEmpty {
+                // Use exerciseIDs for order (preserves user's order)
+                orderedExercises = routine.exerciseIDs.compactMap { id in
+                    allExercises.first { $0.id == id }
+                }
+            } else {
+                // Fallback to exercises relationship (backward compatibility)
+                orderedExercises = routine.exercises
+            }
+
+            let entries = orderedExercises.map { exercise in
                 return WorkoutExerciseEntry(
                     exerciseID: exercise.id,
                     exerciseName: exercise.name,
