@@ -27,22 +27,22 @@ enum MuscleGroup: String, CaseIterable, Identifiable {
         switch self {
         case .chest:
             // Pushing movements - bench press, push-ups
-            return "figure.strengthtraining.functional"
+            return "figure.martial.arts"
         case .back:
             // Pulling movements - rows, pull-ups, deadlifts
-            return "figure.cooldown"
+            return "figure.strengthtraining.traditional"
         case .shoulders:
             // Overhead pressing, lateral raises
-            return "figure.arms.open"
+            return "figure.wave"
         case .biceps:
             // Curling movements - bicep curls
             return "dumbbell.fill"
         case .triceps:
             // Extension movements - tricep extensions, dips
-            return "figure.strengthtraining.traditional"
+            return "figure.cooldown"
         case .legs:
             // Squats, lunges, leg press
-            return "figure.walk"
+            return "figure.strengthtraining.functional"
         case .core:
             // Abs, planks, core stability (perfect symbol exists!)
             return "figure.core.training"

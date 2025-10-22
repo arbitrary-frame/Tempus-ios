@@ -147,14 +147,8 @@ struct WorkoutEditView: View {
                         dismiss()
                     }
                 }
-                ToolbarItem(placement: .destructiveAction) {
-                    Button(role: .destructive) {
-                        showingDeleteConfirmation = true
-                    } label: {
-                        Image(systemName: "trash")
-                    }
-                }
-                ToolbarItem(placement: .primaryAction) {
+
+                ToolbarItem(placement: .automatic) {
                     Menu {
                         Button {
                             showingReorderSheet = true
@@ -168,10 +162,27 @@ struct WorkoutEditView: View {
                         } label: {
                             Label("Save as Routine", systemImage: "arrow.triangle.2.circlepath")
                         }
+
+                        Divider()
+
+                        Button(role: .destructive) {
+                            showingDeleteConfirmation = true
+                        } label: {
+                            Label("Delete Workout", systemImage: "trash")
+                        }
                     } label: {
                         Image(systemName: "ellipsis.circle")
                     }
                 }
+
+                ToolbarItem(placement: .automatic) {
+                    Button {
+                        showingExercisePicker = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
+
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         saveWorkout()

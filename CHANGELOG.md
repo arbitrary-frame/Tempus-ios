@@ -4,6 +4,43 @@ All notable changes to Tempus iOS workout tracking app.
 
 ## [Unreleased]
 
+### [Toolbar Improvements and Required Muscle Group Selection] - 2025-10-22
+
+**Added:**
+- **Always-Visible Add Exercise Button** in toolbar for both workout logging and editing
+  - Plus button now in toolbar alongside three dots and save buttons
+  - Always accessible without scrolling (especially helpful for routines with many exercises)
+  - Bottom "Add Exercise" button remains for discoverability
+  - Fixes issue where add button gets lost when logging from routines
+
+- **Required Muscle Group Selection** when creating exercises
+  - Muscle group field starts empty instead of defaulting to "Chest"
+  - Shows "Select" placeholder until user chooses a muscle group
+  - Create/Save button disabled until muscle group is selected
+  - Prevents accidentally creating exercises with wrong muscle group
+  - Editing existing exercises unchanged (pre-filled as before)
+
+**Changed:**
+- **Reorganised Workout Toolbars** for cleaner UI
+  - New layout: Cancel | Three dots | Plus | Save (reduced from 4-5 buttons to 3)
+  - Moved reorder function into three-dots menu (WorkoutLoggingView)
+  - Moved delete function into three-dots menu (WorkoutEditView)
+  - Consistent, less cluttered layout across logging and editing views
+
+- **Updated Muscle Group Icons** with more representative SF Symbols:
+  - Chest: `figure.martial.arts` (pushing movements like bench press)
+  - Back: `figure.strengthtraining.traditional` (pulling movements like rows)
+  - Shoulders: `figure.wave` (overhead pressing movements)
+  - Legs: `figure.strengthtraining.functional` (squats, lunges)
+  - Triceps: `figure.cooldown` (extension movements)
+
+**Benefits:**
+- ✅ Cleaner, less cluttered toolbar interface
+- ✅ Easier to add exercises without scrolling
+- ✅ Better data quality (no accidental wrong muscle groups)
+- ✅ Consistent UI between workout logging and editing
+- ✅ More intuitive muscle group icons
+
 ### [Complete Data Import/Export System] - 2025-10-16
 
 **Added:**

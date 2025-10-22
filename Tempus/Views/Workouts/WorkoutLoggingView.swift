@@ -187,13 +187,25 @@ struct WorkoutLoggingView: View {
                     }
                 }
 
-                ToolbarItem(placement: .destructiveAction) {
-                    Button {
-                        showingReorderSheet = true
+                ToolbarItem(placement: .automatic) {
+                    Menu {
+                        Button {
+                            showingReorderSheet = true
+                        } label: {
+                            Label("Reorder Exercises", systemImage: "line.3.horizontal")
+                        }
+                        .disabled(workoutExercises.count < 2)
                     } label: {
-                        Image(systemName: "line.3.horizontal")
+                        Image(systemName: "ellipsis.circle")
                     }
-                    .disabled(workoutExercises.count < 2)
+                }
+
+                ToolbarItem(placement: .automatic) {
+                    Button {
+                        showingExercisePicker = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
