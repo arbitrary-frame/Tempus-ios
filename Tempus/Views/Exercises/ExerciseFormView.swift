@@ -16,7 +16,7 @@ struct ExerciseFormView: View {
 
     @State private var name: String = ""
     @State private var exerciseDescription: String = ""
-    @State private var muscleGroup: MuscleGroup = .chest
+    @State private var muscleGroup: MuscleGroup?
     @State private var tagInput: String = ""
     @State private var tags: [String] = []
     @State private var showingValidationError = false
@@ -53,7 +53,7 @@ struct ExerciseFormView: View {
     }
 
     var isValid: Bool {
-        !name.trimmingCharacters(in: .whitespaces).isEmpty
+        !name.trimmingCharacters(in: .whitespaces).isEmpty && muscleGroup != nil
     }
 
     private func affectedWorkoutsCount(for exerciseID: UUID) -> Int {
@@ -75,6 +75,8 @@ struct ExerciseFormView: View {
 
                 Section("Classification") {
                     Picker("Muscle Group", selection: $muscleGroup) {
+                        Text("Select")
+                            .tag(nil as MuscleGroup?)
                         ForEach(MuscleGroup.allCases) { group in
                             Label {
                                 Text(group.rawValue)
@@ -83,7 +85,7 @@ struct ExerciseFormView: View {
                                     .symbolRenderingMode(.hierarchical)
                                     .foregroundStyle(.accent)
                             }
-                            .tag(group)
+                            .tag(group as MuscleGroup?)
                         }
                     }
                     .pickerStyle(.menu)
@@ -324,11 +326,14 @@ struct ExerciseFormView: View {
             // No unilateral change or no workouts affected - save directly
             exercise.name = trimmedName
             exercise.exerciseDescription = exerciseDescription.isEmpty ? nil : exerciseDescription
-            exercise.muscleGroup = muscleGroup.rawValue
+            if let muscleGroup = muscleGroup {
+                exercise.muscleGroup = muscleGroup.rawValue
+            }
             exercise.tags = tags
             exercise.updatedAt = Date()
         } else {
             // Create new exercise
+            guard let muscleGroup = muscleGroup else { return }
             let newExercise = Exercise(
                 name: trimmedName,
                 muscleGroup: muscleGroup.rawValue,
@@ -405,7 +410,9 @@ struct ExerciseFormView: View {
         // Update the exercise itself
         exercise.name = trimmedName
         exercise.exerciseDescription = exerciseDescription.isEmpty ? nil : exerciseDescription
-        exercise.muscleGroup = muscleGroup.rawValue
+        if let muscleGroup = muscleGroup {
+            exercise.muscleGroup = muscleGroup.rawValue
+        }
         exercise.tags = tags
         exercise.updatedAt = Date()
 
