@@ -58,17 +58,6 @@ struct ExerciseFormView: View {
         !name.trimmingCharacters(in: .whitespaces).isEmpty && muscleGroup != nil
     }
 
-    private var validationErrors: [String] {
-        var errors: [String] = []
-        if name.trimmingCharacters(in: .whitespaces).isEmpty {
-            errors.append("Exercise name required")
-        }
-        if muscleGroup == nil {
-            errors.append("Muscle group required")
-        }
-        return errors
-    }
-
     private func affectedWorkoutsCount(for exerciseID: UUID) -> Int {
         return allWorkouts.filter { workout in
             workout.exercisesData.contains { $0.exerciseID == exerciseID }
@@ -189,20 +178,6 @@ struct ExerciseFormView: View {
                     }
                 }
 
-                // Validation errors for missing required fields
-                if !isValid && !validationErrors.isEmpty {
-                    Section {
-                        VStack(alignment: .leading, spacing: 4) {
-                            ForEach(validationErrors, id: \.self) { error in
-                                Label(error, systemImage: "exclamationmark.circle")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                    }
-                }
-
-                // Duplicate name validation error
                 if showingValidationError {
                     Section {
                         Text(validationMessage)
