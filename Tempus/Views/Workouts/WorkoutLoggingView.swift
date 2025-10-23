@@ -190,15 +190,6 @@ struct WorkoutLoggingView: View {
                     }
                 }
 
-                if focusedField {
-                    ToolbarItem(placement: .automatic) {
-                        Button("Done") {
-                            focusedField = false
-                        }
-                        .fontWeight(.semibold)
-                    }
-                }
-
                 ToolbarItem(placement: .automatic) {
                     Button {
                         showingReorderSheet = true
