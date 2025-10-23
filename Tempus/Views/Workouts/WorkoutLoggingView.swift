@@ -181,26 +181,21 @@ struct WorkoutLoggingView: View {
             }
             .listStyle(.insetGrouped)
             .scrollDismissesKeyboard(.interactively)
-            .safeAreaInset(edge: .bottom) {
-                if focusedField {
-                    HStack {
-                        Spacer()
-                        Button("Done") {
-                            focusedField = false
-                        }
-                        .fontWeight(.semibold)
-                        .padding(.horizontal)
-                        .padding(.vertical, 8)
-                    }
-                    .background(.regularMaterial)
-                }
-            }
             .navigationTitle("Log")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
+                    }
+                }
+
+                if focusedField {
+                    ToolbarItem(placement: .automatic) {
+                        Button("Done") {
+                            focusedField = false
+                        }
+                        .fontWeight(.semibold)
                     }
                 }
 
