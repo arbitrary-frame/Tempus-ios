@@ -188,16 +188,12 @@ struct WorkoutLoggingView: View {
                 }
 
                 ToolbarItem(placement: .automatic) {
-                    Menu {
-                        Button {
-                            showingReorderSheet = true
-                        } label: {
-                            Label("Reorder Exercises", systemImage: "line.3.horizontal")
-                        }
-                        .disabled(workoutExercises.count < 2)
+                    Button {
+                        showingReorderSheet = true
                     } label: {
-                        Image(systemName: "ellipsis.circle")
+                        Image(systemName: "line.3.horizontal")
                     }
+                    .disabled(workoutExercises.count < 2)
                 }
 
                 ToolbarItem(placement: .automatic) {
