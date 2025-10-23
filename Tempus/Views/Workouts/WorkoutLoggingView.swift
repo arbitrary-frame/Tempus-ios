@@ -181,17 +181,21 @@ struct WorkoutLoggingView: View {
             }
             .listStyle(.insetGrouped)
             .scrollDismissesKeyboard(.interactively)
-            .simultaneousGesture(
-                TapGesture().onEnded {
-                    focusedField = false
-                }
-            )
             .navigationTitle("Log")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
+                    }
+                }
+
+                if focusedField {
+                    ToolbarItem(placement: .automatic) {
+                        Button("Done") {
+                            focusedField = false
+                        }
+                        .fontWeight(.semibold)
                     }
                 }
 
