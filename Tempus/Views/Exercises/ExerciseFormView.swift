@@ -39,10 +39,12 @@ struct ExerciseFormView: View {
 
     let isEditing: Bool
     let exerciseToEdit: Exercise?
+    let onExerciseCreated: ((Exercise) -> Void)?
 
-    init(exercise: Exercise? = nil) {
+    init(exercise: Exercise? = nil, onExerciseCreated: ((Exercise) -> Void)? = nil) {
         self.isEditing = exercise != nil
         self.exerciseToEdit = exercise
+        self.onExerciseCreated = onExerciseCreated
 
         if let exercise = exercise {
             _name = State(initialValue: exercise.name)
@@ -122,8 +124,9 @@ struct ExerciseFormView: View {
                             }
                         }
 
-                        // Suggested tags
-                        let availableSuggestions = ExerciseTag.suggestedTags.filter { !tags.contains($0) }
+                        // Suggested tags (default + custom from user's exercises)
+                        let allSuggestedTags = ExerciseTag.getSuggestedTags(from: allExercises)
+                        let availableSuggestions = allSuggestedTags.filter { !tags.contains($0) }
                         if !availableSuggestions.isEmpty {
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("Suggested:")
@@ -341,6 +344,9 @@ struct ExerciseFormView: View {
                 exerciseDescription: exerciseDescription.isEmpty ? nil : exerciseDescription
             )
             modelContext.insert(newExercise)
+
+            // Notify callback that exercise was created
+            onExerciseCreated?(newExercise)
         }
 
         HapticManager.shared.trigger(.success)

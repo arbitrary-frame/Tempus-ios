@@ -207,7 +207,7 @@ struct ExercisesListView: View {
                             }
                         }
                     }
-                    .listStyle(.insetGrouped)
+                    .listStyle(.plain)
                 }
             }
             .navigationTitle("Exercises")

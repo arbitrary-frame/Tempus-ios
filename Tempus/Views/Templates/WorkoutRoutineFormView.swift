@@ -253,7 +253,7 @@ struct RoutineExercisePickerView: View {
                     }
                 }
             }
-            .listStyle(.insetGrouped)
+            .listStyle(.plain)
             .navigationTitle("Add Exercises")
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $searchText, prompt: "Search exercises")
@@ -273,7 +273,11 @@ struct RoutineExercisePickerView: View {
                 }
             }
             .sheet(isPresented: $showingExerciseForm) {
-                ExerciseFormView()
+                ExerciseFormView(onExerciseCreated: { newExercise in
+                    // Auto-select the newly created exercise
+                    selectedExercises.append(newExercise)
+                    HapticManager.shared.trigger(.success)
+                })
             }
         }
     }

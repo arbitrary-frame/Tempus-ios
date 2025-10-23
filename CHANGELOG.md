@@ -4,6 +4,42 @@ All notable changes to Tempus iOS workout tracking app.
 
 ## [Unreleased]
 
+### [Minor UI Improvements and Custom Tag Suggestions] - 2025-10-23
+
+**Added:**
+- **Custom Tag Suggestions** when creating exercises
+  - Tags from existing exercises now appear as suggestions
+  - Default tags (dumbbells, barbell, compound, unilateral) shown first
+  - Custom tags sorted alphabetically after defaults
+  - Encourages consistency across exercise library
+  - Reduces typing for frequently used tags
+
+- **Auto-Select Newly Created Exercises**
+  - Exercise created during workout logging automatically added to workout
+  - Exercise created during routine editing automatically added to routine
+  - Eliminates need to search for and manually add new exercise
+  - Smoother workflow with fewer steps
+
+- **Sticky Section Headers** in exercise lists
+  - Changed list style from inset grouped to plain
+  - Muscle group headers follow while scrolling
+  - Applied to main exercises tab, workout picker, and routine picker
+  - Easier navigation through large exercise libraries
+
+**Changed:**
+- **Simplified Reorder Button** in workout logging toolbar
+  - Replaced three-dot menu with direct reorder icon
+  - Reduces interaction from 2 taps to 1 tap
+  - Only enabled when 2+ exercises present
+  - Cleaner, more intuitive toolbar
+
+**Improved:**
+- **Keyboard Dismissal** in workout logging and editing
+  - Scroll anywhere to dismiss keyboard naturally
+  - Single tap to switch between weight/reps fields (no double-tap)
+  - Uses @FocusState for smooth field switching
+  - No UI clutter, natural iOS behavior
+
 ### [Toolbar Improvements and Required Muscle Group Selection] - 2025-10-22
 
 **Added:**

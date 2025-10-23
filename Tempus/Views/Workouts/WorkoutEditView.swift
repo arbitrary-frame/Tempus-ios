@@ -26,6 +26,7 @@ struct WorkoutEditView: View {
     @State private var showingSaveAsRoutine = false
     @State private var showingReorderSheet = false
     @State private var selectedExerciseForInfo: Exercise?
+    @FocusState private var focusedField: Bool
 
     // Cached previous workout data lookup - prevents N+1 query pattern
     private var previousWorkoutDataCache: [UUID: WorkoutExerciseData] {
@@ -78,7 +79,8 @@ struct WorkoutEditView: View {
                         Section {
                             ExerciseEntryView(
                                 exerciseEntry: $exerciseEntry,
-                                previousData: previousWorkoutDataCache[exerciseEntry.exerciseID]
+                                previousData: previousWorkoutDataCache[exerciseEntry.exerciseID],
+                                focusedField: $focusedField
                             )
                         } header: {
                             HStack(spacing: 8) {
@@ -139,6 +141,7 @@ struct WorkoutEditView: View {
                 }
             }
             .listStyle(.insetGrouped)
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Edit")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
