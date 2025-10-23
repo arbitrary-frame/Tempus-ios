@@ -181,6 +181,14 @@ struct WorkoutLoggingView: View {
             .navigationTitle("Log")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") {
+                        hideKeyboard()
+                    }
+                }
+            }
+            .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
@@ -239,6 +247,9 @@ struct WorkoutLoggingView: View {
         }
     }
 
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
 
     private func saveWorkout() {
         // Convert WorkoutExerciseEntry to WorkoutExerciseData
