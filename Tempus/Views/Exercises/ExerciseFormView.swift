@@ -26,6 +26,8 @@ struct ExerciseFormView: View {
     @State private var showingDeleteConfirmation = false
     @State private var showingArchiveConfirmation = false
     @State private var showingCannotDeleteAlert = false
+    @State private var showingMissingFieldsAlert = false
+    @State private var missingFieldsMessage = ""
 
     enum UnilateralChange {
         case addingUnilateral
@@ -217,7 +219,7 @@ struct ExerciseFormView: View {
                     Button(isEditing ? "Save" : "Create") {
                         saveExercise()
                     }
-                    .disabled(!isValid)
+                    .disabled(isEditing ? !isValid : false)
                 }
             }
             .alert("Unilateral Tag Changed", isPresented: $showingUnilateralMigrationConfirm) {
@@ -271,6 +273,11 @@ struct ExerciseFormView: View {
             } message: {
                 Text("This exercise will be hidden from the library but remain in your workout history.")
             }
+            .alert("Missing Required Fields", isPresented: $showingMissingFieldsAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(missingFieldsMessage)
+            }
         }
     }
 
@@ -299,6 +306,28 @@ struct ExerciseFormView: View {
 
     private func saveExercise() {
         let trimmedName = name.trimmingCharacters(in: .whitespaces)
+
+        // Check required fields first (only for new exercises)
+        if !isEditing {
+            var missingFields: [String] = []
+            if trimmedName.isEmpty {
+                missingFields.append("Exercise name")
+            }
+            if muscleGroup == nil {
+                missingFields.append("Muscle group")
+            }
+
+            if !missingFields.isEmpty {
+                if missingFields.count == 1 {
+                    missingFieldsMessage = "Please enter a \(missingFields[0].lowercased())."
+                } else {
+                    missingFieldsMessage = "Please enter an exercise name and select a muscle group."
+                }
+                showingMissingFieldsAlert = true
+                HapticManager.shared.trigger(.warning)
+                return
+            }
+        }
 
         // Validate unique name (case-insensitive)
         let isDuplicate = allExercises.contains { exercise in
