@@ -122,8 +122,9 @@ struct ExerciseFormView: View {
                             }
                         }
 
-                        // Suggested tags
-                        let availableSuggestions = ExerciseTag.suggestedTags.filter { !tags.contains($0) }
+                        // Suggested tags (default + custom from user's exercises)
+                        let allSuggestedTags = ExerciseTag.getSuggestedTags(from: allExercises)
+                        let availableSuggestions = allSuggestedTags.filter { !tags.contains($0) }
                         if !availableSuggestions.isEmpty {
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("Suggested:")
