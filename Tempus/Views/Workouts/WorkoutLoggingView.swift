@@ -650,7 +650,16 @@ struct ExercisePickerView: View {
                 }
             }
             .sheet(isPresented: $showingExerciseForm) {
-                ExerciseFormView()
+                ExerciseFormView(onExerciseCreated: { newExercise in
+                    // Auto-select the newly created exercise
+                    let entry = WorkoutExerciseEntry(
+                        exerciseID: newExercise.id,
+                        exerciseName: newExercise.name,
+                        isUnilateral: newExercise.tags.contains("unilateral")
+                    )
+                    selectedExercises.append(entry)
+                    HapticManager.shared.trigger(.success)
+                })
             }
         }
     }

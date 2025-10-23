@@ -273,7 +273,11 @@ struct RoutineExercisePickerView: View {
                 }
             }
             .sheet(isPresented: $showingExerciseForm) {
-                ExerciseFormView()
+                ExerciseFormView(onExerciseCreated: { newExercise in
+                    // Auto-select the newly created exercise
+                    selectedExercises.append(newExercise)
+                    HapticManager.shared.trigger(.success)
+                })
             }
         }
     }

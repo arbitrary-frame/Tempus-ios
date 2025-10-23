@@ -39,10 +39,12 @@ struct ExerciseFormView: View {
 
     let isEditing: Bool
     let exerciseToEdit: Exercise?
+    let onExerciseCreated: ((Exercise) -> Void)?
 
-    init(exercise: Exercise? = nil) {
+    init(exercise: Exercise? = nil, onExerciseCreated: ((Exercise) -> Void)? = nil) {
         self.isEditing = exercise != nil
         self.exerciseToEdit = exercise
+        self.onExerciseCreated = onExerciseCreated
 
         if let exercise = exercise {
             _name = State(initialValue: exercise.name)
@@ -342,6 +344,9 @@ struct ExerciseFormView: View {
                 exerciseDescription: exerciseDescription.isEmpty ? nil : exerciseDescription
             )
             modelContext.insert(newExercise)
+
+            // Notify callback that exercise was created
+            onExerciseCreated?(newExercise)
         }
 
         HapticManager.shared.trigger(.success)
