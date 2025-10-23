@@ -627,7 +627,7 @@ struct ExercisePickerView: View {
                     }
                 }
             }
-            .listStyle(.insetGrouped)
+            .listStyle(.plain)
             .navigationTitle("Add Exercises")
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $searchText, prompt: "Search exercises")
