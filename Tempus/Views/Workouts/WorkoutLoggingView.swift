@@ -22,6 +22,7 @@ struct WorkoutLoggingView: View {
     @State private var showingReorderSheet = false
     @State private var workoutNotes: String = ""
     @State private var selectedExerciseForInfo: Exercise?
+    @FocusState private var focusedField: Bool
 
     // Track if name was from routine to auto-update it
     private let routineName: String?
@@ -111,7 +112,8 @@ struct WorkoutLoggingView: View {
                         Section {
                             ExerciseEntryView(
                                 exerciseEntry: $exerciseEntry,
-                                previousData: previousWorkoutDataCache[exerciseEntry.exerciseID]
+                                previousData: previousWorkoutDataCache[exerciseEntry.exerciseID],
+                                focusedField: $focusedField
                             )
                         } header: {
                             HStack(spacing: 8) {
@@ -179,6 +181,11 @@ struct WorkoutLoggingView: View {
             }
             .listStyle(.insetGrouped)
             .scrollDismissesKeyboard(.interactively)
+            .simultaneousGesture(
+                TapGesture().onEnded {
+                    focusedField = false
+                }
+            )
             .navigationTitle("Log")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -326,6 +333,7 @@ struct WorkoutExerciseEntry: Identifiable {
 struct ExerciseEntryView: View {
     @Binding var exerciseEntry: WorkoutExerciseEntry
     let previousData: WorkoutExerciseData?
+    @FocusState.Binding var focusedField: Bool
 
     var body: some View {
         VStack(spacing: 12) {
@@ -364,7 +372,7 @@ struct ExerciseEntryView: View {
             // Sets
             ForEach(exerciseEntry.sets.indices, id: \.self) { index in
                 HStack {
-                    SetEntryRow(set: $exerciseEntry.sets[index])
+                    SetEntryRow(set: $exerciseEntry.sets[index], focusedField: $focusedField)
 
                     // Delete set button (only show if more than 1 set)
                     if exerciseEntry.sets.count > 1 {
@@ -477,6 +485,7 @@ struct ExerciseEntryView: View {
 // Individual set entry row with vertical drop sets
 struct SetEntryRow: View {
     @Binding var set: WorkoutSet
+    @FocusState.Binding var focusedField: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -510,6 +519,7 @@ struct SetEntryRow: View {
                     ))
                     .keyboardType(.decimalPad)
                     .textFieldStyle(.roundedBorder)
+                    .focused($focusedField)
                     .frame(width: 60)
 
                     Image(systemName: "xmark")
@@ -525,6 +535,7 @@ struct SetEntryRow: View {
                     ))
                     .keyboardType(.numberPad)
                     .textFieldStyle(.roundedBorder)
+                    .focused($focusedField)
                     .frame(width: 50)
 
                     // Delete drop set button (only for drops, not main set)
