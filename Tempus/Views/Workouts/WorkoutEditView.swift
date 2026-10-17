@@ -25,7 +25,7 @@ struct WorkoutEditView: View {
     @State private var showingDeleteConfirmation = false
     @State private var showingSaveAsRoutine = false
     @State private var showingReorderSheet = false
-    @State private var selectedExerciseForInfo: Exercise?
+    @State private var selectedExerciseForHistory: Exercise?
     @FocusState private var focusedField: Bool
 
     // Cached previous workout data lookup - prevents N+1 query pattern
@@ -80,24 +80,34 @@ struct WorkoutEditView: View {
                             ExerciseEntryView(
                                 exerciseEntry: $exerciseEntry,
                                 previousData: previousWorkoutDataCache[exerciseEntry.exerciseID],
-                                focusedField: $focusedField
+                                focusedField: $focusedField,
+                                onShowHistory: allExercises.first(where: { $0.id == exerciseEntry.exerciseID }).map { exercise in
+                                    { selectedExerciseForHistory = exercise }
+                                }
                             )
                         } header: {
                             HStack(spacing: 8) {
-                                Text(exerciseEntry.exerciseName)
-                                    .font(.headline)
-
-                                // Info button
+                                // Tapping the name opens the exercise's lift history
                                 if let exercise = allExercises.first(where: { $0.id == exerciseEntry.exerciseID }) {
                                     Button {
-                                        selectedExerciseForInfo = exercise
+                                        HapticManager.shared.trigger(.light)
+                                        selectedExerciseForHistory = exercise
                                     } label: {
-                                        Image(systemName: "info.circle")
-                                            .font(.caption)
-                                            .symbolRenderingMode(.hierarchical)
-                                            .foregroundStyle(.secondary)
+                                        HStack(spacing: 6) {
+                                            Text(exerciseEntry.exerciseName)
+                                                .font(.headline)
+                                                .foregroundStyle(.primary)
+
+                                            Image(systemName: "clock.arrow.circlepath")
+                                                .font(.caption)
+                                                .symbolRenderingMode(.hierarchical)
+                                                .foregroundStyle(.secondary)
+                                        }
                                     }
                                     .buttonStyle(.borderless)
+                                } else {
+                                    Text(exerciseEntry.exerciseName)
+                                        .font(.headline)
                                 }
 
                                 // Unilateral badge (if applicable)
@@ -202,8 +212,8 @@ struct WorkoutEditView: View {
             .sheet(isPresented: $showingReorderSheet) {
                 WorkoutExerciseReorderView(exercises: $workoutExercises)
             }
-            .sheet(item: $selectedExerciseForInfo) { exercise in
-                ExerciseInfoSheet(exercise: exercise)
+            .sheet(item: $selectedExerciseForHistory) { exercise in
+                ExerciseHistoryView(exercise: exercise, excludingWorkoutID: workout.id)
             }
             .confirmationDialog("Delete this workout?", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
                 Button("Delete Workout", role: .destructive) {

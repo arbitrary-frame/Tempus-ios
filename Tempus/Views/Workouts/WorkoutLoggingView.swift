@@ -21,7 +21,7 @@ struct WorkoutLoggingView: View {
     @State private var showingExercisePicker = false
     @State private var showingReorderSheet = false
     @State private var workoutNotes: String = ""
-    @State private var selectedExerciseForInfo: Exercise?
+    @State private var selectedExerciseForHistory: Exercise?
     @FocusState private var focusedField: Bool
 
     // Track if name was from routine to auto-update it
@@ -113,24 +113,34 @@ struct WorkoutLoggingView: View {
                             ExerciseEntryView(
                                 exerciseEntry: $exerciseEntry,
                                 previousData: previousWorkoutDataCache[exerciseEntry.exerciseID],
-                                focusedField: $focusedField
+                                focusedField: $focusedField,
+                                onShowHistory: allExercises.first(where: { $0.id == exerciseEntry.exerciseID }).map { exercise in
+                                    { selectedExerciseForHistory = exercise }
+                                }
                             )
                         } header: {
                             HStack(spacing: 8) {
-                                Text(exerciseEntry.exerciseName)
-                                    .font(.headline)
-
-                                // Info button
+                                // Tapping the name opens the exercise's lift history
                                 if let exercise = allExercises.first(where: { $0.id == exerciseEntry.exerciseID }) {
                                     Button {
-                                        selectedExerciseForInfo = exercise
+                                        HapticManager.shared.trigger(.light)
+                                        selectedExerciseForHistory = exercise
                                     } label: {
-                                        Image(systemName: "info.circle")
-                                            .font(.caption)
-                                            .symbolRenderingMode(.hierarchical)
-                                            .foregroundStyle(.secondary)
+                                        HStack(spacing: 6) {
+                                            Text(exerciseEntry.exerciseName)
+                                                .font(.headline)
+                                                .foregroundStyle(.primary)
+
+                                            Image(systemName: "clock.arrow.circlepath")
+                                                .font(.caption)
+                                                .symbolRenderingMode(.hierarchical)
+                                                .foregroundStyle(.secondary)
+                                        }
                                     }
                                     .buttonStyle(.borderless)
+                                } else {
+                                    Text(exerciseEntry.exerciseName)
+                                        .font(.headline)
                                 }
 
                                 // Unilateral badge (if applicable)
@@ -220,8 +230,8 @@ struct WorkoutLoggingView: View {
             .sheet(isPresented: $showingReorderSheet) {
                 WorkoutExerciseReorderView(exercises: $workoutExercises)
             }
-            .sheet(item: $selectedExerciseForInfo) { exercise in
-                ExerciseInfoSheet(exercise: exercise)
+            .sheet(item: $selectedExerciseForHistory) { exercise in
+                ExerciseHistoryView(exercise: exercise)
             }
         }
     }
@@ -329,22 +339,42 @@ struct ExerciseEntryView: View {
     @Binding var exerciseEntry: WorkoutExerciseEntry
     let previousData: WorkoutExerciseData?
     @FocusState.Binding var focusedField: Bool
+    var onShowHistory: (() -> Void)? = nil
 
     var body: some View {
         VStack(spacing: 12) {
             // Previous workout preview
             if let previous = previousData {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Last Session")
-                        .font(.caption.bold())
-                        .foregroundStyle(.secondary)
+                    HStack {
+                        Text("Last Session")
+                            .font(.caption.bold())
+                            .foregroundStyle(.secondary)
+
+                        Spacer()
+
+                        if let onShowHistory {
+                            Button {
+                                HapticManager.shared.trigger(.light)
+                                onShowHistory()
+                            } label: {
+                                HStack(spacing: 2) {
+                                    Text("History")
+                                    Image(systemName: "chevron.right")
+                                }
+                                .font(.caption.bold())
+                                .foregroundStyle(.accent)
+                            }
+                            .buttonStyle(.borderless)
+                        }
+                    }
 
                     HStack(spacing: 4) {
                         ForEach(previous.sets.prefix(3), id: \.id) { set in
                             Button {
                                 addSetFromPrevious(set)
                             } label: {
-                                Text(formatSet(set))
+                                Text(set.displayText)
                                     .font(.caption)
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 4)
@@ -460,20 +490,6 @@ struct ExerciseEntryView: View {
                 weightsAndReps: existingSet.weightsAndReps
             )
         }
-    }
-
-    private func formatSet(_ set: WorkoutSet) -> String {
-        let weightReps = set.weightsAndReps.map { wr in
-            if wr.weight == 0 && wr.reps == 0 {
-                return "—"
-            }
-            // Preserve decimals if present, otherwise show as integer
-            let weightString = wr.weight.truncatingRemainder(dividingBy: 1) == 0
-                ? String(format: "%.0f", wr.weight)
-                : String(format: "%.1f", wr.weight)
-            return "\(weightString)kg × \(wr.reps)"
-        }.joined(separator: " → ")
-        return weightReps
     }
 }
 
@@ -683,72 +699,6 @@ struct ExercisePickerView: View {
                 isUnilateral: exercise.tags.contains("unilateral")
             )
             selectedExercises.append(entry)
-        }
-    }
-}
-
-// Exercise info sheet
-struct ExerciseInfoSheet: View {
-    let exercise: Exercise
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            List {
-                // Description
-                if let description = exercise.exerciseDescription, !description.isEmpty {
-                    Section {
-                        Text(description)
-                            .font(.body)
-                    } header: {
-                        Label("Description", systemImage: "text.alignleft")
-                            .symbolRenderingMode(.hierarchical)
-                    }
-                }
-
-                // Muscle Group
-                Section {
-                    HStack {
-                        if let group = MuscleGroup(rawValue: exercise.muscleGroup) {
-                            Label(exercise.muscleGroup, systemImage: group.icon)
-                        } else {
-                            Text(exercise.muscleGroup)
-                        }
-                    }
-                } header: {
-                    Label("Muscle Group", systemImage: "figure.strengthtraining.traditional")
-                        .symbolRenderingMode(.hierarchical)
-                }
-
-                // Tags
-                if !exercise.tags.isEmpty {
-                    Section {
-                        FlowLayout(spacing: 8) {
-                            ForEach(exercise.tags, id: \.self) { tag in
-                                Text(tag)
-                                    .font(.caption)
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 6)
-                                    .background(.regularMaterial, in: Capsule())
-                            }
-                        }
-                        .padding(.vertical, 4)
-                    } header: {
-                        Label("Tags", systemImage: "tag")
-                            .symbolRenderingMode(.hierarchical)
-                    }
-                }
-            }
-            .listStyle(.insetGrouped)
-            .navigationTitle(exercise.name)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-            }
         }
     }
 }
