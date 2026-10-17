@@ -4,6 +4,24 @@ All notable changes to Tempus iOS workout tracking app.
 
 ## [Unreleased]
 
+### [Exercise Lift History] - 2026-10-17
+
+**Added:**
+- **Lift History View** for every exercise
+  - Shows every past session, newest first, with date, routine and all sets (drop sets shown with →)
+  - Change badge per session compares top weight with the previous session (↑ green, ↓ orange, =), making deload weeks easy to spot
+  - Session volume shown per session (unilateral exercises doubled)
+  - Summary tiles: best set, best estimated 1RM and session count
+  - Progress chart with Weight / Est. 1RM toggle; drag across the chart to see each session's details
+  - "About" section with description, muscle group and tags (replaces the old exercise info sheet)
+  - History is matched by exercise ID, so renamed exercises keep their history
+  - When editing a workout, that workout is excluded from its own history
+
+**Changed:**
+- **Exercises Tab:** tapping an exercise now opens its lift history
+  - Edit via the Edit button in the history sheet, or swipe right on the row
+- **Workout Logging & Editing:** tap an exercise name to open its lift history (replaces the info button)
+
 ### [Minor UI Improvements and Custom Tag Suggestions] - 2025-10-23
 
 **Added:**

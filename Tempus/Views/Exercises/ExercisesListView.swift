@@ -18,6 +18,8 @@ struct ExercisesListView: View {
     @State private var showingCreateForm = false
     @State private var showingPresetBrowser = false
     @State private var selectedExercise: Exercise?
+    @State private var historyExercise: Exercise?
+    @State private var pendingEditExercise: Exercise?
     @State private var showingDeleteConfirmation = false
     @State private var showingCannotDeleteAlert = false
     @State private var exerciseToDelete: Exercise?
@@ -171,7 +173,7 @@ struct ExercisesListView: View {
                             Section {
                                 ForEach(groupedExercises[muscleGroup] ?? []) { exercise in
                                     Button {
-                                        selectedExercise = exercise
+                                        historyExercise = exercise
                                     } label: {
                                         ExerciseRowView(exercise: exercise)
                                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -183,6 +185,14 @@ struct ExercisesListView: View {
                                             .fill(.ultraThinMaterial)
                                             .padding(.vertical, 2)
                                     )
+                                    .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                                        Button {
+                                            selectedExercise = exercise
+                                        } label: {
+                                            Label("Edit", systemImage: "pencil")
+                                        }
+                                        .tint(.accent)
+                                    }
                                     .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                         Button(role: .destructive) {
                                             requestDelete(exercise)
@@ -243,6 +253,18 @@ struct ExercisesListView: View {
             }
             .sheet(item: $selectedExercise) { exercise in
                 ExerciseFormView(exercise: exercise)
+            }
+            .sheet(item: $historyExercise, onDismiss: {
+                // Open the edit form once the history sheet has fully dismissed
+                if let exercise = pendingEditExercise {
+                    pendingEditExercise = nil
+                    selectedExercise = exercise
+                }
+            }) { exercise in
+                ExerciseHistoryView(exercise: exercise) {
+                    pendingEditExercise = exercise
+                    historyExercise = nil
+                }
             }
             .alert("Delete this exercise?", isPresented: $showingDeleteConfirmation) {
                 Button("Delete", role: .destructive) {
