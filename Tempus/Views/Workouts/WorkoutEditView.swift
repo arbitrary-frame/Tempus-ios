@@ -80,10 +80,7 @@ struct WorkoutEditView: View {
                             ExerciseEntryView(
                                 exerciseEntry: $exerciseEntry,
                                 previousData: previousWorkoutDataCache[exerciseEntry.exerciseID],
-                                focusedField: $focusedField,
-                                onShowHistory: allExercises.first(where: { $0.id == exerciseEntry.exerciseID }).map { exercise in
-                                    { selectedExerciseForHistory = exercise }
-                                }
+                                focusedField: $focusedField
                             )
                         } header: {
                             HStack(spacing: 8) {

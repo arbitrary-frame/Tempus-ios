@@ -113,10 +113,7 @@ struct WorkoutLoggingView: View {
                             ExerciseEntryView(
                                 exerciseEntry: $exerciseEntry,
                                 previousData: previousWorkoutDataCache[exerciseEntry.exerciseID],
-                                focusedField: $focusedField,
-                                onShowHistory: allExercises.first(where: { $0.id == exerciseEntry.exerciseID }).map { exercise in
-                                    { selectedExerciseForHistory = exercise }
-                                }
+                                focusedField: $focusedField
                             )
                         } header: {
                             HStack(spacing: 8) {
@@ -339,35 +336,15 @@ struct ExerciseEntryView: View {
     @Binding var exerciseEntry: WorkoutExerciseEntry
     let previousData: WorkoutExerciseData?
     @FocusState.Binding var focusedField: Bool
-    var onShowHistory: (() -> Void)? = nil
 
     var body: some View {
         VStack(spacing: 12) {
             // Previous workout preview
             if let previous = previousData {
                 VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text("Last Session")
-                            .font(.caption.bold())
-                            .foregroundStyle(.secondary)
-
-                        Spacer()
-
-                        if let onShowHistory {
-                            Button {
-                                HapticManager.shared.trigger(.light)
-                                onShowHistory()
-                            } label: {
-                                HStack(spacing: 2) {
-                                    Text("History")
-                                    Image(systemName: "chevron.right")
-                                }
-                                .font(.caption.bold())
-                                .foregroundStyle(.accent)
-                            }
-                            .buttonStyle(.borderless)
-                        }
-                    }
+                    Text("Last Session")
+                        .font(.caption.bold())
+                        .foregroundStyle(.secondary)
 
                     HStack(spacing: 4) {
                         ForEach(previous.sets.prefix(3), id: \.id) { set in

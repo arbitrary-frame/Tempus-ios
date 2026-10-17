@@ -17,7 +17,6 @@ struct ExerciseHistorySession: Identifiable {
     let sets: [WorkoutSet]
     let topSet: WeightRep
     let volume: Double
-    let totalReps: Int
     let bestOneRM: Double
     var topWeightChange: Double?
 
@@ -48,7 +47,6 @@ struct ExerciseHistorySession: Identifiable {
                     sets: sets,
                     topSet: topSet,
                     volume: volume,
-                    totalReps: allReps.reduce(0) { $0 + $1.reps },
                     bestOneRM: allReps.map { AnalyticsService.estimate1RM(weight: $0.weight, reps: $0.reps) }.max() ?? 0
                 ))
             }
@@ -66,7 +64,6 @@ struct ExerciseHistorySession: Identifiable {
 /// What the history chart plots
 enum HistoryChartMetric: String, CaseIterable, Identifiable {
     case weight = "Weight"
-    case reps = "Reps"
     case oneRM = "Est. 1RM"
 
     var id: String { rawValue }
@@ -74,22 +71,17 @@ enum HistoryChartMetric: String, CaseIterable, Identifiable {
     func value(for session: ExerciseHistorySession) -> Double {
         switch self {
         case .weight: session.topSet.weight
-        case .reps: Double(session.totalReps)
         case .oneRM: session.bestOneRM
         }
     }
 
     func axisLabel(_ value: Double) -> String {
-        switch self {
-        case .reps: "\(Int(value))"
-        case .weight, .oneRM: "\(ExerciseHistoryView.formatWeight(value))kg"
-        }
+        "\(ExerciseHistoryView.formatWeight(value))kg"
     }
 
     func selectionLabel(for session: ExerciseHistorySession) -> String {
         switch self {
         case .weight: session.topSet.displayText
-        case .reps: "\(session.totalReps) reps · \(session.sets.count) sets"
         case .oneRM: "\(ExerciseHistoryView.formatWeight(session.bestOneRM))kg est."
         }
     }
@@ -98,7 +90,7 @@ enum HistoryChartMetric: String, CaseIterable, Identifiable {
 struct ExerciseHistoryView: View {
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \WorkoutEntry.workoutDate, order: .reverse) private var allWorkouts: [WorkoutEntry]
-    @State private var chartMetric: HistoryChartMetric?
+    @State private var chartMetric: HistoryChartMetric = .weight
     @State private var selectedChartDate: Date?
 
     let exercise: Exercise
@@ -135,7 +127,7 @@ struct ExerciseHistoryView: View {
                             .listRowBackground(Color.clear)
                     }
 
-                    if sessions.count >= 2 {
+                    if sessions.count >= 2 && sessions.contains(where: { $0.topSet.weight > 0 }) {
                         Section {
                             trendChart(for: sessions)
                                 .padding(.vertical, 8)
@@ -194,8 +186,7 @@ struct ExerciseHistoryView: View {
     // MARK: - Chart
 
     private func trendChart(for sessions: [ExerciseHistorySession]) -> some View {
-        // Bodyweight exercises have no weight to chart, so default to reps
-        let metric = chartMetric ?? (sessions.contains { $0.topSet.weight > 0 } ? .weight : .reps)
+        let metric = chartMetric
         let chronological = Array(sessions.reversed())
         let selected = selectedChartDate.flatMap { date in
             sessions.min { abs($0.date.timeIntervalSince(date)) < abs($1.date.timeIntervalSince(date)) }
@@ -217,28 +208,19 @@ struct ExerciseHistoryView: View {
 
             Chart {
                 ForEach(chronological) { session in
-                    if metric == .reps {
-                        BarMark(
-                            x: .value("Date", session.date, unit: .day),
-                            y: .value(metric.rawValue, metric.value(for: session))
-                        )
-                        .foregroundStyle(Color.accentColor.opacity(selected == nil || selected?.id == session.id ? 1 : 0.4))
-                        .cornerRadius(4)
-                    } else {
-                        LineMark(
-                            x: .value("Date", session.date, unit: .day),
-                            y: .value(metric.rawValue, metric.value(for: session))
-                        )
-                        .interpolationMethod(.monotone)
-                        .foregroundStyle(Color.accentColor)
+                    LineMark(
+                        x: .value("Date", session.date, unit: .day),
+                        y: .value(metric.rawValue, metric.value(for: session))
+                    )
+                    .interpolationMethod(.monotone)
+                    .foregroundStyle(Color.accentColor)
 
-                        PointMark(
-                            x: .value("Date", session.date, unit: .day),
-                            y: .value(metric.rawValue, metric.value(for: session))
-                        )
-                        .foregroundStyle(Color.accentColor)
-                        .symbolSize(selected?.id == session.id ? 80 : 30)
-                    }
+                    PointMark(
+                        x: .value("Date", session.date, unit: .day),
+                        y: .value(metric.rawValue, metric.value(for: session))
+                    )
+                    .foregroundStyle(Color.accentColor)
+                    .symbolSize(selected?.id == session.id ? 80 : 30)
                 }
 
                 if let selected {
