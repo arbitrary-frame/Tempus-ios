@@ -17,6 +17,8 @@ struct ExerciseHistorySession: Identifiable {
     let sets: [WorkoutSet]
     let topSet: WeightRep
     let volume: Double
+    let totalReps: Int
+    let bestOneRM: Double
     var topWeightChange: Double?
 
     /// Builds sessions for an exercise, newest first. Sets with no weight or reps are ignored.
@@ -45,7 +47,9 @@ struct ExerciseHistorySession: Identifiable {
                     routineName: workout.routine?.name,
                     sets: sets,
                     topSet: topSet,
-                    volume: volume
+                    volume: volume,
+                    totalReps: allReps.reduce(0) { $0 + $1.reps },
+                    bestOneRM: allReps.map { AnalyticsService.estimate1RM(weight: $0.weight, reps: $0.reps) }.max() ?? 0
                 ))
             }
         }
@@ -59,9 +63,43 @@ struct ExerciseHistorySession: Identifiable {
     }
 }
 
+/// What the history chart plots
+enum HistoryChartMetric: String, CaseIterable, Identifiable {
+    case weight = "Weight"
+    case reps = "Reps"
+    case oneRM = "Est. 1RM"
+
+    var id: String { rawValue }
+
+    func value(for session: ExerciseHistorySession) -> Double {
+        switch self {
+        case .weight: session.topSet.weight
+        case .reps: Double(session.totalReps)
+        case .oneRM: session.bestOneRM
+        }
+    }
+
+    func axisLabel(_ value: Double) -> String {
+        switch self {
+        case .reps: "\(Int(value))"
+        case .weight, .oneRM: "\(ExerciseHistoryView.formatWeight(value))kg"
+        }
+    }
+
+    func selectionLabel(for session: ExerciseHistorySession) -> String {
+        switch self {
+        case .weight: session.topSet.displayText
+        case .reps: "\(session.totalReps) reps · \(session.sets.count) sets"
+        case .oneRM: "\(ExerciseHistoryView.formatWeight(session.bestOneRM))kg est."
+        }
+    }
+}
+
 struct ExerciseHistoryView: View {
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \WorkoutEntry.workoutDate, order: .reverse) private var allWorkouts: [WorkoutEntry]
+    @State private var chartMetric: HistoryChartMetric?
+    @State private var selectedChartDate: Date?
 
     let exercise: Exercise
     /// Workout to leave out of the history (e.g. the one currently being edited)
@@ -97,12 +135,12 @@ struct ExerciseHistoryView: View {
                             .listRowBackground(Color.clear)
                     }
 
-                    if sessions.count >= 2 && sessions.contains(where: { $0.topSet.weight > 0 }) {
+                    if sessions.count >= 2 {
                         Section {
                             trendChart(for: sessions)
                                 .padding(.vertical, 8)
                         } header: {
-                            Label("Top Set Weight", systemImage: "chart.line.uptrend.xyaxis")
+                            Label("Progress", systemImage: "chart.line.uptrend.xyaxis")
                                 .symbolRenderingMode(.hierarchical)
                         }
                     }
@@ -144,10 +182,7 @@ struct ExerciseHistoryView: View {
 
     private func summary(for sessions: [ExerciseHistorySession]) -> some View {
         let best = sessions.max { ($0.topSet.weight, $0.topSet.reps) < ($1.topSet.weight, $1.topSet.reps) }!
-        let bestOneRM = sessions
-            .flatMap { $0.sets.flatMap(\.weightsAndReps) }
-            .map { AnalyticsService.estimate1RM(weight: $0.weight, reps: $0.reps) }
-            .max() ?? 0
+        let bestOneRM = sessions.map(\.bestOneRM).max() ?? 0
 
         return HStack(spacing: 12) {
             HistoryStatTile(title: "Best Set", value: best.topSet.displayText, icon: "trophy.fill")
@@ -159,40 +194,101 @@ struct ExerciseHistoryView: View {
     // MARK: - Chart
 
     private func trendChart(for sessions: [ExerciseHistorySession]) -> some View {
-        Chart(sessions.reversed()) { session in
-            LineMark(
-                x: .value("Date", session.date),
-                y: .value("Weight", session.topSet.weight)
-            )
-            .interpolationMethod(.monotone)
-            .foregroundStyle(Color.accentColor)
-
-            PointMark(
-                x: .value("Date", session.date),
-                y: .value("Weight", session.topSet.weight)
-            )
-            .foregroundStyle(Color.accentColor)
-            .symbolSize(30)
+        // Bodyweight exercises have no weight to chart, so default to reps
+        let metric = chartMetric ?? (sessions.contains { $0.topSet.weight > 0 } ? .weight : .reps)
+        let chronological = Array(sessions.reversed())
+        let selected = selectedChartDate.flatMap { date in
+            sessions.min { abs($0.date.timeIntervalSince(date)) < abs($1.date.timeIntervalSince(date)) }
         }
-        .chartYAxis {
-            AxisMarks(position: .leading) { value in
-                AxisGridLine()
-                AxisValueLabel {
-                    if let weight = value.as(Double.self) {
-                        Text("\(Self.formatWeight(weight))kg")
+
+        return VStack(alignment: .leading, spacing: 12) {
+            Picker("Metric", selection: Binding(
+                get: { metric },
+                set: { newValue in
+                    HapticManager.shared.trigger(.selection)
+                    withAnimation(.spring(response: 0.3)) { chartMetric = newValue }
+                }
+            )) {
+                ForEach(HistoryChartMetric.allCases) { metric in
+                    Text(metric.rawValue).tag(metric)
+                }
+            }
+            .pickerStyle(.segmented)
+
+            Chart {
+                ForEach(chronological) { session in
+                    if metric == .reps {
+                        BarMark(
+                            x: .value("Date", session.date, unit: .day),
+                            y: .value(metric.rawValue, metric.value(for: session))
+                        )
+                        .foregroundStyle(Color.accentColor.opacity(selected == nil || selected?.id == session.id ? 1 : 0.4))
+                        .cornerRadius(4)
+                    } else {
+                        LineMark(
+                            x: .value("Date", session.date, unit: .day),
+                            y: .value(metric.rawValue, metric.value(for: session))
+                        )
+                        .interpolationMethod(.monotone)
+                        .foregroundStyle(Color.accentColor)
+
+                        PointMark(
+                            x: .value("Date", session.date, unit: .day),
+                            y: .value(metric.rawValue, metric.value(for: session))
+                        )
+                        .foregroundStyle(Color.accentColor)
+                        .symbolSize(selected?.id == session.id ? 80 : 30)
+                    }
+                }
+
+                if let selected {
+                    RuleMark(x: .value("Selected", selected.date, unit: .day))
+                        .foregroundStyle(.secondary.opacity(0.4))
+                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
+                        .annotation(position: .top, spacing: 4, overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))) {
+                            VStack(spacing: 2) {
+                                Text(selected.date, format: .dateTime.day().month(.abbreviated))
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                Text(metric.selectionLabel(for: selected))
+                                    .font(.caption.bold())
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+                        }
+                }
+            }
+            .chartXSelection(value: $selectedChartDate)
+            .chartYAxis {
+                AxisMarks(position: .leading) { value in
+                    AxisGridLine()
+                    AxisValueLabel {
+                        if let number = value.as(Double.self) {
+                            Text(metric.axisLabel(number))
+                        }
                     }
                 }
             }
-        }
-        .chartXAxis {
-            AxisMarks(values: .automatic(desiredCount: 4)) { _ in
-                AxisGridLine()
-                AxisValueLabel(format: .dateTime.day().month(.abbreviated), centered: false)
+            .chartXAxis {
+                AxisMarks(values: .automatic(desiredCount: 4)) { _ in
+                    AxisGridLine()
+                    AxisValueLabel(format: .dateTime.day().month(.abbreviated), centered: false)
+                }
             }
+            .chartXScale(range: .plotDimension(padding: 20))
+            .environment(\.locale, Locale(identifier: "en_GB"))
+            .frame(height: 180)
+            .onChange(of: selected?.id) { _, newValue in
+                if newValue != nil {
+                    HapticManager.shared.trigger(.selection)
+                }
+            }
+
+            Text("Drag across the chart to see each session")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
         }
-        .chartXScale(range: .plotDimension(padding: 20))
-        .environment(\.locale, Locale(identifier: "en_GB"))
-        .frame(height: 160)
     }
 
     // MARK: - Session Row
